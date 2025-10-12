@@ -52,3 +52,4 @@ CREATE INDEX IF NOT EXISTS idx_product_slug    ON product(slug);
 CREATE INDEX IF NOT EXISTS idx_variant_sku     ON product_variant(sku);
 CREATE INDEX IF NOT EXISTS idx_image_product   ON product_image(product_id);
 CREATE INDEX IF NOT EXISTS idx_image_variant   ON product_image(variant_id);
+

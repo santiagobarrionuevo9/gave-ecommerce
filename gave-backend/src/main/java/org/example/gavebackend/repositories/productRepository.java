@@ -10,6 +10,13 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 @Repository
 public interface productRepository extends JpaRepository<product, Long> {
-    Optional<product> findBySlug(String slug);
-    Page<product> findByType_IdAndIsActiveTrue(Long typeId, Pageable pageable);
+    Optional<product> findBySlugAndIsActiveTrue(String slug);
+    Optional<product> findBySku(String sku);
+    boolean existsBySku(String sku);
+    boolean existsBySlug(String slug);
+
+    Page<product> findByIsActive(Boolean active, Pageable pageable);
+    Page<product> findByNameContainingIgnoreCaseAndIsActive(String q, Boolean active, Pageable pageable);
+    Page<product> findByTypeIdAndIsActive(Long typeId, Boolean active, Pageable pageable);
+    Page<product> findByTypeIdAndNameContainingIgnoreCaseAndIsActive(Long typeId, String q, Boolean active, Pageable pageable);
 }
