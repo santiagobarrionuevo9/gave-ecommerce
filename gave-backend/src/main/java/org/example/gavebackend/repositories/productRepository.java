@@ -15,6 +15,11 @@ public interface productRepository extends JpaRepository<product, Long> {
     boolean existsBySku(String sku);
     boolean existsBySlug(String slug);
 
+    // para validar unicidad al actualizar (excluyendo el propio id)
+    boolean existsBySkuAndIdNot(String sku, Long id);
+    boolean existsBySlugAndIdNot(String slug, Long id);
+
+
     Page<product> findByIsActive(Boolean active, Pageable pageable);
     Page<product> findByNameContainingIgnoreCaseAndIsActive(String q, Boolean active, Pageable pageable);
     Page<product> findByTypeIdAndIsActive(Long typeId, Boolean active, Pageable pageable);

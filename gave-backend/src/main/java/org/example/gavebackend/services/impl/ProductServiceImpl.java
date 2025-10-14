@@ -18,7 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ProductServiceImpl implements serviceproducts {
@@ -33,9 +35,9 @@ public class ProductServiceImpl implements serviceproducts {
     @Override
     public ProductTypeDTO createType(ProductTypeDTO dto) {
         var t = new productType();
-        t.setName(dto.getName());
-        t.setSlug(dto.getSlug());
-        t.setDescription(dto.getDescription());
+        t.setName(reqTrim(dto.getName(), "name"));
+        t.setSlug(normalizeSlug(dto.getSlug(), "slug"));
+        t.setDescription(nullSafeTrim(dto.getDescription()));
         t = typeRepo.save(t);
         dto.setId(t.getId());
         return dto;
@@ -43,30 +45,45 @@ public class ProductServiceImpl implements serviceproducts {
 
     @Override @Transactional
     public List<ProductTypeDTO> listTypes() {
-        return typeRepo.findAll(Sort.by("name").ascending()).stream().map(this::toDTO).toList();
+        return typeRepo.findAll(Sort.by("name").ascending())
+                .stream().map(this::toDTO).toList();
     }
 
     // ---- PRODUCTS ----
     @Override
     public ProductDTO create(ProductDTO dto) {
-        if (productRepo.existsBySlug(dto.getSlug()))
+        // ---- Validaciones de request
+        Long typeId = reqNotNull(dto.getTypeId(), "typeId");
+        String name  = reqTrim(dto.getName(), "name");
+        String slug  = normalizeSlug(dto.getSlug(), "slug");
+        String sku   = reqTrim(dto.getSku(), "sku");
+        BigDecimal price = reqNotNull(dto.getPrice(), "price");
+        Integer stock    = reqNotNull(dto.getStock(), "stock");
+
+        mustBePositiveOrZero(price, "price");
+        mustBePositiveOrZero(stock, "stock");
+
+        // ---- Reglas de unicidad
+        if (productRepo.existsBySlug(slug))
             throw new DataIntegrityViolationException("Slug ya existe");
-        if (productRepo.existsBySku(dto.getSku()))
+        if (productRepo.existsBySku(sku))
             throw new DataIntegrityViolationException("SKU ya existe");
 
-        var type = typeRepo.findById(dto.getTypeId())
+        // ---- FK
+        var type = typeRepo.findById(typeId)
                 .orElseThrow(() -> new IllegalArgumentException("ProductType no encontrado"));
 
+        // ---- Persistencia
         var p = new product();
         p.setType(type);
-        p.setName(dto.getName());
-        p.setSlug(dto.getSlug());
-        p.setShortDesc(dto.getShortDesc());
-        p.setDescription(dto.getDescription());
-        p.setIsActive(dto.getIsActive()==null?true:dto.getIsActive());
-        p.setSku(dto.getSku());
-        p.setPrice(dto.getPrice());
-        p.setStock(dto.getStock());
+        p.setName(name);
+        p.setSlug(slug);
+        p.setShortDesc(nullSafeTrim(dto.getShortDesc()));
+        p.setDescription(nullSafeTrim(dto.getDescription()));
+        p.setIsActive(dto.getIsActive() == null ? true : dto.getIsActive());
+        p.setSku(sku);
+        p.setPrice(price);
+        p.setStock(stock);
 
         p = productRepo.save(p);
         return toDTO(p);
@@ -74,25 +91,40 @@ public class ProductServiceImpl implements serviceproducts {
 
     @Override
     public ProductDTO update(Long id, ProductDTO dto) {
-        var p = productRepo.findById(id).orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
+        var p = productRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
 
-        if (!p.getSlug().equals(dto.getSlug()) && productRepo.existsBySlug(dto.getSlug()))
+        // ---- Validaciones de request
+        Long typeId = reqNotNull(dto.getTypeId(), "typeId");
+        String name  = reqTrim(dto.getName(), "name");
+        String slug  = normalizeSlug(dto.getSlug(), "slug");
+        String sku   = reqTrim(dto.getSku(), "sku");
+        BigDecimal price = reqNotNull(dto.getPrice(), "price");
+        Integer stock    = reqNotNull(dto.getStock(), "stock");
+
+        mustBePositiveOrZero(price, "price");
+        mustBePositiveOrZero(stock, "stock");
+
+        // ---- Unicidad (excluyendo el propio id)
+        if (productRepo.existsBySlugAndIdNot(slug, id) && !Objects.equals(p.getSlug(), slug))
             throw new DataIntegrityViolationException("Slug ya existe");
-        if (!p.getSku().equals(dto.getSku()) && productRepo.existsBySku(dto.getSku()))
+        if (productRepo.existsBySkuAndIdNot(sku, id) && !Objects.equals(p.getSku(), sku))
             throw new DataIntegrityViolationException("SKU ya existe");
 
-        var type = typeRepo.findById(dto.getTypeId())
+        // ---- FK
+        var type = typeRepo.findById(typeId)
                 .orElseThrow(() -> new IllegalArgumentException("ProductType no encontrado"));
 
+        // ---- Set campos
         p.setType(type);
-        p.setName(dto.getName());
-        p.setSlug(dto.getSlug());
-        p.setShortDesc(dto.getShortDesc());
-        p.setDescription(dto.getDescription());
-        if (dto.getIsActive()!=null) p.setIsActive(dto.getIsActive());
-        p.setSku(dto.getSku());
-        p.setPrice(dto.getPrice());
-        p.setStock(dto.getStock());
+        p.setName(name);
+        p.setSlug(slug);
+        p.setShortDesc(nullSafeTrim(dto.getShortDesc()));
+        p.setDescription(nullSafeTrim(dto.getDescription()));
+        if (dto.getIsActive() != null) p.setIsActive(dto.getIsActive());
+        p.setSku(sku);
+        p.setPrice(price);
+        p.setStock(stock);
 
         return toDTO(productRepo.save(p));
     }
@@ -110,12 +142,12 @@ public class ProductServiceImpl implements serviceproducts {
 
     @Override @Transactional
     public Page<ProductDTO> search(String q, Long typeId, Boolean active, Pageable pageable) {
-        if (active==null) active=true;
-        if (typeId!=null && q!=null && !q.isBlank())
+        if (active == null) active = true;
+        if (typeId != null && q != null && !q.isBlank())
             return productRepo.findByTypeIdAndNameContainingIgnoreCaseAndIsActive(typeId, q.trim(), active, pageable).map(this::toDTO);
-        if (typeId!=null)
+        if (typeId != null)
             return productRepo.findByTypeIdAndIsActive(typeId, active, pageable).map(this::toDTO);
-        if (q!=null && !q.isBlank())
+        if (q != null && !q.isBlank())
             return productRepo.findByNameContainingIgnoreCaseAndIsActive(q.trim(), active, pageable).map(this::toDTO);
         return productRepo.findByIsActive(active, pageable).map(this::toDTO);
     }
@@ -130,14 +162,19 @@ public class ProductServiceImpl implements serviceproducts {
     // ---- IMAGES ----
     @Override
     public ProductImageDTO addImage(ProductImageDTO dto) {
-        var prod = productRepo.findById(dto.getProductId())
+        Long productId = reqNotNull(dto.getProductId(), "productId");
+        String url = reqTrim(dto.getUrl(), "url");
+        if (dto.getSortOrder() != null && dto.getSortOrder() < 0)
+            throw new IllegalArgumentException("sortOrder no puede ser negativo");
+
+        var prod = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
 
         var img = new ProductImage();
         img.setProduct(prod);
-        img.setUrl(dto.getUrl());
-        img.setAltText(dto.getAltText());
-        img.setSortOrder(dto.getSortOrder()==null?0:dto.getSortOrder());
+        img.setUrl(url);
+        img.setAltText(nullSafeTrim(dto.getAltText()));
+        img.setSortOrder(dto.getSortOrder() == null ? 0 : dto.getSortOrder());
         img = imageRepo.save(img);
         return toDTO(img);
     }
@@ -147,13 +184,17 @@ public class ProductServiceImpl implements serviceproducts {
 
     @Override @Transactional
     public List<ProductImageDTO> listImagesByProduct(Long productId) {
-        return imageRepo.findByProductIdOrderBySortOrderAsc(productId).stream().map(this::toDTO).toList();
+        return imageRepo.findByProductIdOrderBySortOrderAsc(productId)
+                .stream().map(this::toDTO).toList();
     }
 
     // ---- mappers ----
     private ProductTypeDTO toDTO(productType t){
         var dto = new ProductTypeDTO();
-        dto.setId(t.getId()); dto.setName(t.getName()); dto.setSlug(t.getSlug()); dto.setDescription(t.getDescription());
+        dto.setId(t.getId());
+        dto.setName(t.getName());
+        dto.setSlug(t.getSlug());
+        dto.setDescription(t.getDescription());
         return dto;
     }
 
@@ -181,4 +222,47 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setSortOrder(img.getSortOrder());
         return dto;
     }
+
+    // -------- helpers de validación --------
+
+    private String nullSafeTrim(String s) {
+        return (s == null) ? null : s.trim();
+    }
+
+    private String reqTrim(String s, String field) {
+        if (s == null) throw new IllegalArgumentException(field + " es requerido");
+        String v = s.trim();
+        if (v.isEmpty()) throw new IllegalArgumentException(field + " no puede estar vacío");
+        return v;
+    }
+
+    private <T> T reqNotNull(T v, String field) {
+        if (v == null) throw new IllegalArgumentException(field + " es requerido");
+        return v;
+    }
+
+    private void mustBePositiveOrZero(BigDecimal n, String field){
+        if (n.signum() < 0) throw new IllegalArgumentException(field + " no puede ser negativo");
+    }
+
+    private void mustBePositiveOrZero(Integer n, String field){
+        if (n < 0) throw new IllegalArgumentException(field + " no puede ser negativo");
+    }
+
+    /**
+     * Normaliza slug (trim, toLowerCase) y valida formato básico.
+     * Permite letras, números y guiones.
+     */
+    private String normalizeSlug(String slug, String field){
+        String v = reqTrim(slug, field).toLowerCase();
+        // reemplazos simples de tildes/comunes
+        v = v.replace('á','a').replace('é','e').replace('í','i')
+                .replace('ó','o').replace('ú','u').replace('ñ','n');
+        // compactar espacios y dejar guiones
+        v = v.replace(' ', '-');
+        if (!v.matches("^[a-z0-9-]+$"))
+            throw new IllegalArgumentException(field + " inválido (solo a-z, 0-9 y '-')");
+        return v;
+    }
+
 }
