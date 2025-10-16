@@ -5,6 +5,7 @@ import { forkJoin, map, Observable, of } from 'rxjs';
 import { Pages } from '../interface/product/pages';
 import { Productdto } from '../interface/product/productdto';
 import { Imageproductdto } from '../interface/product/imageproductdto';
+import { Createproductdto } from '../interface/product/createproductdto';
 
 export interface SearchParams {
   q?: string | null;
@@ -71,5 +72,35 @@ export class ProductService {
   getImagesByProductId(productId: number) {
     return this.http.get<Imageproductdto[]>(`${this.base}/products/${productId}/images`);
   }
+
+  // src/app/service/product.service.ts
+  createProduct(body: Createproductdto) {
+  return this.http.post<Productdto>(`${this.base}/products`, body);
+}
+
+  addImage(productId: number, body: { url: string; altText?: string; sortOrder?: number }) {
+    return this.http.post<Imageproductdto>(`${this.base}/products/${productId}/images`, body);
+  }
+
+  // src/app/service/product.service.ts
+  uploadImage(productId: number, file: File, altText?: string, sortOrder?: number) {
+    const form = new FormData();
+    form.append('file', file);
+    if (altText != null) form.append('altText', altText);
+    if (sortOrder != null) form.append('sortOrder', String(sortOrder));
+    return this.http.post<Imageproductdto>(`${this.base}/images/${productId}/images/upload`, form);
+  }
+
+  // src/app/service/product.service.ts
+  uploadImages(productId: number, files: File[], altText?: string, sortStart?: number) {
+    const form = new FormData();
+    files.forEach(f => form.append('files', f));      // clave 'files' varias veces
+    if (altText != null) form.append('altText', altText);
+    if (sortStart != null) form.append('sortStart', String(sortStart));
+    return this.http.post<Imageproductdto[]>(`${this.base}/images/${productId}/images/upload-multiple`, form);
+  }
+
+
+
 
 }

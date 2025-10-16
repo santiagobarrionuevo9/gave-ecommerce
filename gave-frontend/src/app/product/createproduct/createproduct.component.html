@@ -1,0 +1,131 @@
+<div class="container py-4" *ngIf="form">
+  <h4 class="mb-3">Crear producto</h4>
+
+  <div *ngIf="loading()" class="alert alert-info">Guardando…</div>
+  <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
+  <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+
+  <form class="row g-3" [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Columna izquierda -->
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre *</label>
+              <input type="text" class="form-control" formControlName="name" placeholder="Ej: Remera Oversize Negra">
+              <div class="text-danger small" *ngIf="hasError('name','required')">Requerido</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Slug *</label>
+              <input type="text" class="form-control" formControlName="slug" placeholder="remera-oversize-negra">
+              <div class="text-danger small" *ngIf="hasError('slug','required')">Requerido</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">SKU *</label>
+              <input type="text" class="form-control" formControlName="sku" placeholder="REM-OVS-BLK-M">
+              <div class="text-danger small" *ngIf="hasError('sku','required')">Requerido</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Precio *</label>
+              <input type="number" class="form-control" formControlName="price" min="0" step="0.01">
+              <div class="text-danger small" *ngIf="hasError('price','required')">Requerido</div>
+              <div class="text-danger small" *ngIf="hasError('price','min')">No puede ser negativo</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Stock *</label>
+              <input type="number" class="form-control" formControlName="stock" min="0" step="1">
+              <div class="text-danger small" *ngIf="hasError('stock','required')">Requerido</div>
+              <div class="text-danger small" *ngIf="hasError('stock','min')">No puede ser negativo</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Categoría *</label>
+              <select class="form-select" formControlName="typeId">
+                <option [ngValue]="null">Seleccionar…</option>
+                <option *ngFor="let t of types" [ngValue]="t.id">{{ t.name }}</option>
+              </select>
+              <div class="text-danger small" *ngIf="hasError('typeId','required')">Requerido</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Activo</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" formControlName="isActive">
+                <label class="form-check-label">Visible en catálogo</label>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Descripción corta</label>
+              <input type="text" class="form-control" formControlName="shortDesc" maxlength="300">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Descripción</label>
+              <textarea rows="5" class="form-control" formControlName="description" placeholder="Detalles del producto"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: Imágenes -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <h6 class="mb-3">Imágenes (múltiples)</h6>
+
+          <div class="mb-3">
+            <label class="form-label">Seleccionar archivos</label>
+            <input type="file" class="form-control" (change)="onFilesChange($event)" accept="image/*" multiple>
+            <div class="form-text">
+              Hasta {{ MAX_FILES }} imágenes. Máx {{ MAX_SIZE_MB }}MB c/u.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Alt text (para todas)</label>
+            <input type="text" class="form-control" formControlName="imageAlt" placeholder="Descripción accesible/SEO">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Orden inicial</label>
+            <input type="number" class="form-control" formControlName="imageSort" min="0" step="1">
+            <div class="form-text">La primera imagen tendrá este orden; las siguientes se incrementan 1 en 1.</div>
+          </div>
+
+          <!-- (Opcional) URL única si no subís archivos -->
+          <div class="mb-3">
+            <label class="form-label">O pegar URL (opcional)</label>
+            <input type="url" class="form-control" formControlName="imageUrl" placeholder="https://cdn.tuapp.com/img.jpg">
+          </div>
+
+          <!-- Previews -->
+          <div class="row g-2" *ngIf="previews.length">
+            <div class="col-6 col-md-4" *ngFor="let p of previews; index as i">
+              <div class="position-relative">
+                <img [src]="p.src" class="img-fluid rounded border" style="height:130px; width:100%; object-fit:cover;">
+                <button type="button"
+                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                        (click)="removePreview(i)">×</button>
+              </div>
+              <div class="small text-center text-muted">
+                #{{ i + (form.get('imageSort')?.value || 0) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid">
+        <button class="btn btn-primary btn-lg" type="submit" [disabled]="loading()">Crear</button>
+        <a routerLink="/catalogo" class="btn btn-outline-secondary mt-2">Volver</a>
+      </div>
+    </div>
+  </form>
+</div>

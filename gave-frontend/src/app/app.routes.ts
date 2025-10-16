@@ -14,6 +14,11 @@ export const routes: Routes = [
       import('./product/detailproduct/detailproduct.component')
         .then(m => m.DetailproductComponent)
   },
+  {
+    path: 'admin/crear',   // o el path que prefieras
+    loadComponent: () => import('./product/createproduct/createproduct.component')
+      .then(m => m.CreateproductComponent)
+  },
 
   // 404 básico
   { path: '**', redirectTo: 'catalogo' }
