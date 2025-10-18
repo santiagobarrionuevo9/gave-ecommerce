@@ -100,7 +100,23 @@ export class ProductService {
     return this.http.post<Imageproductdto[]>(`${this.base}/images/${productId}/images/upload-multiple`, form);
   }
 
+  // === NUEVOS ===
+  getProductById(id: number): Observable<Productdto> {
+    return this.http.get<Productdto>(`${this.base}/products/${id}`);
+  }
 
+  updateProduct(id: number, body: Createproductdto): Observable<Productdto> {
+    return this.http.put<Productdto>(`${this.base}/products/${id}`, body);
+  }
+
+  // NUEVOS: editar/borrar (viven en /api/products/images/{id})
+  updateImage(imageId: number, body: { altText?: string; sortOrder?: number }) {
+    return this.http.put<Imageproductdto>(`${this.base}/products/images/${imageId}`, body);
+  }
+
+  deleteImage(imageId: number) {
+    return this.http.delete<void>(`${this.base}/products/images/${imageId}`);
+  }
 
 
 }

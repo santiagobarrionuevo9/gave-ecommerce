@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () => import('./product/createproduct/createproduct.component')
       .then(m => m.CreateproductComponent)
   },
+   {
+    path: 'admin/editar',
+    loadComponent: () => import('./product/editproduct/editproduct.component')
+      .then(m => m.EditproductComponent)
+  },
 
   // 404 básico
   { path: '**', redirectTo: 'catalogo' }
