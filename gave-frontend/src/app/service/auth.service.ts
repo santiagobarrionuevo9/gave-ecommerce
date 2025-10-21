@@ -4,6 +4,8 @@ import { LoginReq } from '../interface/auth/loginreq';
 import { AuthResponse } from '../interface/auth/authresponse';
 import { tap } from 'rxjs';
 import { RegisterReq } from '../interface/auth/registerreq';
+import { ForgotPasswordRequest } from '../interface/auth/forgotpasswordrequest';
+import { ResetPasswordRequest } from '../interface/auth/resetpasswordrequest';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +25,15 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.base}/auth/register`, body).pipe(
       tap(res => this.store(res))
     );
+  }
+
+  // ----- PASSWORD FLOW -----
+  forgotPassword(body: ForgotPasswordRequest) {
+    return this.http.post<void>(`${this.base}/auth/forgot`, body);
+  }
+
+  resetPassword(body: ResetPasswordRequest) {
+    return this.http.post<void>(`${this.base}/auth/reset`, body);
   }
 
   private store(res: AuthResponse){

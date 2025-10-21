@@ -1,0 +1,20 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <h4 class="mb-3">Recuperar contraseña</h4>
+
+      <div *ngIf="sent" class="alert alert-info">
+        Si el email existe, te enviamos un enlace para restablecer la contraseña.
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="card p-3 shadow-sm" *ngIf="!sent">
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input class="form-control" formControlName="email" type="email">
+        </div>
+        <button class="btn btn-primary w-100" [disabled]="loading">Enviar instrucciones</button>
+      </form>
+    </div>
+  </div>
+</div>
+

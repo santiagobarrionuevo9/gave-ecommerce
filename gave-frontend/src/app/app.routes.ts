@@ -5,39 +5,18 @@ import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'catalogo', pathMatch: 'full' },
-
-  // catálogo (listado con filtros que ya hiciste)
   { path: 'catalogo', component: ProductbrowseComponent },
-   // LOGIN (si no lo tenés ya)
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./auth/login/login.component').then(m => m.LoginComponent)
-  },
+  { path: 'producto/:slug', loadComponent: () => import('./product/detailproduct/detailproduct.component').then(m => m.DetailproductComponent) },
 
-  // detalle de producto (lo podés crear luego; acá dejo lazy)
-  {
-    path: 'producto/:slug',
-    loadComponent: () =>
-      import('./product/detailproduct/detailproduct.component')
-        .then(m => m.DetailproductComponent)
-  },
-  // ADMIN — protegidos
-  {
-    path: 'admin/crear',
-    canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./product/createproduct/createproduct.component')
-        .then(m => m.CreateproductComponent)
-  },
-  {
-    path: 'admin/editar',
-    canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./product/editproduct/editproduct.component')
-        .then(m => m.EditproductComponent)
-  },
+  // auth
+  { path: 'login',    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'forgot',   loadComponent: () => import('./auth/forgot/forgot.component').then(m => m.ForgotComponent) },
+  { path: 'reset',    loadComponent: () => import('./auth/reset/reset.component').then(m => m.ResetComponent) },
 
-  // 404 básico
+  // admin
+  { path: 'admin/crear',  canActivate: [adminGuard], loadComponent: () => import('./product/createproduct/createproduct.component').then(m => m.CreateproductComponent) },
+  { path: 'admin/editar', canActivate: [adminGuard], loadComponent: () => import('./product/editproduct/editproduct.component').then(m => m.EditproductComponent) },
+
   { path: '**', redirectTo: 'catalogo' }
 ];

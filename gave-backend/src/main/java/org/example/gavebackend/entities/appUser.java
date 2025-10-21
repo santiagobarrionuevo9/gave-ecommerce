@@ -29,5 +29,12 @@ public class appUser {
     private String fullName;
     private Instant createdAt;
 
+    // === Reset password inline ===
+    @Column(name="password_reset_token", length=180, unique=false) // unique lo controla el índice parcial
+    private String passwordResetToken;
+
+    @Column(name="password_reset_expiry")
+    private Instant passwordResetExpiry;
+
     @PrePersist void pre(){ createdAt = Instant.now(); }
 }

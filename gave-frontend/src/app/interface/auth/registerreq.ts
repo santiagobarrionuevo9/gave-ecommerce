@@ -1,6 +1,6 @@
-import { LoginReq } from "./loginreq";
-
-export interface RegisterReq extends LoginReq { 
-    fullName?: string; 
-    role?: 'ADMIN'|'CLIENT'; 
+export interface RegisterReq  { 
+email: string;
+  password: string;
+  fullName: string;
+  role?: 'ADMIN' | 'CLIENT';
 }
