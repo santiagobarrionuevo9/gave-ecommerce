@@ -7,6 +7,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class MailService {
 
@@ -113,4 +115,22 @@ public class MailService {
       Equipo Gave
       """.formatted(safe, hours, link);
     }
+
+    // src/main/java/.../services/MailService.java (agregar)
+    public void sendOrderConfirmationEmail(String to, String fullName, Long orderId, BigDecimal total) {
+        String subject = "Tu pedido #" + orderId + " fue recibido";
+        String link = "#"; // si luego tenés front para /mis-pedidos
+        String html = """
+      <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.5">
+        <h2>¡Gracias por tu pedido!</h2>
+        <p>Hola %s, recibimos tu pedido <b>#%d</b>.</p>
+        <p>Total: <b>$ %s</b></p>
+        <p>Te avisaremos cuando el estado cambie.</p>
+      </div>
+    """.formatted(fullName == null ? "" : fullName, orderId, total.toPlainString());
+        String text = "Hola %s, recibimos tu pedido #%d. Total: $ %s"
+                .formatted(fullName == null ? "" : fullName, orderId, total.toPlainString());
+        send(to, subject, html, text);
+    }
+
 }

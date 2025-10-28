@@ -51,6 +51,9 @@ public class product {
 
     @Column(name="updated_at")
     private Instant updatedAt;
+    /** NUEVO: unidades reservadas (pendientes en pedidos no entregados) */
+    @Column(nullable = false)
+    private Integer reserved = 0;
 
     @PrePersist void prePersist(){ createdAt = Instant.now(); }
     @PreUpdate  void preUpdate(){  updatedAt = Instant.now();  }

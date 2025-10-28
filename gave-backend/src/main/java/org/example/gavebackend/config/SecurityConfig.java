@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/orders/mine").authenticated()
                         // catálogo GET clásico (si querés mantenerlo)
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
