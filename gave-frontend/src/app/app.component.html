@@ -1,13 +1,31 @@
 <!-- src/app/app.component.html -->
-<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+<nav class="navbar navbar-expand-lg navbar-petrol">
   <div class="container">
-    <a class="navbar-brand" routerLink="/catalogo">Gave Store</a>
-    <div class="collapse navbar-collapse">
+    <a class="navbar-brand brand-logo" routerLink="/catalogo">Gave Store</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" routerLink="/catalogo">Catálogo</a></li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
+        </li>
       </ul>
+
+      <!-- (opcional) acción de login/logout a la derecha -->
+      <!-- <a class="btn btn-outline-light btn-sm" routerLink="/login">Ingresar</a> -->
     </div>
   </div>
 </nav>
 
 <router-outlet></router-outlet>
+
+<!-- Footer simple (opcional) -->
+<footer class="footer-petrol mt-5 py-3">
+  <div class="container d-flex justify-content-between small">
+    <span>© {{ year }} Gave</span>
+    <span><a href="#">Términos</a> · <a href="#">Privacidad</a></span>
+  </div>
+</footer>

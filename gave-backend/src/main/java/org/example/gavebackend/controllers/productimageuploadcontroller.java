@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import org.example.gavebackend.dtos.ProductImageDTO;
 import org.example.gavebackend.entities.product;
 import org.example.gavebackend.repositories.productRepository;
+import org.example.gavebackend.services.impl.CloudinaryService;
 import org.example.gavebackend.services.serviceproducts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,19 +20,15 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/images")
 public class productimageuploadcontroller {
-    @Value("${app.upload.dir}")
-    private String uploadDir;
-    @Autowired
-    private productRepository productRepo;
-    @Autowired
-    private serviceproducts service;
-
-
+    @Autowired private productRepository productRepo;
+    @Autowired private serviceproducts service;
+    @Autowired private CloudinaryService cloudinaryService;
 
     @PostMapping(value = "/{productId}/images/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProductImageDTO upload(
@@ -41,30 +38,19 @@ public class productimageuploadcontroller {
             @RequestParam(value="sortOrder", required = false, defaultValue = "0") Integer sortOrder
     ) throws IOException {
 
-        product p = productRepo.findById(productId)
+        productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
 
-        // crear carpeta si no existe
-        Path dir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(dir);
+        Map res = cloudinaryService.upload(file);
+        String secureUrl = (String) res.get("secure_url");
+        String publicId  = (String) res.get("public_id");
 
-        // nombre único conservando extensión
-        String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
-        String filename = UUID.randomUUID() + (ext != null ? ("." + ext) : "");
-        Path target = dir.resolve(filename);
-
-        // guardar archivo
-        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-
-        // URL pública que servimos con /files/**
-        String publicUrl = "/files/" + filename;
-
-        // crear registro en DB usando tu service existente
         var dto = new ProductImageDTO();
         dto.setProductId(productId);
-        dto.setUrl(publicUrl);
+        dto.setUrl(secureUrl);
         dto.setAltText(altText);
         dto.setSortOrder(sortOrder);
+        dto.setCloudPublicId(publicId);
 
         return service.addImage(dto);
     }
@@ -73,41 +59,33 @@ public class productimageuploadcontroller {
     public List<ProductImageDTO> uploadMultiple(
             @PathVariable Long productId,
             @RequestPart("files") MultipartFile[] files,
-            @RequestParam(value="altText", required=false) String altText,         // opcional (mismo para todas)
+            @RequestParam(value="altText", required=false) String altText,
             @RequestParam(value="sortStart", required=false, defaultValue="0") Integer sortStart
     ) throws IOException {
 
-        var prod = productRepo.findById(productId)
+        productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
-
-        Path dir = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(dir);
 
         List<ProductImageDTO> results = new ArrayList<>();
         int sort = sortStart;
 
         for (MultipartFile file : files) {
             if (file == null || file.isEmpty()) continue;
-            // validación rápida de content-type
-            if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
-                continue; // o lanzar excepción si preferís
-            }
-            String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
-            String filename = UUID.randomUUID() + (ext != null ? ("." + ext) : "");
-            Path target = dir.resolve(filename);
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            if (file.getContentType() == null || !file.getContentType().startsWith("image/")) continue;
 
-            String publicUrl = "/files/" + filename;
+            Map res = cloudinaryService.upload(file);
+            String secureUrl = (String) res.get("secure_url");
+            String publicId  = (String) res.get("public_id");
 
             var dto = new ProductImageDTO();
             dto.setProductId(productId);
-            dto.setUrl(publicUrl);
+            dto.setUrl(secureUrl);
             dto.setAltText(altText);
             dto.setSortOrder(sort++);
+            dto.setCloudPublicId(publicId);
 
             results.add(service.addImage(dto));
         }
-
         return results;
     }
 }

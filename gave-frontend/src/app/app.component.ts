@@ -11,4 +11,5 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'gave-frontend';
+  year = new Date().getFullYear();
 }

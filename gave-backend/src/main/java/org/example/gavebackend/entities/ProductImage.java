@@ -27,4 +27,8 @@ public class ProductImage {
 
     @Column(name="sort_order")
     private Integer sortOrder = 0;
+
+    @Column(name = "cloud_public_id")
+    private String cloudPublicId;
+
 }

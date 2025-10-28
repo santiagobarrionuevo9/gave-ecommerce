@@ -29,7 +29,9 @@ public class ProductServiceImpl implements serviceproducts {
     @Autowired
     private  productTypeRepository typeRepo;
     @Autowired
-    private productImageRepository imageRepo;;
+    private productImageRepository imageRepo;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     // ---- TYPES ----
     @Override
@@ -140,15 +142,19 @@ public class ProductServiceImpl implements serviceproducts {
         productRepo.deleteById(id);
     }
 
-    @Override @Transactional
+    @Override
+    @Transactional
     public Page<ProductDTO> search(String q, Long typeId, Boolean active, Pageable pageable) {
         if (active == null) active = true;
-        if (typeId != null && q != null && !q.isBlank())
-            return productRepo.findByTypeIdAndNameContainingIgnoreCaseAndIsActive(typeId, q.trim(), active, pageable).map(this::toDTO);
+
+        if (q != null && !q.isBlank()) {
+            String like = "%" + q.trim().toLowerCase() + "%";
+            return productRepo.searchAllFields(typeId, active, like, pageable).map(this::toDTO);
+        }
+
         if (typeId != null)
             return productRepo.findByTypeIdAndIsActive(typeId, active, pageable).map(this::toDTO);
-        if (q != null && !q.isBlank())
-            return productRepo.findByNameContainingIgnoreCaseAndIsActive(q.trim(), active, pageable).map(this::toDTO);
+
         return productRepo.findByIsActive(active, pageable).map(this::toDTO);
     }
 
@@ -175,12 +181,24 @@ public class ProductServiceImpl implements serviceproducts {
         img.setUrl(url);
         img.setAltText(nullSafeTrim(dto.getAltText()));
         img.setSortOrder(dto.getSortOrder() == null ? 0 : dto.getSortOrder());
+        img.setCloudPublicId(dto.getCloudPublicId()); // NUEVO
         img = imageRepo.save(img);
         return toDTO(img);
     }
 
     @Override
-    public void deleteImage(Long id) { imageRepo.deleteById(id); }
+    public void deleteImage(Long id) {
+        var img = imageRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Imagen no encontrada"));
+        try {
+            if (img.getCloudPublicId() != null && !img.getCloudPublicId().isBlank()) {
+                cloudinaryService.delete(img.getCloudPublicId());
+            }
+        } catch (Exception ignored) {
+            // podés loguear el error, pero no rompas la UX por fallar el delete remoto
+        }
+        imageRepo.deleteById(id);
+    }
 
     @Override @Transactional
     public List<ProductImageDTO> listImagesByProduct(Long productId) {
@@ -220,8 +238,10 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setUrl(img.getUrl());
         dto.setAltText(img.getAltText());
         dto.setSortOrder(img.getSortOrder());
+        dto.setCloudPublicId(img.getCloudPublicId()); // NUEVO
         return dto;
     }
+
 
     // -------- helpers de validación --------
 

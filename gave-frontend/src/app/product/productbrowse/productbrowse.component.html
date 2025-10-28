@@ -2,13 +2,12 @@
   <!-- Filtros -->
   <div class="card shadow-sm mb-3">
     <div class="card-body">
-      <!-- usa formGroup + formControlName ✅ -->
       <form class="row g-3" [formGroup]="form">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-5">
           <label class="form-label">Buscar</label>
           <div class="input-group">
-            <input type="text" class="form-control" placeholder="Nombre, SKU..." formControlName="q">
-            <button class="btn btn-outline-secondary" type="button" (click)="onClear()">Limpiar</button>
+            <input type="text" class="form-control" placeholder="Nombre, SKU, descripción…" formControlName="q">
+            <button class="btn btn-outline-primary" type="button" (click)="onClear()">Limpiar</button>
           </div>
         </div>
 
@@ -20,7 +19,7 @@
           </select>
         </div>
 
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-2">
           <label class="form-label">Ordenar por</label>
           <select class="form-select" formControlName="sort">
             <option value="name,asc">Nombre (A→Z)</option>
@@ -39,6 +38,16 @@
           </select>
         </div>
       </form>
+
+      <!-- Chips de filtros activos -->
+      <div class="mt-3 d-flex gap-2 flex-wrap">
+        <span class="filter-chip" *ngIf="form.value.q">Búsqueda: “{{ form.value.q }}”</span>
+        <span class="filter-chip" *ngIf="form.value.typeId">
+          <ng-container *ngFor="let t of types">
+            <span *ngIf="t.id === form.value.typeId">Categoría: {{ t.name }}</span>
+          </ng-container>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -57,7 +66,9 @@
           <li class="page-item" [class.disabled]="page.first">
             <button class="page-link" (click)="goTo(page.number - 1)">Anterior</button>
           </li>
-          <li class="page-item disabled"><span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span></li>
+          <li class="page-item disabled">
+            <span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span>
+          </li>
           <li class="page-item" [class.disabled]="page.last">
             <button class="page-link" (click)="goTo(page.number + 1)">Siguiente</button>
           </li>
@@ -71,13 +82,13 @@
     <!-- Grid -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3">
       <div class="col" *ngFor="let p of page.content">
-        <div class="card h-100 shadow-sm">
+        <div class="card h-100 shadow-sm product-card">
           <img class="card-img-top" [src]="getImageUrl(p)" [alt]="p.name" style="object-fit: cover; height: 200px;">
           <div class="card-body d-flex flex-column">
             <h6 class="card-title mb-1">{{ p.name }}</h6>
             <div class="text-muted small mb-2" *ngIf="p.shortDesc">{{ p.shortDesc }}</div>
             <div class="mt-auto">
-              <div class="fw-semibold h5 mb-1">$ {{ p.price | number:'1.0-0' }}</div>
+              <div class="price h5 mb-1">$ {{ p.price | number:'1.0-0' }}</div>
               <div class="small" [class.text-danger]="p.stock===0" [class.text-success]="p.stock>0">
                 Stock: {{ p.stock }}
               </div>
@@ -97,7 +108,9 @@
           <li class="page-item" [class.disabled]="page.first">
             <button class="page-link" (click)="goTo(page.number - 1)">Anterior</button>
           </li>
-          <li class="page-item disabled"><span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span></li>
+          <li class="page-item disabled">
+            <span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span>
+          </li>
           <li class="page-item" [class.disabled]="page.last">
             <button class="page-link" (click)="goTo(page.number + 1)">Siguiente</button>
           </li>
