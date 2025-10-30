@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.gavebackend.entities.enums.DeliveryMethod;
 import org.example.gavebackend.entities.enums.OrderStatus;
 
 import java.math.BigDecimal;
@@ -37,6 +38,16 @@ public class order {
 
     @Column(nullable=false) private Instant createdAt;
     @Column(nullable=false) private Instant updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private DeliveryMethod deliveryMethod = DeliveryMethod.DELIVERY; // o PICKUP
+
+    @Embedded
+    private ShippingAddress shippingAddress; // obligatorio si DELIVERY
+
+    @Column(precision=12, scale=2, nullable=false)
+    private BigDecimal deliveryCost = BigDecimal.ZERO;
 
     @OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval = true, fetch=FetchType.LAZY)
     private List<orderItem> items = new ArrayList<>();

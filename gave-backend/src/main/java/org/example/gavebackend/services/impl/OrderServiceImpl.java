@@ -3,6 +3,8 @@ package org.example.gavebackend.services.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.*;
+import org.example.gavebackend.entities.ShippingAddress;
+import org.example.gavebackend.entities.enums.DeliveryMethod;
 import org.example.gavebackend.entities.enums.OrderStatus;
 import org.example.gavebackend.entities.order;
 import org.example.gavebackend.entities.orderItem;
@@ -28,63 +30,99 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private MailService mail;
 
-    @Override @Transactional
+    @Override
+    @Transactional
     public OrderDTO createOrder(CreateOrderDTO dto) {
-        if (dto.getItems()==null || dto.getItems().isEmpty())
+        if (dto.getItems() == null || dto.getItems().isEmpty())
             throw new IllegalArgumentException("El pedido no tiene items");
 
-        order order = new order();
-        order.setBuyerEmail(dto.getBuyerEmail().trim().toLowerCase());
-        order.setBuyerName(dto.getBuyerName().trim());
-        order.setBuyerPhone(dto.getBuyerPhone());
-        order.setStatus(OrderStatus.PENDING);
+        if (dto.getDeliveryMethod() == null)
+            throw new IllegalArgumentException("deliveryMethod es requerido");
 
+        if (dto.getDeliveryMethod() == DeliveryMethod.DELIVERY) {
+            if (dto.getAddress() == null || isEmpty(dto.getAddress().getStreet()))
+                throw new IllegalArgumentException("Dirección requerida para entrega a domicilio");
+        }
+
+        order o = new order();
+        o.setBuyerEmail(dto.getBuyerEmail().trim().toLowerCase());
+        o.setBuyerName(dto.getBuyerName().trim());
+        o.setBuyerPhone(dto.getBuyerPhone());
+        o.setStatus(OrderStatus.PENDING);
+        o.setDeliveryMethod(dto.getDeliveryMethod());
+
+        // Dirección si corresponde
+        if (dto.getDeliveryMethod() == DeliveryMethod.DELIVERY) {
+            ShippingAddress addr = new ShippingAddress();
+            var a = dto.getAddress();
+            addr.setStreet(n(a.getStreet()));
+            addr.setNumber(n(a.getNumber()));
+            addr.setApt(n(a.getApt()));
+            addr.setReference(n(a.getReference()));
+            addr.setCity(n(a.getCity()));
+            addr.setProvince(n(a.getProvince()));
+            addr.setPostalCode(n(a.getPostalCode()));
+            addr.setLat(a.getLat());
+            addr.setLng(a.getLng());
+            o.setShippingAddress(addr);
+        }
+
+        BigDecimal delivery = (dto.getDeliveryCost() == null) ? BigDecimal.ZERO : dto.getDeliveryCost();
+        o.setDeliveryCost(delivery);
+
+        // === ITEMS + RESERVAS ===
         BigDecimal itemsTotal = BigDecimal.ZERO;
 
-        // construir items con lock y reservas
         for (CreateOrderItemDTO it : dto.getItems()) {
             product p = productRepo.lockById(it.getProductId());
-            if (p == null || p.getIsActive()==null || !p.getIsActive())
+            if (p == null || p.getIsActive() == null || !p.getIsActive())
                 throw new IllegalArgumentException("Producto inválido: " + it.getProductId());
 
             int qty = it.getQuantity();
-            if (qty <= 0) throw new IllegalArgumentException("Cantidad inválida");
+            if (qty <= 0) throw new IllegalArgumentException("Cantidad inválida para " + p.getName());
 
-            int available = p.getStock() - (p.getReserved()==null?0:p.getReserved());
+            int reserved = (p.getReserved() == null ? 0 : p.getReserved());
+            int available = p.getStock() - reserved;
             if (available < qty)
                 throw new IllegalArgumentException("Sin stock disponible para " + p.getName());
 
             // reservar
-            p.setReserved((p.getReserved()==null?0:p.getReserved()) + qty);
+            p.setReserved(reserved + qty);
             productRepo.save(p);
 
-            // item con precio actual
-            BigDecimal unit = p.getPrice();
+            BigDecimal unit = p.getPrice(); // validar si puede ser null
+            if (unit == null) throw new IllegalArgumentException("Producto sin precio: " + p.getName());
             BigDecimal line = unit.multiply(BigDecimal.valueOf(qty));
 
             orderItem oi = new orderItem();
-            oi.setOrder(order);
+            oi.setOrder(o);              // <- necesario para la relación
             oi.setProduct(p);
             oi.setQuantity(qty);
             oi.setUnitPrice(unit);
             oi.setLineTotal(line);
 
-            order.getItems().add(oi);
+            o.getItems().add(oi);        // <- necesario para cascade
             itemsTotal = itemsTotal.add(line);
         }
 
-        order.setItemsTotal(itemsTotal);
-        order.setGrandTotal(itemsTotal); // sin delivery/recargos por ahora
+        o.setItemsTotal(itemsTotal);
+        o.setGrandTotal(itemsTotal.add(delivery));
 
-        order = orderRepo.save(order);
+        // persistir
+        o = orderRepo.save(o);
 
-        // email 1 sola vez al crear
+        // email de confirmación (único)
         try {
-            mail.sendOrderConfirmationEmail(order.getBuyerEmail(), order.getBuyerName(), order.getId(), order.getGrandTotal());
+            mail.sendOrderConfirmationEmail(o.getBuyerEmail(), o.getBuyerName(), o.getId(), o.getGrandTotal());
         } catch (Exception ignored) {}
 
-        return toDTO(order);
+        return toDTO(o);
     }
+
+
+    private boolean isEmpty(String s){ return s==null || s.trim().isEmpty(); }
+    private String n(String s){ return s==null? null : s.trim(); }
+
 
     @Override
     public OrderDTO get(Long id) {
@@ -157,6 +195,23 @@ public class OrderServiceImpl implements OrderService {
         d.setGrandTotal(o.getGrandTotal());
         d.setCreatedAt(o.getCreatedAt());
         d.setUpdatedAt(o.getUpdatedAt());
+        d.setDeliveryMethod(o.getDeliveryMethod());
+        d.setDeliveryCost(o.getDeliveryCost());
+
+        if (o.getShippingAddress()!=null) {
+            ShippingAddressDTO ad = new ShippingAddressDTO();
+            var a = o.getShippingAddress();
+            ad.setStreet(a.getStreet());
+            ad.setNumber(a.getNumber());
+            ad.setApt(a.getApt());
+            ad.setReference(a.getReference());
+            ad.setCity(a.getCity());
+            ad.setProvince(a.getProvince());
+            ad.setPostalCode(a.getPostalCode());
+            ad.setLat(a.getLat());
+            ad.setLng(a.getLng());
+            d.setAddress(ad);
+        }
         d.setItems(o.getItems().stream().map(oi -> {
             OrderItemDTO x = new OrderItemDTO();
             x.setId(oi.getId());
