@@ -1,0 +1,122 @@
+<div class="container py-4">
+
+  <h4 class="mb-3">Pedidos (Admin)</h4>
+
+  <!-- Filtros -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Estado</label>
+          <select class="form-select" [ngModel]="currentStatus()" (ngModelChange)="setStatusFilter($event)">
+            <option *ngFor="let s of statusList" [ngValue]="s">{{ s }}</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <label class="form-label">Por página</label>
+          <select class="form-select" [ngModel]="size()" (ngModelChange)="size.set($event); page.set(0); fetch()">
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-petrol" (click)="fetch()">
+            <i class="bi bi-arrow-repeat me-1"></i> Refrescar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Tabla -->
+  <div class="table-responsive" *ngIf="!loading() && orders?.length">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Contacto</th>
+          <th>Importe</th>
+          <th>Entrega</th>
+          <th>Estado</th>
+          <th class="text-end">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of orders">
+          <td>
+            <a [routerLink]="['/admin/pedidos', o.id]">#{{ o.id }}</a>
+            <div class="text-muted small">{{ o.createdAt | date:'short' }}</div>
+          </td>
+          <td>
+            {{ o.buyerName }}
+            <div class="text-muted small">{{ o.buyerEmail }}</div>
+          </td>
+          <td class="small">
+            <div *ngIf="o.address">
+              {{ o.address.street }} {{ o.address.number || '' }} - {{ o.address.city }}
+            </div>
+            <div *ngIf="o.buyerPhone">Tel: {{ o.buyerPhone }}</div>
+          </td>
+          <td>
+            <div class="fw-semibold">$ {{ o.grandTotal | number:'1.0-0' }}</div>
+            <div class="text-muted small">Items: $ {{ o.itemsTotal | number:'1.0-0' }}</div>
+            <div class="text-muted small" *ngIf="o.deliveryCost">Envío: $ {{ o.deliveryCost | number:'1.0-0' }}</div>
+          </td>
+          <td>
+            <span class="badge text-bg-light me-1">{{ o.deliveryMethod }}</span>
+          </td>
+          <td>
+            <span [class]="badgeCls(o.status)">{{ o.status }}</span>
+          </td>
+          <td class="text-end">
+            <div class="d-flex gap-2 justify-content-end">
+              <select class="form-select form-select-sm" style="max-width: 210px"
+                      [ngModel]="nextMap.get(o.id)" (ngModelChange)="nextMap.set(o.id, $event)"
+                      [disabled]="optionsFor(o).length === 0">
+                <option *ngFor="let ns of optionsFor(o)" [ngValue]="ns">{{ ns }}</option>
+              </select>
+              <button class="btn btn-sm btn-primary"
+                      (click)="changeStatus(o)"
+                      [disabled]="optionsFor(o).length === 0">
+                Actualizar
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="small text-muted">
+        Mostrando página {{ page() + 1 }} de {{ totalPages }} ({{ totalElements }} pedidos)
+      </div>
+      <ul class="pagination mb-0">
+        <li class="page-item" [class.disabled]="page()===0">
+          <button class="page-link" (click)="goTo(0)">&laquo;</button>
+        </li>
+        <li class="page-item" [class.disabled]="page()===0">
+          <button class="page-link" (click)="goTo(page()-1)">Anterior</button>
+        </li>
+        <li class="page-item disabled"><span class="page-link">{{ page()+1 }}</span></li>
+        <li class="page-item" [class.disabled]="page() >= totalPages-1">
+          <button class="page-link" (click)="goTo(page()+1)">Siguiente</button>
+        </li>
+        <li class="page-item" [class.disabled]="page() >= totalPages-1">
+          <button class="page-link" (click)="goTo(totalPages-1)">&raquo;</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && !orders?.length" class="alert alert-warning">
+    No hay pedidos con ese estado.
+  </div>
+</div>

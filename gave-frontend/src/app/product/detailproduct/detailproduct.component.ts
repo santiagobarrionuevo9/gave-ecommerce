@@ -4,11 +4,13 @@ import { Imageproductdto } from '../../interface/product/imageproductdto';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../../service/product.service';
 import { CommonModule } from '@angular/common';
+import { CartService } from '../../service/cart.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-detailproduct',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './detailproduct.component.html',
   styleUrl: './detailproduct.component.css'
 })
@@ -19,7 +21,17 @@ export class DetailproductComponent implements OnInit {
   product!: Productdto;
   images: Imageproductdto[] = [];
 
-  constructor(private route: ActivatedRoute, private api: ProductService) {}
+  qty = 1;
+
+  constructor(private route: ActivatedRoute,
+              private api: ProductService,
+              private cart: CartService) {}
+
+  addToCart() {
+    const img = this.images?.[0]?.url;
+    this.cart.add(this.product, this.qty, img);
+    alert('Producto agregado al carrito ✅');
+  }
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug')!;

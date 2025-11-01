@@ -27,9 +27,16 @@
           Stock: {{ product.stock }}
         </div>
 
-        <button class="btn btn-primary btn-lg mb-3" [disabled]="product.stock===0">
-          Agregar al carrito
-        </button>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <input type="number" class="form-control" style="max-width:110px"
+                [(ngModel)]="qty" min="1">
+          <button class="btn btn-primary btn-lg"
+                  [disabled]="product.stock===0"
+                  (click)="addToCart()">
+            Agregar al carrito
+          </button>
+        </div>
+
 
         <div class="mt-3">
           <h6>Descripción</h6>

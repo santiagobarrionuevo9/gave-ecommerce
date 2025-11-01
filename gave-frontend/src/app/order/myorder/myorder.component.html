@@ -1,0 +1,24 @@
+<div class="container py-4">
+  <h3>Mis pedidos</h3>
+  <div class="mb-3 d-flex gap-2">
+    <input class="form-control" placeholder="Tu email" [(ngModel)]="email" style="max-width:380px">
+    <button class="btn btn-primary" (click)="load()">Buscar</button>
+  </div>
+
+  <div *ngFor="let o of orders" class="card mb-2">
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <div>
+          <strong>#{{o.id}}</strong> · {{o.status}} · {{o.createdAt | date:'short'}}
+          <div class="text-muted small" *ngIf="o.deliveryMethod==='DELIVERY'">
+            Envío a: {{o.address?.street}} {{o.address?.number}}, {{o.address?.city}}
+          </div>
+        </div>
+        <div class="fw-semibold">$ {{o.grandTotal | number:'1.0-0'}}</div>
+      </div>
+      <ul class="small mt-2 mb-0">
+        <li *ngFor="let it of o.items">{{it.quantity}} × {{it.productName}} — $ {{it.lineTotal | number:'1.0-0'}}</li>
+      </ul>
+    </div>
+  </div>
+</div>`

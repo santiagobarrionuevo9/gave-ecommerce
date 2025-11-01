@@ -18,48 +18,35 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class ordercontroller {
-    @Autowired
-    private OrderService orders;
-    @Autowired
-    private  JwtUtil jwt;
+    @Autowired private OrderService orders;
+    @Autowired private JwtUtil jwt;
 
-    // Cliente crea pedido (usa dto con items)
-    @PostMapping("/orders")
-    public OrderDTO create(@Valid @RequestBody CreateOrderDTO dto){
-        // si tenés autenticación JWT, podés forzar buyerEmail = del token
-        // String email = jwt.getEmailFromToken(... SecurityContext ...);
+    @PostMapping                 // POST /api/orders
+    public OrderDTO create(@Valid @RequestBody CreateOrderDTO dto) {
         return orders.createOrder(dto);
     }
 
-    // Cliente ve sus pedidos (paginado)
-    @GetMapping("/orders/mine")
+    @GetMapping("/mine")         // GET /api/orders/mine?buyerEmail=...
     public Page<OrderDTO> mine(@RequestParam(defaultValue="0") int page,
                                @RequestParam(defaultValue="10") int size,
-                               @RequestParam String buyerEmail){
-        // si estás autenticado, derivá buyerEmail del token y no lo aceptes por query
+                               @RequestParam String buyerEmail) {
         return orders.myOrders(buyerEmail, PageRequest.of(page, size));
     }
 
-    // ADMIN: listar por estado (paginado)
-    @GetMapping("/admin/orders")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{id}")         // GET /api/orders/{id}
+    public OrderDTO get(@PathVariable Long id){ return orders.get(id); }
+
+    // ADMIN
+    @GetMapping("/admin")        // GET /api/orders/admin?status=...
     public Page<OrderDTO> listByStatus(@RequestParam OrderStatus status,
                                        @RequestParam(defaultValue="0") int page,
                                        @RequestParam(defaultValue="10") int size){
         return orders.listByStatus(status, PageRequest.of(page, size));
     }
 
-    // ADMIN: cambiar estado
-    @PutMapping("/admin/orders/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/admin/{id}/status") // PUT /api/orders/admin/{id}/status
     public OrderDTO changeStatus(@PathVariable Long id, @Valid @RequestBody ChangeOrderStatusDTO dto){
         return orders.changeStatus(id, dto);
-    }
-
-    // Detalle pedido (podés restringir a dueño o admin)
-    @GetMapping("/orders/{id}")
-    public OrderDTO get(@PathVariable Long id){
-        return orders.get(id);
     }
 }
 

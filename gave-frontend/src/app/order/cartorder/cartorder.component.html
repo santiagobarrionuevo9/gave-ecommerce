@@ -1,0 +1,85 @@
+<div class="container py-4">
+  <h3>Carrito</h3>
+  <div *ngIf="cart.snapshot.items.length === 0" class="alert alert-warning">No hay productos en el carrito.</div>
+
+  <div class="row" *ngIf="cart.snapshot.items.length">
+    <div class="col-lg-8">
+      <table class="table align-middle">
+        <thead><tr><th>Producto</th><th>Precio</th><th style="width:120px">Cant.</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let it of cart.snapshot.items">
+            <td>
+              <img *ngIf="it.imageUrl" [src]="it.imageUrl" style="width:60px;height:60px;object-fit:cover" class="me-2 rounded">
+              {{ it.name }}
+            </td>
+            <td>$ {{ it.price | number:'1.0-0' }}</td>
+            <td>
+              <input type="number" class="form-control" [value]="it.quantity" min="1"
+                     (change)="setQty(it.productId, $any($event.target).value)">
+            </td>
+            <td>$ {{ (it.price * it.quantity) | number:'1.0-0' }}</td>
+            <td><button class="btn btn-sm btn-outline-danger" (click)="remove(it.productId)">Quitar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5>Datos del comprador</h5>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input class="form-control" [(ngModel)]="buyerEmail">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" [(ngModel)]="buyerName">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" [(ngModel)]="buyerPhone">
+          </div>
+
+          <h5>Entrega</h5>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="del" value="PICKUP" [(ngModel)]="deliveryMethod">
+            <label class="form-check-label">Retiro en local</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="del" value="DELIVERY" [(ngModel)]="deliveryMethod">
+            <label class="form-check-label">Envío a domicilio</label>
+          </div>
+
+          <div *ngIf="deliveryMethod==='DELIVERY'" class="border rounded p-2 mb-2">
+            <div class="row g-2">
+              <div class="col-8"><input class="form-control" placeholder="Calle" [(ngModel)]="address.street"></div>
+              <div class="col-4"><input class="form-control" placeholder="N°" [(ngModel)]="address.number"></div>
+              <div class="col-6"><input class="form-control" placeholder="Ciudad" [(ngModel)]="address.city"></div>
+              <div class="col-6"><input class="form-control" placeholder="Provincia" [(ngModel)]="address.province"></div>
+              <div class="col-6"><input class="form-control" placeholder="CP" [(ngModel)]="address.postalCode"></div>
+              <div class="col-6"><input class="form-control" placeholder="Referencia" [(ngModel)]="address.reference"></div>
+              <div class="col-6">
+                <label class="form-label small mb-0 mt-2">Costo de envío</label>
+                <input type="number" class="form-control" [(ngModel)]="deliveryCost" min="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between border-top pt-2">
+            <span>Subtotal</span><strong>$ {{ itemsTotal() | number:'1.0-0' }}</strong>
+          </div>
+          <div class="d-flex justify-content-between" *ngIf="deliveryMethod==='DELIVERY'">
+            <span>Envío</span><strong>$ {{ deliveryCost | number:'1.0-0' }}</strong>
+          </div>
+          <div class="d-flex justify-content-between fs-5 border-top pt-2">
+            <span>Total</span><strong>$ {{ grandTotal() | number:'1.0-0' }}</strong>
+          </div>
+
+          <button class="btn btn-primary w-100 mt-3" (click)="checkout()">Confirmar pedido</button>
+          <button class="btn btn-outline-secondary w-100 mt-2" (click)="clear()">Vaciar carrito</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

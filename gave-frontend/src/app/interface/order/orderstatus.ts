@@ -1,0 +1,13 @@
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  PREPARING = 'PREPARING',
+  OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY',
+  DELIVERED = 'DELIVERED',
+  CANCELED = 'CANCELED',
+}
+
+export enum DeliveryMethod {
+  DELIVERY = 'DELIVERY',
+  PICKUP = 'PICKUP',
+}

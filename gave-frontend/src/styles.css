@@ -31,6 +31,16 @@
 .navbar-petrol .navbar-brand{
   color:#fff !important;
 }
+/* app.component.css */
+.navbar .btn.position-relative .badge {
+  min-width: 22px;
+  height: 22px;
+  line-height: 22px;
+  font-size: 12px;
+  text-align: center;
+  padding: 0 6px;
+}
+
 
 /* Botones principales con petróleo */
 .btn-primary{
@@ -49,6 +59,14 @@
   --bs-btn-hover-bg: var(--petrol-600);
   --bs-btn-hover-border-color: var(--petrol-600);
   --bs-btn-hover-color:#fff;
+}
+
+.btn-petrol{
+  --bs-btn-bg: var(--petrol);
+  --bs-btn-border-color: var(--petrol);
+  --bs-btn-hover-bg: var(--petrol-700);
+  --bs-btn-hover-border-color: var(--petrol-700);
+  --bs-btn-color:#fff;
 }
 
 /* Inputs: foco petróleo */
