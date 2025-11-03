@@ -1,4 +1,18 @@
-<!-- src/app/product/product-detail/product-detail.component.html -->
+<!-- src/app/product/detailproduct/detailproduct.component.html -->
+
+<!-- TOAST / ALERTA FLOTANTE -->
+<div *ngIf="toast()" class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+  <div class="toast show shadow border-0"
+       [ngClass]="{'text-bg-success': toast()?.type === 'success',
+                   'text-bg-danger':  toast()?.type === 'danger'}">
+    <div class="d-flex align-items-center px-3 py-2">
+      <div class="me-3">{{ toast()?.text }}</div>
+      <button type="button" class="btn-close btn-close-white ms-auto" aria-label="Close"
+              (click)="clearToast()"></button>
+    </div>
+  </div>
+</div>
+
 <div class="container py-4" *ngIf="!loading(); else loadingTpl">
   <ng-container *ngIf="!error; else errorTpl">
 
@@ -29,14 +43,13 @@
 
         <div class="d-flex align-items-center gap-2 mb-3">
           <input type="number" class="form-control" style="max-width:110px"
-                [(ngModel)]="qty" min="1">
+                 [(ngModel)]="qty" min="1" (keyup.enter)="addToCart()">
           <button class="btn btn-primary btn-lg"
                   [disabled]="product.stock===0"
                   (click)="addToCart()">
             Agregar al carrito
           </button>
         </div>
-
 
         <div class="mt-3">
           <h6>Descripción</h6>
@@ -64,4 +77,3 @@
     <a routerLink="/catalogo" class="btn btn-outline-secondary mt-2">Volver al catálogo</a>
   </div>
 </ng-template>
-

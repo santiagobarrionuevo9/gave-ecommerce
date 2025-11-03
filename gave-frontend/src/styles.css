@@ -40,6 +40,55 @@
   text-align: center;
   padding: 0 6px;
 }
+/* Chips simples para filtros activos */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #2f4fb0;
+  font-weight: 600;
+  font-size: .85rem;
+}
+
+/* Card hover suave */
+.product-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.12);
+}
+
+/* “Nuevo” badge */
+.badge-new {
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+  padding: .35rem .6rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #34d399, #10b981); /* verde */
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .2px;
+  font-size: .8rem;
+}
+
+/* Truncado de texto (compatibles) */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 
 /* Botones principales con petróleo */

@@ -2,24 +2,41 @@
   <div class="container">
     <a class="navbar-brand brand-logo" routerLink="/catalogo">Gave Store</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="mainNav">
-      <!-- Left -->
+      <!-- IZQUIERDA -->
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" routerLink="/catalogo" routerLinkActive="active">Catálogo</a>
         </li>
+
+        <!-- Cliente logueado (no admin): Mis pedidos -->
+        <li class="nav-item" *ngIf="isLoggedIn() && !isAdmin()">
+          <a class="nav-link" routerLink="/mis-pedidos" routerLinkActive="active">Mis pedidos</a>
+        </li>
+
+        <!-- ADMIN: menú de gestión -->
+        <li class="nav-item dropdown" *ngIf="isAdmin()">
+          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">Admin</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/admin/crear">Agregar producto</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/editar">Editar producto</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/pedidos">Pedidos</a></li>
+          </ul>
+        </li>
       </ul>
 
-      <!-- Right (push) -->
+      <!-- DERECHA (push) -->
       <div class="ms-auto d-flex align-items-center gap-2">
-        <!-- Carrito -->
-        <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito">
+
+        <!-- Carrito: visible para cliente (si querés que admin también lo vea, quitá el *ngIf) -->
+        <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito"
+           *ngIf="!isAdmin()">
           <i class="bi bi-cart"></i>
-          <!-- badge solo si hay items -->
           <ng-container *ngIf="cartCount() as c">
             <span *ngIf="c > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
               {{ c > 99 ? '99+' : c }}
@@ -27,6 +44,25 @@
             </span>
           </ng-container>
         </a>
+
+        <!-- Autenticación -->
+        <ng-container *ngIf="!isLoggedIn(); else loggedTpl">
+          <a class="btn btn-outline-light btn-sm" routerLink="/login">Ingresar</a>
+          <a class="btn btn-light btn-sm" routerLink="/register">Crear cuenta</a>
+        </ng-container>
+
+        <ng-template #loggedTpl>
+          <div class="dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button">
+              {{ displayName() }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li *ngIf="!isAdmin()"><a class="dropdown-item" routerLink="/mis-pedidos">Mis pedidos</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item" (click)="logout()">Salir</button></li>
+            </ul>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>

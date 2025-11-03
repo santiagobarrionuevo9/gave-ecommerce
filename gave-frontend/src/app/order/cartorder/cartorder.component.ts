@@ -3,6 +3,8 @@ import { OrderService } from '../../service/order.service';
 import { CartService } from '../../service/cart.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cartorder',
@@ -12,20 +14,21 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './cartorder.component.css'
 })
 export class CartorderComponent {
-  buyerEmail = '';
+  buyerEmail = localStorage.getItem('email') || '';
   buyerName  = '';
   buyerPhone = '';
 
   deliveryMethod: 'DELIVERY'|'PICKUP' = 'PICKUP';
   deliveryCost = 0;
 
-  // Dirección (si DELIVERY)
+  submitting = false;
+
   address = {
     street: '', number: '', apt: '', reference: '',
     city: '', province: '', postalCode: '', lat: null as number|null, lng: null as number|null
   };
 
-  constructor(public cart: CartService, private orders: OrderService) {}
+  constructor(public cart: CartService, private orders: OrderService, private router: Router) {}
 
   itemsTotal() { return this.cart.snapshot.itemsTotal; }
   grandTotal() { return this.itemsTotal() + (this.deliveryMethod==='DELIVERY' ? this.deliveryCost : 0); }
@@ -34,9 +37,15 @@ export class CartorderComponent {
   remove(id: number) { this.cart.remove(id); }
   clear() { this.cart.clear(); }
 
-  checkout() {
-    if (!this.cart.snapshot.items.length) return alert('El carrito está vacío');
-    if (!this.buyerEmail || !this.buyerName) return alert('Email y nombre son obligatorios');
+  async checkout() {
+    if (!this.cart.snapshot.items.length) {
+      await Swal.fire({ icon: 'warning', title: 'Carrito vacío', text: 'Agrega productos para continuar.' });
+      return;
+    }
+    if (!this.buyerEmail || !this.buyerName) {
+      await Swal.fire({ icon: 'info', title: 'Datos incompletos', text: 'Email y nombre son obligatorios.' });
+      return;
+    }
 
     const dto: any = {
       buyerEmail: this.buyerEmail,
@@ -48,9 +57,29 @@ export class CartorderComponent {
     };
     if (this.deliveryMethod==='DELIVERY') dto.address = this.address;
 
+    this.submitting = true;
     this.orders.createOrder(dto).subscribe({
-      next: (o) => { alert('Pedido creado #'+o.id); this.cart.clear(); },
-      error: (e) => { alert('No se pudo crear el pedido: ' + (e.error?.message || e.message)); }
+      next: async (o) => {
+        this.submitting = false;
+        this.cart.clear();
+        const res = await Swal.fire({
+          icon: 'success',
+          title: '¡Pedido confirmado!',
+          html: `Tu número de pedido es <b>#${o.id}</b>.`,
+          confirmButtonText: 'Ir al catálogo'
+        });
+        if (res.isConfirmed) this.router.navigate(['/catalogo']);
+      },
+      error: async (e) => {
+        this.submitting = false;
+        const msg = e?.error?.message || e?.message || 'Ocurrió un error inesperado.';
+        await Swal.fire({
+          icon: 'error',
+          title: 'No se pudo crear el pedido',
+          text: msg,
+          confirmButtonText: 'Entendido'
+        });
+      }
     });
   }
 }

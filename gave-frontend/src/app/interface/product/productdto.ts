@@ -9,4 +9,5 @@ export interface Productdto {
   sku: string;
   price: number;
   stock: number;
+  createdAt: string; // ISO de backend 👈
 }

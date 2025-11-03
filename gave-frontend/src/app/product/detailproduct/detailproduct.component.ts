@@ -7,6 +7,8 @@ import { CommonModule } from '@angular/common';
 import { CartService } from '../../service/cart.service';
 import { FormsModule } from '@angular/forms';
 
+type ToastKind = 'success' | 'danger';
+
 @Component({
   selector: 'app-detailproduct',
   standalone: true,
@@ -23,14 +25,49 @@ export class DetailproductComponent implements OnInit {
 
   qty = 1;
 
-  constructor(private route: ActivatedRoute,
-              private api: ProductService,
-              private cart: CartService) {}
+  // estado del toast
+  toast = signal<{ type: ToastKind; text: string } | null>(null);
+  private toastTimer: any;
+
+  constructor(
+    private route: ActivatedRoute,
+    private api: ProductService,
+    private cart: CartService
+  ) {}
+
+  /** Mostrar toast 3s */
+  private showToast(type: ToastKind, text: string) {
+    this.toast.set({ type, text });
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toast.set(null), 3000);
+  }
+  clearToast() {
+    clearTimeout(this.toastTimer);
+    this.toast.set(null);
+  }
 
   addToCart() {
-    const img = this.images?.[0]?.url;
-    this.cart.add(this.product, this.qty, img);
-    alert('Producto agregado al carrito ✅');
+    try {
+      if (!this.product) return;
+
+      const q = Math.max(1, Math.floor(this.qty || 1));
+      if (this.product.stock === 0) {
+        this.showToast('danger', 'No hay stock disponible.');
+        return;
+      }
+      if (q > this.product.stock) {
+        this.showToast('danger', `Solo hay ${this.product.stock} en stock.`);
+        return;
+      }
+
+      const img = this.images?.[0]?.url;
+      this.cart.add(this.product, q, img);
+      this.qty = 1; // opcional: reset cantidad
+      this.showToast('success', 'Producto agregado al carrito ✅');
+    } catch (e: any) {
+      const msg = e?.message || 'No se pudo agregar al carrito.';
+      this.showToast('danger', msg);
+    }
   }
 
   ngOnInit(): void {
@@ -49,16 +86,16 @@ export class DetailproductComponent implements OnInit {
       }
     });
   }
-  /** Mueve la imagen clickeada al comienzo (como principal) */
+
+  /** Galería */
   selectAsMain(img: Imageproductdto): void {
     if (!img || !this.images?.length) return;
     const idx = this.images.findIndex(i => i && i.id === img.id);
-    if (idx <= 0) return; // -1 no existe, 0 ya es principal
-    const [picked] = this.images.splice(idx, 1); // nunca undefined por el guard
+    if (idx <= 0) return;
+    const [picked] = this.images.splice(idx, 1);
     this.images.unshift(picked);
   }
 
-  /** trackBy para mejorar performance y evitar warnings */
   trackByImgId = (_: number, item: Imageproductdto) => item?.id ?? _;
   mainImage(): string {
     return this.images.length ? this.images[0].url : 'https://via.placeholder.com/800x600?text=Sin+imagen';

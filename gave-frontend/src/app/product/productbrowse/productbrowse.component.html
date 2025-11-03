@@ -22,6 +22,7 @@
         <div class="col-6 col-md-2">
           <label class="form-label">Ordenar por</label>
           <select class="form-select" formControlName="sort">
+            <option value="createdAt,desc">Novedades (recientes)</option> <!-- ✅ usa createdAt -->
             <option value="name,asc">Nombre (A→Z)</option>
             <option value="name,desc">Nombre (Z→A)</option>
             <option value="price,asc">Precio (menor→mayor)</option>
@@ -61,7 +62,7 @@
       <nav>
         <ul class="pagination mb-0">
           <li class="page-item" [class.disabled]="page.first">
-            <button class="page-link" (click)="goTo(0)">&laquo;</button>
+            <button class="page-link" (click)="goTo(0)" aria-label="Primera página">&laquo;</button>
           </li>
           <li class="page-item" [class.disabled]="page.first">
             <button class="page-link" (click)="goTo(page.number - 1)">Anterior</button>
@@ -73,7 +74,7 @@
             <button class="page-link" (click)="goTo(page.number + 1)">Siguiente</button>
           </li>
           <li class="page-item" [class.disabled]="page.last">
-            <button class="page-link" (click)="goTo(page.totalPages - 1)">&raquo;</button>
+            <button class="page-link" (click)="goTo(page.totalPages - 1)" aria-label="Última página">&raquo;</button>
           </li>
         </ul>
       </nav>
@@ -83,10 +84,19 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3">
       <div class="col" *ngFor="let p of page.content">
         <div class="card h-100 shadow-sm product-card">
-          <img class="card-img-top" [src]="getImageUrl(p)" [alt]="p.name" style="object-fit: cover; height: 200px;">
+          <div class="position-relative">
+            <img class="card-img-top" [src]="getImageUrl(p)" [alt]="p.name"
+                 style="object-fit: cover; height: 200px;">
+            <!-- BADGE NUEVO -->
+            <span *ngIf="isNew(p)"
+                  class="badge-new shadow-sm">
+              Nuevo
+            </span>
+          </div>
+
           <div class="card-body d-flex flex-column">
-            <h6 class="card-title mb-1">{{ p.name }}</h6>
-            <div class="text-muted small mb-2" *ngIf="p.shortDesc">{{ p.shortDesc }}</div>
+            <h6 class="card-title mb-1 text-truncate" title="{{ p.name }}">{{ p.name }}</h6>
+            <div class="text-muted small mb-2 line-clamp-2" *ngIf="p.shortDesc">{{ p.shortDesc }}</div>
             <div class="mt-auto">
               <div class="price h5 mb-1">$ {{ p.price | number:'1.0-0' }}</div>
               <div class="small" [class.text-danger]="p.stock===0" [class.text-success]="p.stock>0">
@@ -94,8 +104,11 @@
               </div>
             </div>
           </div>
+
           <div class="card-footer bg-transparent border-0">
-            <a class="btn btn-sm btn-outline-primary w-100" [routerLink]="['/producto', p.slug]">Ver detalle</a>
+            <a class="btn btn-sm btn-outline-primary w-100" [routerLink]="['/producto', p.slug]">
+              Ver detalle
+            </a>
           </div>
         </div>
       </div>

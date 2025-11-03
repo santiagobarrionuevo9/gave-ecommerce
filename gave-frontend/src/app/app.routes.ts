@@ -15,7 +15,8 @@ export const routes: Routes = [
   { path: 'reset',    loadComponent: () => import('./auth/reset/reset.component').then(m => m.ResetComponent) },
   // routes.ts
   { path: 'carrito', loadComponent: () => import('./order/cartorder/cartorder.component').then(m => m.CartorderComponent) },
-  { path: 'mis-pedidos', loadComponent: () => import('./order/myorder/myorder.component').then(m => m.MyorderComponent) },
+  { path: 'mis-pedidos', canActivate: [authGuard], loadComponent: () => import('./order/myorder/myorder.component').then(m => m.MyorderComponent) },
+
 
   // admin
   { path: 'admin/crear',  canActivate: [adminGuard], loadComponent: () => import('./product/createproduct/createproduct.component').then(m => m.CreateproductComponent) },

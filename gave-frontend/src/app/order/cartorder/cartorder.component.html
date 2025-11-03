@@ -76,8 +76,22 @@
             <span>Total</span><strong>$ {{ grandTotal() | number:'1.0-0' }}</strong>
           </div>
 
-          <button class="btn btn-primary w-100 mt-3" (click)="checkout()">Confirmar pedido</button>
-          <button class="btn btn-outline-secondary w-100 mt-2" (click)="clear()">Vaciar carrito</button>
+          <button class="btn btn-primary w-100 mt-3"
+        (click)="checkout()"
+        [disabled]="submitting">
+            <span *ngIf="!submitting">Confirmar pedido</span>
+            <span *ngIf="submitting" class="d-inline-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Enviando…
+            </span>
+          </button>
+
+          <button class="btn btn-outline-secondary w-100 mt-2"
+                  (click)="clear()"
+                  [disabled]="submitting">
+            Vaciar carrito
+          </button>
+
         </div>
       </div>
     </div>

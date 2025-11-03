@@ -228,6 +228,7 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setSku(p.getSku());
         dto.setPrice(p.getPrice());
         dto.setStock(p.getStock());
+        dto.setCreatedAt(p.getCreatedAt()); // 👈
         return dto;
     }
 

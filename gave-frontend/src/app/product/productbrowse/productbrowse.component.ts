@@ -55,26 +55,38 @@ export class ProductbrowseComponent implements OnInit {
   }
 
   fetch() {
-    this.loading.set(true);
-    const v = this.form.getRawValue();       // más seguro que .value
+  this.loading.set(true);
+  const v = this.form.getRawValue();
 
-    const params: SearchParams = {
-      q: v.q ?? '',
-      typeId: v.typeId !== null ? Number(v.typeId) : null,
-      active: true,
-      page: this.currentPage(),
-      size: Number(v.size ?? 12),
-      sort: v.sort ?? 'name,asc'
-    };
+  const noSearch = !v.q || !String(v.q).trim();
+  const noCategory = v.typeId === null || v.typeId === undefined;
+  const effectiveSort = (noSearch && noCategory)
+    ? 'createdAt,desc'          // ✅ SOLO createdAt
+    : (v.sort ?? 'name,asc');
 
-    return this.api.searchProducts(params).pipe(
-      tap(page => { this.page = page; }),
-      switchMap(page => this.api.loadFirstImages(page.content)),
-      tap(mapImg => {
-        this.imagesMap = mapImg;
-        this.loading.set(false);
-      })
-    );
+  const params: SearchParams = {
+    q: v.q ?? '',
+    typeId: noCategory ? null : Number(v.typeId),
+    active: true,
+    page: this.currentPage(),
+    size: Number(v.size ?? 12),
+    sort: effectiveSort
+  };
+
+  return this.api.searchProducts(params).pipe(
+    tap(page => { this.page = page; }),
+    switchMap(page => this.api.loadFirstImages(page.content)),
+    tap(mapImg => { this.imagesMap = mapImg; this.loading.set(false); })
+  );
+}
+
+
+  isNew(p: Productdto): boolean {
+    if (!p?.createdAt) return false;
+    const created = new Date(p.createdAt).getTime();
+    const now = Date.now();
+    const THIRTY_DAYS = 7 * 24 * 60 * 60 * 1000;
+    return (now - created) <= THIRTY_DAYS;
   }
 
   goTo(page: number) {
