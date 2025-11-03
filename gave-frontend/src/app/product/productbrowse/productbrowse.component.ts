@@ -36,41 +36,35 @@ export class ProductbrowseComponent implements OnInit {
   constructor(private fb: FormBuilder, private api: ProductService) {}
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      q: [''],
-      typeId: [null],          // null en lugar de '' ✅
-      sort: ['name,asc'],
-      size: [12]
-    });
+  this.form = this.fb.group({
+    q: [''],
+    typeId: [null],
+    sort: ['createdAt,desc'],   // 👈 default: recientes primero
+    size: [12]
+  });
 
-    this.api.getTypes().subscribe(ts => this.types = ts);
+  this.api.getTypes().subscribe(ts => this.types = ts);
 
-    this.form.valueChanges.pipe(
-      debounceTime(300),
-      tap(() => this.currentPage.set(0)),
-      switchMap(() => this.fetch())
-    ).subscribe();
+  this.form.valueChanges.pipe(
+    debounceTime(300),
+    tap(() => this.currentPage.set(0)),
+    switchMap(() => this.fetch())
+  ).subscribe();
 
-    this.fetch().subscribe();
-  }
+  this.fetch().subscribe();
+}
 
-  fetch() {
+fetch() {
   this.loading.set(true);
   const v = this.form.getRawValue();
 
-  const noSearch = !v.q || !String(v.q).trim();
-  const noCategory = v.typeId === null || v.typeId === undefined;
-  const effectiveSort = (noSearch && noCategory)
-    ? 'createdAt,desc'          // ✅ SOLO createdAt
-    : (v.sort ?? 'name,asc');
-
   const params: SearchParams = {
     q: v.q ?? '',
-    typeId: noCategory ? null : Number(v.typeId),
+    typeId: (v.typeId === null || v.typeId === undefined) ? null : Number(v.typeId),
     active: true,
     page: this.currentPage(),
     size: Number(v.size ?? 12),
-    sort: effectiveSort
+    sort: v.sort || 'createdAt,desc'   // 👈 usar SIEMPRE lo que el usuario eligió
   };
 
   return this.api.searchProducts(params).pipe(
@@ -79,6 +73,7 @@ export class ProductbrowseComponent implements OnInit {
     tap(mapImg => { this.imagesMap = mapImg; this.loading.set(false); })
   );
 }
+
 
 
   isNew(p: Productdto): boolean {
