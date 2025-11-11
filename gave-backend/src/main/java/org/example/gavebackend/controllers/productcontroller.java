@@ -2,10 +2,8 @@ package org.example.gavebackend.controllers;
 
 
 import jakarta.validation.Valid;
-import org.example.gavebackend.dtos.ProductDTO;
-import org.example.gavebackend.dtos.ProductImageDTO;
-import org.example.gavebackend.dtos.ProductTypeDTO;
-import org.example.gavebackend.dtos.StockChangeDTO;
+import org.example.gavebackend.dtos.*;
+
 import org.example.gavebackend.services.serviceproducts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,9 +26,34 @@ public class productcontroller {
     @GetMapping("/types")
     public List<ProductTypeDTO> listTypes(){ return service.listTypes(); }
 
+    // productcontroller.java
+    @PutMapping("/types/{id}")
+    public ProductTypeDTO updateType(@PathVariable Long id, @Valid @RequestBody ProductTypeDTO dto){
+        dto.setId(id);
+        return service.updateType(dto);
+    }
+
+    @DeleteMapping("/types/{id}")
+    public void deleteType(@PathVariable Long id){
+        service.deleteType(id);
+    }
+
+
     // PRODUCTS
     @PostMapping
     public ProductDTO create(@Valid @RequestBody ProductDTO dto){ return service.create(dto); }
+
+    // src/main/java/org/example/gavebackend/controllers/productcontroller.java
+    @PostMapping("/{id}/stock")
+    public ProductDTO updateStock(@PathVariable Long id, @Valid @RequestBody StockChangeDTO dto) {
+        return service.updateStock(id, dto);
+    }
+
+    @PostMapping("/stock/bulk")
+    public List<ProductDTO> bulkUpdateStock(@Valid @RequestBody List<StockChangeDTOItem> items) {
+        // items = [{ productId, operation, amount, reason }]
+        return service.bulkUpdateStock(items);
+    }
 
     @GetMapping
     public Page<ProductDTO> search(

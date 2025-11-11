@@ -1,0 +1,57 @@
+<!-- src/app/admin/type-admin/type-admin.component.html -->
+<div class="container py-4">
+  <h3>Categorías</h3>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <form class="row g-2" [formGroup]="form">
+        <div class="col-12 col-md-3">
+          <input class="form-control" placeholder="Nombre" formControlName="name">
+        </div>
+        <div class="col-12 col-md-3">
+          <input class="form-control" placeholder="slug" formControlName="slug">
+        </div>
+        <div class="col-12 col-md-4">
+          <input class="form-control" placeholder="Descripción" formControlName="description">
+        </div>
+        <div class="col-12 col-md-2 d-grid">
+          <button class="btn btn-primary" type="button" (click)="create()">Agregar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando…</div>
+
+  <div class="table-responsive" *ngIf="!loading()">
+    <table class="table align-middle">
+      <thead>
+        <tr><th>Nombre</th><th>Slug</th><th>Descripción</th><th style="width:180px"></th></tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let t of types">
+          <tr *ngIf="editRow?.id !== t.id">
+            <td>{{ t.name }}</td>
+            <td><code>{{ t.slug }}</code></td>
+            <td>{{ t.description }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary me-1" (click)="startEdit(t)">Editar</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="remove(t)">Eliminar</button>
+            </td>
+          </tr>
+
+          <tr *ngIf="editRow?.id === t.id" [formGroup]="editForm">
+            <td><input class="form-control" formControlName="name"></td>
+            <td><input class="form-control" formControlName="slug"></td>
+            <td><input class="form-control" formControlName="description"></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-success me-1" (click)="saveEdit()">Guardar</button>
+              <button class="btn btn-sm btn-secondary" (click)="cancelEdit()">Cancelar</button>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</div>
+

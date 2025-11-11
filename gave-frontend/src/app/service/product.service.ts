@@ -6,6 +6,7 @@ import { Pages } from '../interface/product/pages';
 import { Productdto } from '../interface/product/productdto';
 import { Imageproductdto } from '../interface/product/imageproductdto';
 import { Createproductdto } from '../interface/product/createproductdto';
+import { StockChangeDTO } from '../interface/product/stockchangedto';
 
 export interface SearchParams {
   q?: string | null;
@@ -118,5 +119,20 @@ export class ProductService {
     return this.http.delete<void>(`${this.base}/products/images/${imageId}`);
   }
 
+  updateStock(id: number, body: StockChangeDTO): Observable<Productdto> {
+    return this.http.post<Productdto>(`${this.base}/products/${id}/stock`, body);
+  }
+
+  // ---------- Categorías ----------
+  createType(dto: Producttypedto): Observable<Producttypedto> {
+    return this.http.post<Producttypedto>(`${this.base}/products/types`, dto);
+  }
+  updateType(id: number, dto: Producttypedto): Observable<Producttypedto> {
+    // si no querés PUT, podés hacer POST a /types/{id}. Ajustá backend si hace falta.
+    return this.http.put<Producttypedto>(`${this.base}/products/types/${id}`, dto);
+  }
+  deleteType(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/products/types/${id}`);
+  }
 
 }

@@ -53,4 +53,6 @@ public interface productRepository extends JpaRepository<product, Long> {
     @Query("select p from product p where p.id = :id")
     product lockById(@Param("id") Long id);
 
+    boolean existsByTypeId(Long typeId);
+
 }

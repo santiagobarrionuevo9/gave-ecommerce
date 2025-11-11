@@ -1,8 +1,6 @@
 package org.example.gavebackend.services;
 
-import org.example.gavebackend.dtos.ProductDTO;
-import org.example.gavebackend.dtos.ProductImageDTO;
-import org.example.gavebackend.dtos.ProductTypeDTO;
+import org.example.gavebackend.dtos.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,4 +23,13 @@ public interface serviceproducts {
     ProductImageDTO addImage(ProductImageDTO dto);
     void deleteImage(Long id);
     List<ProductImageDTO> listImagesByProduct(Long productId);
+    // src/main/java/org/example/gavebackend/services/serviceproducts.java
+    public ProductDTO updateStock(Long id, StockChangeDTO dto);
+    public List<ProductDTO> bulkUpdateStock(List<StockChangeDTOItem> items);
+
+    void deleteType(Long id);
+
+    public ProductTypeDTO updateType(ProductTypeDTO dto);
+
+
 }

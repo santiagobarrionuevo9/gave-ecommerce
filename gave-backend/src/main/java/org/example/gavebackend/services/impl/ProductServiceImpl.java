@@ -1,9 +1,9 @@
 package org.example.gavebackend.services.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.example.gavebackend.dtos.ProductDTO;
-import org.example.gavebackend.dtos.ProductImageDTO;
-import org.example.gavebackend.dtos.ProductTypeDTO;
+import org.apache.coyote.BadRequestException;
+import org.example.gavebackend.dtos.*;
 import org.example.gavebackend.entities.ProductImage;
 import org.example.gavebackend.entities.product;
 import org.example.gavebackend.entities.productType;
@@ -13,12 +13,14 @@ import org.example.gavebackend.repositories.productTypeRepository;
 import org.example.gavebackend.services.serviceproducts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -131,6 +133,40 @@ public class ProductServiceImpl implements serviceproducts {
         return toDTO(productRepo.save(p));
     }
 
+    // src/main/java/org/example/gavebackend/services/impl/serviceproductsImpl.java
+    @Override
+    @Transactional
+    public ProductDTO updateStock(Long id, StockChangeDTO dto) {
+        product p = productRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+        int current = p.getStock() == null ? 0 : p.getStock();
+        int next;
+        switch (dto.getOperation()) {
+            case SET -> next = dto.getAmount();
+            case INCREMENT -> next = current + dto.getAmount();
+            case DECREMENT -> next = Math.max(0, current - dto.getAmount());
+            default -> throw new IllegalArgumentException("Operación inválida");
+        }
+        p.setStock(next);
+        // opcional: auditar reason, updatedAt se setea en @PreUpdate
+        return toDTO(p);
+    }
+
+    @Override
+    @Transactional
+    public List<ProductDTO> bulkUpdateStock(List<StockChangeDTOItem> items) {
+        List<ProductDTO> result = new ArrayList<>();
+        for (var it : items) {
+            var dto = new StockChangeDTO();
+            dto.setOperation(it.getOperation());
+            dto.setAmount(it.getAmount());
+            dto.setReason(it.getReason());
+            result.add(updateStock(it.getProductId(), dto));
+        }
+        return result;
+    }
+
+
     @Override @Transactional
     public ProductDTO get(Long id) {
         return productRepo.findById(id).map(this::toDTO)
@@ -204,6 +240,34 @@ public class ProductServiceImpl implements serviceproducts {
     public List<ProductImageDTO> listImagesByProduct(Long productId) {
         return imageRepo.findByProductIdOrderBySortOrderAsc(productId)
                 .stream().map(this::toDTO).toList();
+    }
+    @Override
+    public ProductTypeDTO updateType(ProductTypeDTO dto){
+        var entity = typeRepo.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
+
+        entity.setName(dto.getName());
+        entity.setSlug(dto.getSlug());
+        entity.setDescription(dto.getDescription());
+        typeRepo.save(entity);
+
+        return toDTO(entity);
+    }
+    @Override
+    public void deleteType(Long id) {
+        var entity = typeRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
+
+        if (productRepo.existsByTypeId(id)) {
+            throw new IllegalArgumentException("No se puede eliminar: hay productos asociados a esta categoría");
+        }
+
+        try {
+            typeRepo.delete(entity);
+        } catch (DataIntegrityViolationException ex) {
+            // Podés crear otra excepción @ResponseStatus(HttpStatus.CONFLICT) si querés
+            throw new IllegalArgumentException("No se puede eliminar por restricciones de integridad");
+        }
     }
 
     // ---- mappers ----

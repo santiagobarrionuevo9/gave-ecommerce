@@ -1,0 +1,86 @@
+<!-- src/app/admin/stock-admin/stock-admin.component.html -->
+<div class="container py-4">
+  <h3>Actualizar stock</h3>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <form class="row g-2" [formGroup]="form">
+        <div class="col-12 col-md-6">
+          <input class="form-control" placeholder="Buscar por nombre, SKU…" formControlName="q">
+        </div>
+        <div class="col-6 col-md-2">
+          <select class="form-select" formControlName="sort">
+            <option value="name,asc">Nombre (A→Z)</option>
+            <option value="name,desc">Nombre (Z→A)</option>
+            <option value="createdAt,desc">Novedades</option>
+            <option value="price,asc">Precio ↑</option>
+            <option value="price,desc">Precio ↓</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select class="form-select" formControlName="size">
+            <option [value]="12">12</option>
+            <option [value]="24">24</option>
+            <option [value]="48">48</option>
+          </select>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="alert alert-info">Cargando…</div>
+
+  <div *ngIf="page">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Producto</th><th>SKU</th><th>Precio</th><th>Stock</th>
+            <th style="width:200px">+/-</th>
+            <th style="width:220px">SET</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of page.content">
+            <td>{{ p.name }}</td>
+            <td><code>{{ p.sku }}</code></td>
+            <td>$ {{ p.price | number:'1.0-0' }}</td>
+            <td><strong>{{ p.stock }}</strong></td>
+            <td>
+              <div class="input-group">
+                <input type="number" min="0" class="form-control" (input)="setDelta(p.id, $any($event.target).value)" placeholder="Cantidad">
+                <button class="btn btn-outline-success" (click)="doUpdate(p.id,'INCREMENT')">+ Sum</button>
+                <button class="btn btn-outline-danger" (click)="doUpdate(p.id,'DECREMENT')">− Rest</button>
+              </div>
+            </td>
+            <td>
+              <div class="input-group">
+                <input type="number" min="0" class="form-control" (input)="setSet(p.id, $any($event.target).value)" placeholder="Nuevo stock">
+                <button class="btn btn-primary" (click)="doUpdate(p.id,'SET')">Aplicar</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="d-flex justify-content-end">
+      <ul class="pagination mb-0">
+        <li class="page-item" [class.disabled]="page.first">
+          <button class="page-link" (click)="goTo(0)">&laquo;</button>
+        </li>
+        <li class="page-item" [class.disabled]="page.first">
+          <button class="page-link" (click)="goTo((page.number||0)-1)">Anterior</button>
+        </li>
+        <li class="page-item disabled"><span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span></li>
+        <li class="page-item" [class.disabled]="page.last">
+          <button class="page-link" (click)="goTo((page.number||0)+1)">Siguiente</button>
+        </li>
+        <li class="page-item" [class.disabled]="page.last">
+          <button class="page-link" (click)="goTo(page.totalPages-1)">&raquo;</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
