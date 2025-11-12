@@ -19,23 +19,36 @@
           <a class="nav-link" routerLink="/mis-pedidos" routerLinkActive="active">Mis pedidos</a>
         </li>
 
-        <!-- ADMIN: menú de gestión -->
-        <li class="nav-item dropdown" *ngIf="isAdmin()">
-          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown">Admin</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" routerLink="/admin/crear">Agregar producto</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/editar">Editar producto</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/pedidos">Pedidos</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/stock">Stock</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/categorias">Categorias</a></li>
-          </ul>
-        </li>
+        <!-- ADMIN -->
+        <ng-container *ngIf="isAdmin()">
+
+          <!-- SOLO STOCK, SIN DESPLEGABLE -->
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/stock" routerLinkActive="active">
+              Stock
+            </a>
+          </li>
+
+          <!-- Links normales -->
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/pedidos" routerLinkActive="active">
+              Pedidos
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/categorias" routerLinkActive="active">
+              Categorías
+            </a>
+          </li>
+
+        </ng-container>
       </ul>
 
       <!-- DERECHA (push) -->
       <div class="ms-auto d-flex align-items-center gap-2">
 
-        <!-- Carrito: visible para cliente (si querés que admin también lo vea, quitá el *ngIf) -->
+        <!-- Carrito -->
         <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito"
            *ngIf="!isAdmin()">
           <i class="bi bi-cart"></i>
@@ -59,7 +72,9 @@
               {{ displayName() }}
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li *ngIf="!isAdmin()"><a class="dropdown-item" routerLink="/mis-pedidos">Mis pedidos</a></li>
+              <li *ngIf="!isAdmin()">
+                <a class="dropdown-item" routerLink="/mis-pedidos">Mis pedidos</a>
+              </li>
               <li><hr class="dropdown-divider"></li>
               <li><button class="dropdown-item" (click)="logout()">Salir</button></li>
             </ul>
@@ -71,10 +86,3 @@
 </nav>
 
 <router-outlet></router-outlet>
-
-<footer class="footer-petrol mt-5 py-3">
-  <div class="container d-flex justify-content-between small">
-    <span>© {{ year }} Gave</span>
-    <span><a href="#">Términos</a> · <a href="#">Privacidad</a></span>
-  </div>
-</footer>

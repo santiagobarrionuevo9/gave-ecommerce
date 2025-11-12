@@ -21,6 +21,8 @@ export const routes: Routes = [
   // admin
   { path: 'admin/crear',  canActivate: [adminGuard], loadComponent: () => import('./product/createproduct/createproduct.component').then(m => m.CreateproductComponent) },
   { path: 'admin/editar', canActivate: [adminGuard], loadComponent: () => import('./product/editproduct/editproduct.component').then(m => m.EditproductComponent) },
+  // NUEVA RUTA CON ID
+  { path: 'admin/editar/:id', canActivate: [adminGuard],loadComponent: () => import('./product/editproduct/editproduct.component').then(m => m.EditproductComponent)},
   // src/app/app.routes.ts
   { path: 'admin/stock', canActivate: [adminGuard], loadComponent: () => import('./product/stockadmin/stockadmin.component').then(m => m.StockadminComponent) },
   { path: 'admin/categorias', canActivate: [adminGuard], loadComponent: () => import('./product/typeadmin/typeadmin.component').then(m => m.TypeadminComponent) },

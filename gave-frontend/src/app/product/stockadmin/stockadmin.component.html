@@ -1,6 +1,14 @@
-<!-- src/app/admin/stock-admin/stock-admin.component.html -->
+<!-- src/app/product/stockadmin/stockadmin.component.html -->
 <div class="container py-4">
-  <h3>Actualizar stock</h3>
+  <!-- Título + botón agregar -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Actualizar stock</h3>
+
+    <!-- BOTÓN AGREGAR PRODUCTO -->
+    <a class="btn btn-primary" [routerLink]="['/admin/crear']">
+      + Agregar producto
+    </a>
+  </div>
 
   <div class="card mb-3">
     <div class="card-body">
@@ -35,9 +43,14 @@
       <table class="table align-middle">
         <thead>
           <tr>
-            <th>Producto</th><th>SKU</th><th>Precio</th><th>Stock</th>
+            <th>Producto</th>
+            <th>SKU</th>
+            <th>Precio</th>
+            <th>Stock</th>
             <th style="width:200px">+/-</th>
             <th style="width:220px">SET</th>
+            <!-- NUEVA COLUMNA -->
+            <th style="width:120px">Editar</th>
           </tr>
         </thead>
         <tbody>
@@ -48,16 +61,30 @@
             <td><strong>{{ p.stock }}</strong></td>
             <td>
               <div class="input-group">
-                <input type="number" min="0" class="form-control" (input)="setDelta(p.id, $any($event.target).value)" placeholder="Cantidad">
-                <button class="btn btn-outline-success" (click)="doUpdate(p.id,'INCREMENT')">+ Sum</button>
-                <button class="btn btn-outline-danger" (click)="doUpdate(p.id,'DECREMENT')">− Rest</button>
+                <input type="number" min="0" class="form-control"
+                       (input)="setDelta(p.id, $any($event.target).value)"
+                       placeholder="Cantidad">
+                <button class="btn btn-outline-success"
+                        (click)="doUpdate(p.id,'INCREMENT')">+ Sum</button>
+                <button class="btn btn-outline-danger"
+                        (click)="doUpdate(p.id,'DECREMENT')">− Rest</button>
               </div>
             </td>
             <td>
               <div class="input-group">
-                <input type="number" min="0" class="form-control" (input)="setSet(p.id, $any($event.target).value)" placeholder="Nuevo stock">
-                <button class="btn btn-primary" (click)="doUpdate(p.id,'SET')">Aplicar</button>
+                <input type="number" min="0" class="form-control"
+                       (input)="setSet(p.id, $any($event.target).value)"
+                       placeholder="Nuevo stock">
+                <button class="btn btn-primary"
+                        (click)="doUpdate(p.id,'SET')">Aplicar</button>
               </div>
+            </td>
+            <!-- BOTÓN EDITAR PRODUCTO -->
+            <td>
+              <a class="btn btn-sm btn-outline-secondary"
+                 [routerLink]="['/admin/editar', p.id]">
+                Editar
+              </a>
             </td>
           </tr>
         </tbody>
@@ -72,7 +99,9 @@
         <li class="page-item" [class.disabled]="page.first">
           <button class="page-link" (click)="goTo((page.number||0)-1)">Anterior</button>
         </li>
-        <li class="page-item disabled"><span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span></li>
+        <li class="page-item disabled">
+          <span class="page-link">{{ page.number + 1 }} / {{ page.totalPages }}</span>
+        </li>
         <li class="page-item" [class.disabled]="page.last">
           <button class="page-link" (click)="goTo((page.number||0)+1)">Siguiente</button>
         </li>
@@ -83,4 +112,3 @@
     </nav>
   </div>
 </div>
-

@@ -5,12 +5,13 @@ import { ProductService } from '../../service/product.service';
 import { Createproductdto } from '../../interface/product/createproductdto';
 import { CommonModule } from '@angular/common';
 import { Imageproductdto } from '../../interface/product/imageproductdto';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: number };
 @Component({
   selector: 'app-editproduct',
   standalone: true,
-  imports: [ReactiveFormsModule,CommonModule, FormsModule],
+  imports: [ReactiveFormsModule,CommonModule, FormsModule,RouterModule],
   templateUrl: './editproduct.component.html',
   styleUrl: './editproduct.component.css'
 })
@@ -28,19 +29,20 @@ export class EditproductComponent implements OnInit {
 
   currentId: number | null = null;
 
-  // imágenes existentes
   images: ImageRow[] = [];
-
-  // subida múltiple
   selectedFiles: File[] = [];
   previews: string[] = [];
   readonly MAX_FILES = 20;
   readonly MAX_MB = 10;
 
-  // base para transformar /files/... en absoluta:
-  private readonly filesHost = 'http://localhost:9011'; // si usás proxy, podrías no necesitarlo
+  private readonly filesHost = 'http://localhost:9011';
 
-  constructor(private fb: FormBuilder, private api: ProductService) {}
+  // 👇 inyectamos ActivatedRoute
+  constructor(
+    private fb: FormBuilder,
+    private api: ProductService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.loadForm = this.fb.group({
@@ -59,13 +61,24 @@ export class EditproductComponent implements OnInit {
       stock: [0, [Validators.required, Validators.min(0)]],
     });
 
+    // cargar tipos
     this.api.getTypes().subscribe({
       next: ts => this.types = ts,
       error: () => this.types = []
     });
+
+    // 👇 si viene id por la ruta, cargarlo directamente
+    const paramId = this.route.snapshot.paramMap.get('id');
+    if (paramId) {
+      const idNum = Number(paramId);
+      if (!isNaN(idNum) && idNum > 0) {
+        this.loadForm.patchValue({ id: idNum });
+        this.loadById();
+      }
+    }
   }
 
-  // ---------- cargar producto por ID ----------
+  // ---------- cargar producto por ID (se reutiliza para formulario y para ruta) ----------
   loadById(): void {
     this.successMsg = this.errorMsg = null;
     if (this.loadForm.invalid) { this.loadForm.markAllAsTouched(); return; }
