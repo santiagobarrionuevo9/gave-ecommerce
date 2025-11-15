@@ -1,20 +1,27 @@
-<!-- src/app/product/stockadmin/stockadmin.component.html -->
-<div class="container py-4">
+<div class="container py-4 stock-page">
   <!-- Título + botón agregar -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Actualizar stock</h3>
+  <div class="d-flex justify-content-between align-items-center mb-3 stock-header">
+    <div>
+      <h3 class="mb-0">Actualizar stock</h3>
+      <p class="text-muted small mb-0">
+        Gestioná el stock de tus productos de forma rápida.
+      </p>
+    </div>
 
     <!-- BOTÓN AGREGAR PRODUCTO -->
-    <a class="btn btn-primary" [routerLink]="['/admin/crear']">
+    <a class="btn btn-primary btn-sm px-3" [routerLink]="['/admin/crear']">
       + Agregar producto
     </a>
   </div>
 
-  <div class="card mb-3">
+  <!-- Filtros -->
+  <div class="card mb-3 stock-filters-card">
     <div class="card-body">
-      <form class="row g-2" [formGroup]="form">
+      <form class="row g-2 align-items-center" [formGroup]="form">
         <div class="col-12 col-md-6">
-          <input class="form-control" placeholder="Buscar por nombre, SKU…" formControlName="q">
+          <input class="form-control"
+                 placeholder="Buscar por nombre, SKU…"
+                 formControlName="q">
         </div>
         <div class="col-6 col-md-2">
           <select class="form-select" formControlName="sort">
@@ -40,45 +47,78 @@
 
   <div *ngIf="page">
     <div class="table-responsive">
-      <table class="table align-middle">
+      <table class="table align-middle stock-table">
         <thead>
           <tr>
             <th>Producto</th>
             <th>SKU</th>
             <th>Precio</th>
             <th>Stock</th>
-            <th style="width:200px">+/-</th>
-            <th style="width:220px">SET</th>
-            <!-- NUEVA COLUMNA -->
+            <th style="width:210px">+ / −</th>
+            <th style="width:220px">Set absoluto</th>
             <th style="width:120px">Editar</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of page.content">
-            <td>{{ p.name }}</td>
+          <tr *ngFor="let p of page.content"
+              [class.stock-low]="p.stock <= 5">
+            <td class="stock-name">
+              {{ p.name }}
+            </td>
             <td><code>{{ p.sku }}</code></td>
-            <td>$ {{ p.price | number:'1.0-0' }}</td>
-            <td><strong>{{ p.stock }}</strong></td>
+            <td class="stock-price">$ {{ p.price | number:'1.0-0' }}</td>
             <td>
-              <div class="input-group">
-                <input type="number" min="0" class="form-control"
-                       (input)="setDelta(p.id, $any($event.target).value)"
-                       placeholder="Cantidad">
-                <button class="btn btn-outline-success"
-                        (click)="doUpdate(p.id,'INCREMENT')">+ Sum</button>
-                <button class="btn btn-outline-danger"
-                        (click)="doUpdate(p.id,'DECREMENT')">− Rest</button>
+              <span class="badge stock-badge">
+                {{ p.stock }}
+              </span>
+            </td>
+
+            <!-- SUMAR / RESTAR -->
+            <td>
+              <div class="stock-input-group">
+                <div class="input-group input-group-sm">
+                  <input type="number"
+                         min="0"
+                         class="form-control text-center"
+                         (input)="setDelta(p.id, $any($event.target).value)"
+                         placeholder="Cant.">
+                  <button class="btn btn-outline-success"
+                          type="button"
+                          (click)="doUpdate(p,'INCREMENT')"
+                          title="Sumar al stock">
+                    <i class="bi bi-plus-lg"></i>
+                  </button>
+                  <button class="btn btn-outline-danger"
+                          type="button"
+                          (click)="doUpdate(p,'DECREMENT')"
+                          title="Restar del stock">
+                    <i class="bi bi-dash-lg"></i>
+                  </button>
+                </div>
+                <div class="form-text small">Sumar / restar unidades</div>
               </div>
             </td>
+
+            <!-- SET ABSOLUTO -->
             <td>
-              <div class="input-group">
-                <input type="number" min="0" class="form-control"
-                       (input)="setSet(p.id, $any($event.target).value)"
-                       placeholder="Nuevo stock">
-                <button class="btn btn-primary"
-                        (click)="doUpdate(p.id,'SET')">Aplicar</button>
+              <div class="stock-input-group">
+                <div class="input-group input-group-sm">
+                  <input type="number"
+                         min="0"
+                         class="form-control text-center"
+                         (input)="setSet(p.id, $any($event.target).value)"
+                         placeholder="Nuevo stock">
+                  <button class="btn btn-primary"
+                          type="button"
+                          (click)="doUpdate(p,'SET')"
+                          title="Establecer stock exacto">
+                    SET
+                  </button>
+                </div>
+                <div class="form-text small">Reemplaza el stock actual</div>
               </div>
             </td>
+
             <!-- BOTÓN EDITAR PRODUCTO -->
             <td>
               <a class="btn btn-sm btn-outline-secondary"
@@ -91,6 +131,7 @@
       </table>
     </div>
 
+    <!-- Paginación -->
     <nav class="d-flex justify-content-end">
       <ul class="pagination mb-0">
         <li class="page-item" [class.disabled]="page.first">

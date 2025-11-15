@@ -6,6 +6,7 @@ import { Createproductdto } from '../../interface/product/createproductdto';
 import { CommonModule } from '@angular/common';
 import { Imageproductdto } from '../../interface/product/imageproductdto';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ProductstateService } from '../../service/productstate.service';
 
 type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: number };
 @Component({
@@ -41,7 +42,8 @@ export class EditproductComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private api: ProductService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private productState: ProductstateService
   ) {}
 
   ngOnInit(): void {
@@ -115,36 +117,46 @@ export class EditproductComponent implements OnInit {
 
   // ---------- guardar cambios de producto ----------
   save(): void {
-    this.successMsg = this.errorMsg = null;
-    if (this.currentId == null) { this.errorMsg = 'Primero cargá un producto por ID.'; return; }
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-
-    const v = this.form.getRawValue();
-    const payload: Createproductdto = {
-      typeId: Number(v.typeId),
-      name: v.name,
-      slug: v.slug,
-      shortDesc: v.shortDesc || null,
-      description: v.description || null,
-      isActive: !!v.isActive,
-      sku: v.sku,
-      price: Number(v.price),
-      stock: Number(v.stock)
-    };
-
-    this.saving.set(true);
-    this.api.updateProduct(this.currentId, payload).subscribe({
-      next: (updated) => {
-        this.saving.set(false);
-        this.successMsg = `Producto #${updated.id} actualizado correctamente.`;
-      },
-      error: (err) => {
-        console.error(err);
-        this.saving.set(false);
-        this.errorMsg = err?.error?.message || 'Error al actualizar el producto.';
-      }
-    });
+  this.successMsg = this.errorMsg = null;
+  if (this.currentId == null) { 
+    this.errorMsg = 'Primero cargá un producto por ID.'; 
+    return; 
   }
+  if (this.form.invalid) { 
+    this.form.markAllAsTouched(); 
+    return; 
+  }
+
+  const v = this.form.getRawValue();
+  const payload: Createproductdto = {
+    typeId: Number(v.typeId),
+    name: v.name,
+    slug: v.slug,
+    shortDesc: v.shortDesc || null,
+    description: v.description || null,
+    isActive: !!v.isActive,
+    sku: v.sku,
+    price: Number(v.price),
+    stock: Number(v.stock)
+  };
+
+  this.saving.set(true);
+  this.api.updateProduct(this.currentId, payload).subscribe({
+    next: (updated) => {
+      this.saving.set(false);
+      this.successMsg = `Producto #${updated.id} actualizado correctamente.`;
+
+      // 🔔 AVISAR QUE HUBO CAMBIO EN PRODUCTOS (navbar se entera)
+      this.productState.bump();
+    },
+    error: (err) => {
+      console.error(err);
+      this.saving.set(false);
+      this.errorMsg = err?.error?.message || 'Error al actualizar el producto.';
+    }
+  });
+}
+
 
   // ===================== IMÁGENES =====================
 

@@ -189,3 +189,275 @@
 }
 .footer-petrol a{ color:#fff; text-decoration: underline; }
 
+/* ===== MIS PEDIDOS (CLIENTE) ===== */
+
+.order-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+  border-left: 4px solid var(--petrol-500);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px rgba(15,76,92,.12);
+}
+
+.order-header {
+  gap: .75rem;
+}
+
+.order-amount {
+  color: var(--petrol-600);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Lista de items del pedido */
+.order-items li + li {
+  border-top: 1px dashed rgba(15,76,92,.12);
+  margin-top: .25rem;
+  padding-top: .25rem;
+}
+
+/* Por si algún nombre de producto es muy largo */
+.order-items .text-truncate {
+  max-width: 75%;
+}
+
+/* Variantes por estado (opcional, si querés tunear por estado) */
+.order-card.status-PENDING {
+  border-left-color: #ffc107; /* amarillo */
+}
+.order-card.status-ACCEPTED,
+.order-card.status-PREPARING {
+  border-left-color: #0d6efd; /* azul */
+}
+.order-card.status-OUT_FOR_DELIVERY {
+  border-left-color: #198754; /* verde */
+}
+.order-card.status-CANCELLED {
+  border-left-color: #dc3545; /* rojo */
+}
+
+/* ===== CARRITO (CLIENTE) ===== */
+
+.cart-page h3 {
+  color: var(--petrol-text);
+}
+
+.cart-empty {
+  border-radius: 12px;
+}
+
+/* Card de items */
+.cart-items-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+.cart-items-card .card-body {
+  padding: 1rem 1.25rem 1.1rem;
+}
+
+/* Imagen del producto */
+.cart-item-img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border: 1px solid rgba(15,76,92,.15);
+}
+
+/* Nombre largo */
+.cart-item-name {
+  font-size: .95rem;
+  color: var(--petrol-text);
+}
+
+/* Tabla del carrito */
+.cart-table thead th {
+  border-bottom-width: 2px;
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--petrol-600);
+}
+
+.cart-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Precios */
+.cart-price {
+  color: var(--petrol-600);
+  font-weight: 600;
+}
+
+/* Card de resumen */
+.cart-summary-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+.cart-summary-card h5 {
+  color: var(--petrol-text);
+}
+
+/* Caja de dirección */
+.cart-address-box {
+  border-color: rgba(15,76,92,.25) !important;
+}
+
+/* Totales */
+.cart-totals {
+  border-top: 1px solid rgba(15,76,92,.12);
+  padding-top: .75rem;
+  font-size: .95rem;
+}
+
+.cart-total-row {
+  border-top: 1px solid rgba(15,76,92,.18);
+  margin-top: .35rem;
+  padding-top: .35rem;
+  font-size: 1.05rem;
+  color: var(--petrol-600);
+}
+
+/* Responsive tweaks */
+@media (max-width: 767.98px) {
+  .cart-items-card .card-body {
+    padding: .75rem;
+  }
+  .cart-table thead {
+    font-size: .8rem;
+  }
+}
+
+/* ===== AUTH (LOGIN / REGISTER) ===== */
+
+.auth-page {
+  min-height: calc(100vh - 120px);
+}
+
+.auth-title {
+  color: var(--petrol-text);
+  font-weight: 700;
+}
+
+.auth-card {
+  border-radius: 16px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+.auth-card .card-body {
+  padding: 1.5rem 1.5rem 1.4rem;
+}
+
+.auth-card .form-label {
+  font-weight: 500;
+  color: var(--petrol-text);
+}
+
+.auth-submit-btn {
+  margin-top: .25rem;
+}
+
+/* Links secundarios (login / register / forgot) */
+.auth-alt-link a {
+  color: var(--petrol-600);
+  text-decoration: none;
+}
+
+.auth-alt-link a:hover {
+  text-decoration: underline;
+}
+
+/* Alertas un poco más redondeadas */
+.auth-page .alert {
+  border-radius: 12px;
+}
+
+/* ===== ADMIN STOCK ===== */
+
+.stock-page h3 {
+  color: var(--petrol-text);
+}
+
+.stock-header p {
+  font-size: .85rem;
+}
+
+/* Card de filtros */
+.stock-filters-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+/* Tabla */
+.stock-table thead th {
+  white-space: nowrap;
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--petrol-600);
+  border-bottom-width: 2px;
+}
+
+.stock-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Nombre de producto con ancho máximo para que no rompa */
+.stock-name {
+  max-width: 260px;
+}
+
+/* Precio */
+.stock-price {
+  color: var(--petrol-600);
+  font-weight: 600;
+}
+
+/* Badge de stock */
+.stock-badge {
+  background: var(--petrol-100);
+  color: var(--petrol-600);
+  border: 1px solid rgba(15,76,92,.2);
+  font-weight: 600;
+  min-width: 52px;
+  display: inline-flex;
+  justify-content: center;
+  padding: .15rem .4rem;
+  border-radius: 999px;
+}
+
+/* Resaltar stock bajo */
+.stock-low .stock-badge {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeeba;
+}
+
+/* Inputs de stock */
+.stock-input-group .form-control {
+  min-width: 80px;
+}
+
+.stock-input-group .form-text {
+  margin-top: .1rem;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+  .stock-name {
+    max-width: 180px;
+  }
+
+  .stock-page h3 {
+    font-size: 1.25rem;
+  }
+}
+
+
+
+

@@ -54,4 +54,6 @@ export class CartService {
   private emit() {
     this.recalc(this.state); this.save(); this.subject.next({ ...this.state, items:[...this.state.items] });
   }
+
+  
 }

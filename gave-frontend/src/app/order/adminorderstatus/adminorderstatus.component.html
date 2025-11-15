@@ -35,7 +35,7 @@
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
   <!-- Tabla -->
-  <div class="table-responsive" *ngIf="!loading() && orders?.length">
+  <div class="table-responsive" *ngIf="!loading() && orders.length">
     <table class="table align-middle">
       <thead>
         <tr>
@@ -116,7 +116,7 @@
     </div>
   </div>
 
-  <div *ngIf="!loading() && !orders?.length" class="alert alert-warning">
+  <div *ngIf="!loading() && !orders.length" class="alert alert-warning">
     No hay pedidos con ese estado.
   </div>
 </div>

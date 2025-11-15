@@ -1,30 +1,78 @@
 <div class="container py-4">
-  <h3>Mis pedidos</h3>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="mb-0">Mis pedidos</h3>
+      <p class="text-muted small mb-0" *ngIf="orders.length">
+        Tenés {{ orders.length }} pedido{{ orders.length > 1 ? 's' : '' }} en total.
+      </p>
+    </div>
+  </div>
 
   <!-- Estados -->
-  <div *ngIf="loading()">Cargando...</div>
-  <div *ngIf="error && !loading()" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="loading()" class="alert alert-info mb-3">
+    Cargando tus pedidos...
+  </div>
+  <div *ngIf="error && !loading()" class="alert alert-danger mb-3">
+    {{ error }}
+  </div>
 
   <!-- Lista de pedidos -->
   <ng-container *ngIf="!loading() && !error">
-    <div *ngIf="orders.length === 0" class="alert alert-info">
+
+    <div *ngIf="orders.length === 0" class="alert alert-warning">
       Aún no tenés pedidos.
     </div>
 
-    <div *ngFor="let o of orders" class="card mb-2">
+    <div *ngFor="let o of orders" class="card shadow-sm mb-3 order-card">
       <div class="card-body">
-        <div class="d-flex justify-content-between">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start order-header">
           <div>
-            <strong>#{{ o.id }}</strong> · {{ o.status }} · {{ o.createdAt | date:'short' }}
-            <div class="text-muted small" *ngIf="o.deliveryMethod === 'DELIVERY'">
-              Envío a: {{ o.address?.street }} {{ o.address?.number }}, {{ o.address?.city }}
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="fw-semibold">Pedido #{{ o.id }}</span>
+              <span class="badge badge-petrol text-uppercase small">
+                {{ o.status }}
+              </span>
+            </div>
+            <div class="text-muted small">
+              Realizado el {{ o.createdAt | date:'short' }}
+            </div>
+
+            <div class="text-muted small mt-1" *ngIf="o.deliveryMethod === 'DELIVERY'">
+              <i class="bi bi-truck me-1"></i>
+              Envío a: {{ o.address?.street }} {{ o.address?.number }},
+              {{ o.address?.city }}
+            </div>
+
+            <div class="text-muted small mt-1" *ngIf="o.deliveryMethod === 'PICKUP'">
+              <i class="bi bi-shop me-1"></i>
+              Retiro en el local
             </div>
           </div>
-          <div class="fw-semibold">$ {{ o.grandTotal | number:'1.0-0' }}</div>
+
+          <div class="text-end">
+            <div class="order-amount">
+              $ {{ o.grandTotal | number:'1.0-0' }}
+            </div>
+            <div class="text-muted small">
+              {{ o.items.length }} ítem{{ o.items.length > 1 ? 's' : '' }}
+            </div>
+          </div>
         </div>
-        <ul class="small mt-2 mb-0">
-          <li *ngFor="let it of o.items">
-            {{ it.quantity }} × {{ it.productName }} — $ {{ it.lineTotal | number:'1.0-0' }}
+
+        <hr class="my-2">
+
+        <!-- Items -->
+        <ul class="list-unstyled small mb-0 order-items">
+          <li *ngFor="let it of o.items" class="d-flex justify-content-between align-items-center">
+            <div class="me-2 text-truncate">
+              <span class="fw-semibold">{{ it.quantity }} ×</span>
+              <span>{{ it.productName }}</span>
+            </div>
+            <div class="text-muted">
+              $ {{ it.lineTotal | number:'1.0-0' }}
+            </div>
           </li>
         </ul>
       </div>

@@ -53,20 +53,63 @@ export class StockadminComponent implements OnInit {
   setDelta(id: number, v: string){ this.deltas[id] = Math.max(0, Number(v)||0); }
   setSet(id: number, v: string){ this.sets[id]   = Math.max(0, Number(v)||0); }
 
-  doUpdate(id: number, op: StockChangeDTO['operation']) {
-    let amount = 0;
-    if (op === 'SET') amount = this.sets[id] ?? 0;
-    else amount = this.deltas[id] ?? 0;
-    if (amount <= 0) { Swal.fire('Atención','Ingresá un valor mayor a 0','warning'); return; }
+  doUpdate(p: Productdto, op: StockChangeDTO['operation']) {
+  let amount = 0;
+  if (op === 'SET') amount = this.sets[p.id] ?? 0;
+  else amount = this.deltas[p.id] ?? 0;
+
+  if (amount <= 0) {
+    Swal.fire('Atención', 'Ingresá un valor mayor a 0', 'warning');
+    return;
+  }
+
+  const actionText =
+    op === 'INCREMENT' ? 'sumar' :
+    op === 'DECREMENT' ? 'restar' :
+    'establecer';
+
+  const opLabel =
+    op === 'INCREMENT' ? 'INCREMENTAR' :
+    op === 'DECREMENT' ? 'DECREMENTAR' :
+    'SET';
+
+  // Confirmación antes de aplicar el cambio
+  Swal.fire({
+    title: 'Confirmar actualización',
+    html: `
+      Vas a <b>${actionText}</b> <b>${amount}</b> unidad(es)<br>
+      del producto <b>${p.name}</b><br>
+      <span class="text-muted">Stock actual: ${p.stock}</span>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, actualizar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#0f4c5c'
+  }).then(result => {
+    if (!result.isConfirmed) return;
 
     const body: StockChangeDTO = { operation: op, amount };
-    this.api.updateStock(id, body).subscribe({
+
+    this.api.updateStock(p.id, body).subscribe({
       next: (prod) => {
-        Swal.fire('OK', `Stock actualizado: ${prod.stock}`, 'success');
-        // refrescar la página actual
+        const msg =
+          op === 'SET'
+            ? `Stock establecido en ${prod.stock}.`
+            : `Stock actualizado: ${prod.stock}.`;
+
+        Swal.fire('Actualizado', msg, 'success');
         this.search(this.page?.number || 0);
       },
-      error: (e) => Swal.fire('Error', e?.error?.message || 'No se pudo actualizar', 'error')
+      error: (e) => {
+        Swal.fire(
+          'Error',
+          e?.error?.message || 'No se pudo actualizar',
+          'error'
+        );
+      }
     });
-  }
+  });
+}
+
 }

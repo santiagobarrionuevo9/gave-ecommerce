@@ -1,26 +1,55 @@
-<div class="container py-4">
+<div class="container py-4 auth-page">
   <div class="row justify-content-center">
     <div class="col-sm-8 col-md-6 col-lg-5">
-      <h4 class="mb-3">Crear cuenta</h4>
-      <div *ngIf="errorMsg" class="alert alert-danger">{{errorMsg}}</div>
+      <div class="text-center mb-3">
+        <h4 class="auth-title mb-1">Crear cuenta</h4>
+        <p class="text-muted small mb-0">
+          Registrate para empezar a comprar en <strong>Gave Store</strong>.
+        </p>
+      </div>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" class="card p-3 shadow-sm">
-        <div class="mb-3">
-          <label class="form-label">Nombre completo</label>
-          <input class="form-control" formControlName="fullName" />
+      <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
+
+      <form [formGroup]="form"
+            (ngSubmit)="submit()"
+            class="card auth-card shadow-sm">
+
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" formControlName="fullName" placeholder="Ej: Juan Pérez" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" formControlName="email" type="email" placeholder="tu@email.com" />
+          </div>
+
+          <div class="mb-1">
+            <label class="form-label">Contraseña</label>
+            <input class="form-control" formControlName="password" type="password" placeholder="••••••••" />
+          </div>
+          <div class="form-text mb-3">
+            Mínimo 6 caracteres.
+          </div>
+
+          <button class="btn btn-primary w-100 auth-submit-btn"
+                  type="submit"
+                  [disabled]="loading">
+            <span *ngIf="!loading">Crear cuenta</span>
+            <span *ngIf="loading" class="d-inline-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Creando…
+            </span>
+          </button>
+
+          <div class="mt-3 text-center auth-alt-link">
+            <span class="text-muted small">¿Ya tenés cuenta?</span>
+            <a routerLink="/login" class="ms-1 small">Iniciar sesión</a>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input class="form-control" formControlName="email" type="email" />
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Contraseña</label>
-          <input class="form-control" formControlName="password" type="password" />
-          <div class="form-text">Mínimo 6 caracteres.</div>
-        </div>
-        <button class="btn btn-success w-100" [disabled]="loading">Crear cuenta</button>
       </form>
+
     </div>
   </div>
 </div>
-

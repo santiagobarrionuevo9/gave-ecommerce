@@ -1,26 +1,12 @@
-<div class="container py-4" *ngIf="loadForm && form">
+<div class="container py-4" *ngIf="form">
   <h4 class="mb-3">Editar producto</h4>
 
-  <!-- Buscar por ID -->
-  <div class="card shadow-sm mb-3">
-    <div class="card-body">
-      <form class="row g-2" [formGroup]="loadForm" (ngSubmit)="loadById()">
-        <div class="col-sm-4 col-md-3">
-          <label class="form-label">ID de producto</label>
-          <input type="number" class="form-control" formControlName="id" min="1" placeholder="Ej: 10">
-          <div class="text-danger small" *ngIf="loadForm.get('id')?.touched && loadForm.get('id')?.hasError('required')">Requerido</div>
-          <div class="text-danger small" *ngIf="loadForm.get('id')?.touched && loadForm.get('id')?.hasError('min')">Debe ser mayor a 0</div>
-        </div>
-        <div class="col-sm-3 d-flex align-items-end">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">Cargar</button>
-        </div>
-        <div class="col-12" *ngIf="loading()">
-          <div class="alert alert-info my-2">Cargando datos…</div>
-        </div>
-      </form>
-    </div>
+  <!-- Estado de carga -->
+  <div *ngIf="loading()" class="alert alert-info mb-3">
+    Cargando datos…
   </div>
 
+  <!-- Mensajes -->
   <div *ngIf="successMsg" class="alert alert-success">{{ successMsg }}</div>
   <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
@@ -129,10 +115,25 @@
                 </ng-template>
               </td>
               <td class="text-end">
-                <button *ngIf="!img._editing" class="btn btn-sm btn-outline-primary me-2" (click)="startEdit(img)">Editar</button>
-                <button *ngIf="img._editing" class="btn btn-sm btn-primary me-2" (click)="saveImage(img)">Guardar</button>
-                <button *ngIf="img._editing" class="btn btn-sm btn-secondary me-2" (click)="cancelEdit(img)">Cancelar</button>
-                <button class="btn btn-sm btn-outline-danger" (click)="deleteImage(img)">Eliminar</button>
+                <button *ngIf="!img._editing"
+                        class="btn btn-sm btn-outline-primary me-2"
+                        (click)="startEdit(img)">
+                  Editar
+                </button>
+                <button *ngIf="img._editing"
+                        class="btn btn-sm btn-primary me-2"
+                        (click)="saveImage(img)">
+                  Guardar
+                </button>
+                <button *ngIf="img._editing"
+                        class="btn btn-sm btn-secondary me-2"
+                        (click)="cancelEdit(img)">
+                  Cancelar
+                </button>
+                <button class="btn btn-sm btn-outline-danger"
+                        (click)="deleteImage(img)">
+                  Eliminar
+                </button>
               </td>
             </tr>
           </tbody>
@@ -148,18 +149,36 @@
       <div class="row g-2">
         <div class="col-md-8">
           <label class="form-label">Agregar nuevas imágenes</label>
-          <input type="file" class="form-control" (change)="onFilesChange($event)" accept="image/*" multiple>
-          <div class="form-text">Hasta {{ MAX_FILES }} imágenes (máx {{ MAX_MB }} MB c/u).</div>
+          <input type="file"
+                 class="form-control"
+                 (change)="onFilesChange($event)"
+                 accept="image/*"
+                 multiple>
+          <div class="form-text">
+            Hasta {{ MAX_FILES }} imágenes (máx {{ MAX_MB }} MB c/u).
+          </div>
         </div>
         <div class="col-md-4 d-flex align-items-end justify-content-end">
-          <button class="btn btn-outline-secondary me-2" (click)="clearUploads()" [disabled]="!previews.length">Limpiar selección</button>
-          <button class="btn btn-success" (click)="uploadSelected()" [disabled]="!previews.length || imgLoading()">Subir seleccionadas</button>
+          <button class="btn btn-outline-secondary me-2"
+                  type="button"
+                  (click)="clearUploads()"
+                  [disabled]="!previews.length">
+            Limpiar selección
+          </button>
+          <button class="btn btn-success"
+                  type="button"
+                  (click)="uploadSelected()"
+                  [disabled]="!previews.length || imgLoading()">
+            Subir seleccionadas
+          </button>
         </div>
       </div>
 
       <div class="row g-2 mt-2" *ngIf="previews.length">
         <div class="col-6 col-md-3 col-lg-2" *ngFor="let p of previews">
-          <img [src]="p" class="img-fluid rounded border" style="height:110px; object-fit:cover;">
+          <img [src]="p"
+               class="img-fluid rounded border"
+               style="height:110px; object-fit:cover;">
         </div>
       </div>
     </div>

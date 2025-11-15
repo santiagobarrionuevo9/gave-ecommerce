@@ -1,2 +1,20 @@
 /* src/app/admin/stock-admin/stock-admin.component.css */
 .table td, .table th { vertical-align: middle; }
+/* Tabla de stock */
+.stock-table thead th {
+  white-space: nowrap;
+}
+
+.stock-name {
+  max-width: 260px;
+}
+
+/* Inputs de stock */
+.stock-input-group .form-control {
+  min-width: 80px;
+}
+
+/* Hover leve en filas */
+.stock-table tbody tr:hover {
+  background: #f8fafc;
+}

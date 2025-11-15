@@ -50,7 +50,7 @@
 
         <!-- Carrito -->
         <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito"
-           *ngIf="!isAdmin()">
+          *ngIf="!isAdmin()">
           <i class="bi bi-cart"></i>
           <ng-container *ngIf="cartCount() as c">
             <span *ngIf="c > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -59,6 +59,7 @@
             </span>
           </ng-container>
         </a>
+
 
         <!-- Autenticación -->
         <ng-container *ngIf="!isLoggedIn(); else loggedTpl">
@@ -72,9 +73,6 @@
               {{ displayName() }}
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li *ngIf="!isAdmin()">
-                <a class="dropdown-item" routerLink="/mis-pedidos">Mis pedidos</a>
-              </li>
               <li><hr class="dropdown-divider"></li>
               <li><button class="dropdown-item" (click)="logout()">Salir</button></li>
             </ul>
