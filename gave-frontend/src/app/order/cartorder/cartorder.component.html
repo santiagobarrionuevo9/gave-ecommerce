@@ -186,15 +186,21 @@
           </div>
 
           <button class="btn btn-primary w-100"
-                  type="button"
-                  (click)="checkout()"
-                  [disabled]="submitting">
+        type="button"
+        (click)="checkout()"
+        [disabled]="submitting || !isLoggedIn">
             <span *ngIf="!submitting">Confirmar pedido</span>
             <span *ngIf="submitting" class="d-inline-flex align-items-center gap-2">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               Enviando…
             </span>
           </button>
+
+          <!-- Mensajito para invitados -->
+          <div *ngIf="!isLoggedIn" class="alert alert-info mt-2 small">
+            Para confirmar el pedido necesitás <strong>iniciar sesión o crear tu cuenta</strong>.
+          </div>
+
 
           <button class="btn btn-outline-secondary w-100 mt-2"
                   type="button"

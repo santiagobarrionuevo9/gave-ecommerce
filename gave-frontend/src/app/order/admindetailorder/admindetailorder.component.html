@@ -1,8 +1,13 @@
-<div class="container py-4" *ngIf="!loading(); else loadingTpl">
+<div class="container py-4 admin-page" *ngIf="!loading(); else loadingTpl">
   <ng-container *ngIf="!error; else errorTpl">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="mb-0">Pedido #{{ order.id }}</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3 admin-header">
+      <div>
+        <h4 class="mb-0">Pedido #{{ order.id }}</h4>
+        <p class="text-muted small mb-0">
+          {{ order.buyerEmail }} · {{ order.buyerPhone || 'Sin teléfono' }}
+        </p>
+      </div>
       <a routerLink="/admin/pedidos" class="btn btn-outline-secondary btn-sm">
         ← Volver
       </a>
@@ -10,12 +15,14 @@
 
     <div class="row g-3">
       <div class="col-12 col-lg-7">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm order-detail-card">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div class="fw-semibold">{{ order.buyerName }}</div>
-                <div class="text-muted small">{{ order.buyerEmail }} · {{ order.buyerPhone || '—' }}</div>
+                <div class="text-muted small">
+                  {{ order.buyerEmail }} · {{ order.buyerPhone || '—' }}
+                </div>
               </div>
               <span [class]="badgeCls(order.status)">{{ order.status }}</span>
             </div>
@@ -33,11 +40,13 @@
               <div class="text-muted small">
                 {{ order.address.city }}, {{ order.address.province }} ({{ order.address.postalCode || '-' }})
               </div>
-              <div class="text-muted small" *ngIf="order.address.reference">Ref: {{ order.address.reference }}</div>
+              <div class="text-muted small" *ngIf="order.address.reference">
+                Ref: {{ order.address.reference }}
+              </div>
             </div>
 
             <div class="table-responsive">
-              <table class="table table-sm align-middle">
+              <table class="table table-sm align-middle admin-table">
                 <thead>
                   <tr>
                     <th>Producto</th>
@@ -54,7 +63,7 @@
                     <td class="text-end">$ {{ it.lineTotal | number:'1.0-0' }}</td>
                   </tr>
                 </tbody>
-                <tfoot>
+                <tfoot class="order-totals">
                   <tr>
                     <th colspan="3" class="text-end">Subtotal</th>
                     <th class="text-end">$ {{ order.itemsTotal | number:'1.0-0' }}</th>
@@ -65,18 +74,24 @@
                   </tr>
                   <tr>
                     <th colspan="3" class="text-end">Total</th>
-                    <th class="text-end h5">$ {{ order.grandTotal | number:'1.0-0' }}</th>
+                    <th class="text-end h5 text-petrol">
+                      $ {{ order.grandTotal | number:'1.0-0' }}
+                    </th>
                   </tr>
                 </tfoot>
               </table>
             </div>
 
-            <div class="d-flex gap-2 justify-content-end">
-              <select class="form-select" style="max-width: 260px"
-                      [(ngModel)]="nextStatus" [disabled]="options().length===0">
+            <div class="d-flex gap-2 justify-content-end mt-2">
+              <select class="form-select form-select-sm"
+                      style="max-width: 260px"
+                      [(ngModel)]="nextStatus"
+                      [disabled]="options().length===0">
                 <option *ngFor="let ns of options()" [ngValue]="ns">{{ ns }}</option>
               </select>
-              <button class="btn btn-primary" (click)="update()" [disabled]="options().length===0">
+              <button class="btn btn-primary btn-sm"
+                      (click)="update()"
+                      [disabled]="options().length===0">
                 Actualizar estado
               </button>
             </div>
@@ -86,7 +101,7 @@
 
       <!-- Resumen -->
       <div class="col-12 col-lg-5">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm order-summary-card">
           <div class="card-body">
             <div class="fw-semibold mb-2">Resumen</div>
             <div class="d-flex justify-content-between">
@@ -100,7 +115,9 @@
             <hr>
             <div class="d-flex justify-content-between fw-semibold">
               <span>Total</span>
-              <span class="h5">$ {{ order.grandTotal | number:'1.0-0' }}</span>
+              <span class="h5 text-petrol">
+                $ {{ order.grandTotal | number:'1.0-0' }}
+              </span>
             </div>
           </div>
         </div>

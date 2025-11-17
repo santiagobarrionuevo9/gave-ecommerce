@@ -1,9 +1,9 @@
-<div class="container py-4">
+<div class="container py-4 admin-page">
 
-  <h4 class="mb-3">Pedidos (Admin)</h4>
+  <h4 class="mb-3 admin-title">Pedidos (Admin)</h4>
 
   <!-- Filtros -->
-  <div class="card shadow-sm mb-3">
+  <div class="card shadow-sm mb-3 admin-filters-card">
     <div class="card-body">
       <div class="row g-3 align-items-end">
         <div class="col-12 col-md-4">
@@ -36,7 +36,7 @@
 
   <!-- Tabla -->
   <div class="table-responsive" *ngIf="!loading() && orders.length">
-    <table class="table align-middle">
+    <table class="table align-middle admin-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -65,7 +65,9 @@
             <div *ngIf="o.buyerPhone">Tel: {{ o.buyerPhone }}</div>
           </td>
           <td>
-            <div class="fw-semibold">$ {{ o.grandTotal | number:'1.0-0' }}</div>
+            <div class="fw-semibold text-petrol">
+              $ {{ o.grandTotal | number:'1.0-0' }}
+            </div>
             <div class="text-muted small">Items: $ {{ o.itemsTotal | number:'1.0-0' }}</div>
             <div class="text-muted small" *ngIf="o.deliveryCost">Envío: $ {{ o.deliveryCost | number:'1.0-0' }}</div>
           </td>
@@ -94,7 +96,7 @@
     </table>
 
     <!-- Paginación -->
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center admin-pagination">
       <div class="small text-muted">
         Mostrando página {{ page() + 1 }} de {{ totalPages }} ({{ totalElements }} pedidos)
       </div>

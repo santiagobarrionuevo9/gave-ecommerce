@@ -457,6 +457,81 @@
     font-size: 1.25rem;
   }
 }
+/* ===== ADMIN LAYOUT GENERICO ===== */
+
+.admin-page h3,
+.admin-page h4,
+.admin-title {
+  color: var(--petrol-text);
+}
+
+.admin-header p {
+  font-size: .85rem;
+}
+
+/* Cards de filtros / cabeceras */
+.admin-filters-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+/* Tablas admin (categorías, pedidos, etc.) */
+.admin-table thead th {
+  white-space: nowrap;
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--petrol-600);
+  border-bottom-width: 2px;
+}
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Celda con nombres (categorías, productos) */
+.admin-name-cell {
+  max-width: 260px;
+}
+
+/* Texto petrol para montos y totales */
+.text-petrol {
+  color: var(--petrol-600);
+}
+
+/* Cards detalle pedido */
+.order-detail-card,
+.order-summary-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15,76,92,.08);
+}
+
+/* Totales en tabla detalle */
+.order-totals th {
+  border-top: none;
+}
+
+/* Paginación admin */
+.admin-pagination .pagination .page-link {
+  color: var(--petrol-600);
+  border-color: rgba(15,76,92,.2);
+}
+
+.admin-pagination .pagination .page-link:hover {
+  background: var(--petrol-100);
+  border-color: var(--petrol-600);
+}
+
+/* Responsivo */
+@media (max-width: 767.98px) {
+  .admin-header h3,
+  .admin-header h4 {
+    font-size: 1.25rem;
+  }
+  .admin-name-cell {
+    max-width: 180px;
+  }
+}
 
 
 
