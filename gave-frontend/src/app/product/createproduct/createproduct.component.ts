@@ -30,6 +30,7 @@ export class CreateproductComponent implements OnInit {
   // límites / validaciones de ejemplo
   readonly MAX_FILES = 12;
   readonly MAX_SIZE_MB = 10;
+  showDiscountConfig = false;  // 👈 NUEVO
 
   constructor(
     private fb: FormBuilder,
@@ -49,6 +50,9 @@ export class CreateproductComponent implements OnInit {
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
+      // 👇 NUEVOS CAMPOS DE DESCUENTO
+      discountThreshold: [null, [Validators.min(1)]],
+      discountPercent: [null, [Validators.min(0), Validators.max(100)]],
       // Imágenes
       imageAlt: [''],
       imageSort: [0],
@@ -123,7 +127,16 @@ export class CreateproductComponent implements OnInit {
       isActive: !!v.isActive,
       sku: v.sku,
       price: Number(v.price),
-      stock: Number(v.stock)
+      stock: Number(v.stock),
+       // 👇 NUEVO: si están vacíos, van como null
+    discountThreshold:
+      v.discountThreshold !== null && v.discountThreshold !== ''
+        ? Number(v.discountThreshold)
+        : null,
+    discountPercent:
+      v.discountPercent !== null && v.discountPercent !== ''
+        ? Number(v.discountPercent)
+        : null
     };
 
     this.api.createProduct(payload).subscribe({

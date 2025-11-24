@@ -35,6 +35,7 @@ export class EditproductComponent implements OnInit {
   previews: string[] = [];
   readonly MAX_FILES = 20;
   readonly MAX_MB = 10;
+  showDiscountConfig = false;  // 👈 NUEVO
 
   private readonly filesHost = 'http://localhost:9011';
 
@@ -51,7 +52,7 @@ export class EditproductComponent implements OnInit {
       id: [null, [Validators.required, Validators.min(1)]]
     });
 
-    this.form = this.fb.group({
+        this.form = this.fb.group({
       typeId: [null, [Validators.required]],
       name: ['', [Validators.required, Validators.maxLength(180)]],
       slug: ['', [Validators.required, Validators.maxLength(200)]],
@@ -61,7 +62,12 @@ export class EditproductComponent implements OnInit {
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
+
+      // 👇 NUEVOS CAMPOS
+      discountThreshold: [null, [Validators.min(1)]],
+      discountPercent: [null, [Validators.min(0), Validators.max(100)]],
     });
+
 
     // cargar tipos
     this.api.getTypes().subscribe({
@@ -100,8 +106,13 @@ export class EditproductComponent implements OnInit {
           isActive: p.isActive ?? true,
           sku: p.sku,
           price: p.price,
-          stock: p.stock
+          stock: p.stock,
+
+          // 👇 NUEVO
+          discountThreshold: p.discountThreshold ?? null,
+          discountPercent: p.discountPercent ?? null,
         });
+
         this.fetchImages();
         this.loading.set(false);
       },
@@ -137,8 +148,15 @@ export class EditproductComponent implements OnInit {
     isActive: !!v.isActive,
     sku: v.sku,
     price: Number(v.price),
-    stock: Number(v.stock)
+    stock: Number(v.stock),
+
+    // 👇 NUEVO
+    discountThreshold:
+      v.discountThreshold !== null && v.discountThreshold !== '' ? Number(v.discountThreshold) : null,
+    discountPercent:
+      v.discountPercent !== null && v.discountPercent !== '' ? Number(v.discountPercent) : null,
   };
+
 
   this.saving.set(true);
   this.api.updateProduct(this.currentId, payload).subscribe({

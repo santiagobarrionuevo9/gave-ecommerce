@@ -66,6 +66,9 @@ public class ProductServiceImpl implements serviceproducts {
 
         mustBePositiveOrZero(price, "price");
         mustBePositiveOrZero(stock, "stock");
+        BigDecimal discountPercent = dto.getDiscountPercent();
+        Integer discountThreshold = dto.getDiscountThreshold();
+
 
         // ---- Reglas de unicidad
         if (productRepo.existsBySlug(slug))
@@ -88,6 +91,9 @@ public class ProductServiceImpl implements serviceproducts {
         p.setSku(sku);
         p.setPrice(price);
         p.setStock(stock);
+        // NUEVO: descuento por cantidad
+        p.setDiscountPercent(discountPercent == null ? BigDecimal.ZERO : discountPercent);
+        p.setDiscountThreshold(discountThreshold == null ? 0 : discountThreshold);
 
         p = productRepo.save(p);
         return toDTO(p);
@@ -108,6 +114,8 @@ public class ProductServiceImpl implements serviceproducts {
 
         mustBePositiveOrZero(price, "price");
         mustBePositiveOrZero(stock, "stock");
+        BigDecimal discountPercent = dto.getDiscountPercent();
+        Integer discountThreshold = dto.getDiscountThreshold();
 
         // ---- Unicidad (excluyendo el propio id)
         if (productRepo.existsBySlugAndIdNot(slug, id) && !Objects.equals(p.getSlug(), slug))
@@ -129,6 +137,9 @@ public class ProductServiceImpl implements serviceproducts {
         p.setSku(sku);
         p.setPrice(price);
         p.setStock(stock);
+        // NUEVO: descuento por cantidad
+        p.setDiscountPercent(discountPercent == null ? BigDecimal.ZERO : discountPercent);
+        p.setDiscountThreshold(discountThreshold == null ? 0 : discountThreshold);
 
         return toDTO(productRepo.save(p));
     }
@@ -292,6 +303,9 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setSku(p.getSku());
         dto.setPrice(p.getPrice());
         dto.setStock(p.getStock());
+        // NUEVO
+        dto.setDiscountThreshold(p.getDiscountThreshold());
+        dto.setDiscountPercent(p.getDiscountPercent());
         dto.setCreatedAt(p.getCreatedAt()); // 👈
         return dto;
     }

@@ -59,8 +59,28 @@
                          (change)="setQty(it.productId, $any($event.target).value)">
                 </td>
                 <td class="text-end">
+                <!-- Si hay descuento -->
+                <ng-container *ngIf="it.discountAmount && it.discountAmount > 0; else noDiscount">
+                  <!-- total original tachado -->
+                  <div class="text-muted small text-decoration-line-through">
+                    $ {{ (it.price * it.quantity) | number:'1.0-0' }}
+                  </div>
+                  <!-- total con descuento -->
+                  <div class="fw-semibold text-success">
+                    $ {{ (it.lineTotal || (it.price * it.quantity - it.discountAmount)) | number:'1.0-0' }}
+                  </div>
+                  <!-- mensaje de ahorro -->
+                  <div class="text-success small">
+                    Ahorrás $ {{ it.discountAmount | number:'1.0-0' }}
+                  </div>
+                </ng-container>
+
+                <!-- Si NO hay descuento -->
+                <ng-template #noDiscount>
                   <strong>$ {{ (it.price * it.quantity) | number:'1.0-0' }}</strong>
-                </td>
+                </ng-template>
+              </td>
+
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-danger"
                           type="button"

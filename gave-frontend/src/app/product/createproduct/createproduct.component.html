@@ -69,6 +69,51 @@
               <label class="form-label">Descripción</label>
               <textarea rows="5" class="form-control" formControlName="description" placeholder="Detalles del producto"></textarea>
             </div>
+            <!-- 🔧 Config de descuentos (tuerca a la derecha) -->
+            <div class="col-12 d-flex justify-content-between align-items-center mt-2">
+              <div class="text-muted small">
+                Descuentos por cantidad (opcionales)
+              </div>
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center"
+                      (click)="showDiscountConfig = !showDiscountConfig">
+                <i class="bi bi-gear me-1"></i>
+                Configurar descuentos
+              </button>
+            </div>
+
+            <div class="col-12 mt-2" *ngIf="showDiscountConfig">
+              <div class="border rounded p-3 bg-light">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Cantidad mínima para aplicar descuento</label>
+                    <input type="number"
+                          class="form-control"
+                          formControlName="discountThreshold"
+                          min="1">
+                    <div class="form-text">
+                      Si lo dejás vacío, se usa el valor por defecto: <strong>10 unidades</strong>.
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">% de descuento sobre esa línea</label>
+                    <div class="input-group">
+                      <input type="number"
+                            class="form-control"
+                            formControlName="discountPercent"
+                            min="0"
+                            max="100"
+                            step="0.01">
+                      <span class="input-group-text">%</span>
+                    </div>
+                    <div class="form-text">
+                      Si lo dejás vacío, se aplica el <strong>10&nbsp;%</strong> por defecto.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

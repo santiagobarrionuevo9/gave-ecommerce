@@ -24,6 +24,8 @@ export class DetailproductComponent implements OnInit {
   images: Imageproductdto[] = [];
 
   qty = 1;
+  private readonly DEFAULT_DISCOUNT_THRESHOLD = 10;
+  private readonly DEFAULT_DISCOUNT_PERCENT = 10;
 
   // estado del toast
   toast = signal<{ type: ToastKind; text: string } | null>(null);
@@ -99,5 +101,25 @@ export class DetailproductComponent implements OnInit {
   trackByImgId = (_: number, item: Imageproductdto) => item?.id ?? _;
   mainImage(): string {
     return this.images.length ? this.images[0].url : 'https://via.placeholder.com/800x600?text=Sin+imagen';
+  }
+  /** Cantidad mínima efectiva (si no viene del backend, usamos default 10) */
+  get discountThreshold(): number {
+    if (!this.product) return this.DEFAULT_DISCOUNT_THRESHOLD;
+    return this.product.discountThreshold ?? this.DEFAULT_DISCOUNT_THRESHOLD;
+  }
+
+  /** % de descuento efectivo (si no viene del backend, usamos default 10) */
+  get discountPercent(): number {
+    if (!this.product) return this.DEFAULT_DISCOUNT_PERCENT;
+    return this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
+  }
+
+  /** ¿Hay descuento real (> 0 %)? */
+  get hasDiscount(): boolean {
+    if (!this.product) return false;
+
+    // Si el back deja percent en 0, no mostramos promo
+    const percent = this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
+    return percent > 0;
   }
 }

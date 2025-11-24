@@ -43,6 +43,13 @@ public class product {
     @Column(precision=12, scale=2)
     private BigDecimal price;           // si querés, podés dejarlo nullable
 
+    /** NUEVO: descuento por cantidad */
+    @Column(name = "discount_threshold")
+    private Integer discountThreshold;       // ej: 10
+
+    @Column(name = "discount_percent", precision = 5, scale = 2)
+    private BigDecimal discountPercent;      // ej: 10.00 -> 10%
+
     @Column(nullable=false)
     private Integer stock = 0;
 

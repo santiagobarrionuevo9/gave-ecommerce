@@ -26,6 +26,9 @@ public class ProductDTO {
     @NotBlank(message = "SKU es requerido") private String sku;
     @NotNull @DecimalMin("0.00") private BigDecimal price;
     @NotNull @Min(0) private Integer stock;
+    private Integer discountThreshold;
+    private BigDecimal discountPercent;
+
     // 👇 NUEVO
     private Instant createdAt;
 }

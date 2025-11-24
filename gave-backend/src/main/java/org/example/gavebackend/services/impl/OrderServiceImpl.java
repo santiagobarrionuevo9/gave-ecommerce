@@ -30,6 +30,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private MailService mail;
 
+    private static final int DEFAULT_DISCOUNT_QTY = 10;
+    private static final BigDecimal DEFAULT_DISCOUNT_PERCENT = new BigDecimal("10.00");
+
     @Override
     @Transactional
     public OrderDTO createOrder(CreateOrderDTO dto) {
@@ -70,7 +73,6 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal delivery = (dto.getDeliveryCost() == null) ? BigDecimal.ZERO : dto.getDeliveryCost();
         o.setDeliveryCost(delivery);
 
-        // === ITEMS + RESERVAS ===
         BigDecimal itemsTotal = BigDecimal.ZERO;
 
         for (CreateOrderItemDTO it : dto.getItems()) {
@@ -79,7 +81,8 @@ public class OrderServiceImpl implements OrderService {
                 throw new IllegalArgumentException("Producto inválido: " + it.getProductId());
 
             int qty = it.getQuantity();
-            if (qty <= 0) throw new IllegalArgumentException("Cantidad inválida para " + p.getName());
+            if (qty <= 0)
+                throw new IllegalArgumentException("Cantidad inválida para " + p.getName());
 
             int reserved = (p.getReserved() == null ? 0 : p.getReserved());
             int available = p.getStock() - reserved;
@@ -90,30 +93,53 @@ public class OrderServiceImpl implements OrderService {
             p.setReserved(reserved + qty);
             productRepo.save(p);
 
-            BigDecimal unit = p.getPrice(); // validar si puede ser null
-            if (unit == null) throw new IllegalArgumentException("Producto sin precio: " + p.getName());
-            BigDecimal line = unit.multiply(BigDecimal.valueOf(qty));
+            BigDecimal unit = p.getPrice();
+            if (unit == null)
+                throw new IllegalArgumentException("Producto sin precio: " + p.getName());
+
+            BigDecimal lineGross = unit.multiply(BigDecimal.valueOf(qty));
+
+            // === CÁLCULO DE DESCUENTO POR PRODUCTO ===
+            int threshold = (p.getDiscountThreshold() != null)
+                    ? p.getDiscountThreshold()
+                    : DEFAULT_DISCOUNT_QTY;
+
+            BigDecimal percent = (p.getDiscountPercent() != null)
+                    ? p.getDiscountPercent()
+                    : DEFAULT_DISCOUNT_PERCENT;
+
+            BigDecimal discountAmount = BigDecimal.ZERO;
+
+            if (qty >= threshold && percent.compareTo(BigDecimal.ZERO) > 0) {
+                // lineGross * (percent / 100)
+                discountAmount = lineGross
+                        .multiply(percent)
+                        .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+            }
+
+            BigDecimal lineNet = lineGross.subtract(discountAmount);
 
             orderItem oi = new orderItem();
-            oi.setOrder(o);              // <- necesario para la relación
+            oi.setOrder(o);
             oi.setProduct(p);
             oi.setQuantity(qty);
-            oi.setUnitPrice(unit);
-            oi.setLineTotal(line);
+            oi.setUnitPrice(unit);          // precio original
+            oi.setLineTotal(lineNet);       // total con descuento
+            oi.setDiscountAmount(discountAmount);
 
-            o.getItems().add(oi);        // <- necesario para cascade
-            itemsTotal = itemsTotal.add(line);
+            o.getItems().add(oi);
+            itemsTotal = itemsTotal.add(lineNet); // sumás el neto, NO el bruto
         }
 
         o.setItemsTotal(itemsTotal);
         o.setGrandTotal(itemsTotal.add(delivery));
 
-        // persistir
         o = orderRepo.save(o);
 
-        // email de confirmación (único)
         try {
-            mail.sendOrderConfirmationEmail(o.getBuyerEmail(), o.getBuyerName(), o.getId(), o.getGrandTotal());
+            mail.sendOrderConfirmationEmail(
+                    o.getBuyerEmail(), o.getBuyerName(), o.getId(), o.getGrandTotal()
+            );
         } catch (Exception ignored) {}
 
         return toDTO(o);

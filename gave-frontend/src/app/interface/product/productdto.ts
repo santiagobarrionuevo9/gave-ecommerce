@@ -10,4 +10,7 @@ export interface Productdto {
   price: number;
   stock: number;
   createdAt: string; // ISO de backend 👈
+  // 👇 NUEVO
+  discountThreshold?: number | null;
+  discountPercent?: number | null;
 }

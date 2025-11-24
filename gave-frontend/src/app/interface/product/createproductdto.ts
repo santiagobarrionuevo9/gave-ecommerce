@@ -8,4 +8,7 @@ export interface Createproductdto {
   sku: string;
   price: number;
   stock: number;
+  // 👇 NUEVO
+  discountThreshold?: number | null;
+  discountPercent?: number | null;
 }
