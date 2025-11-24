@@ -16,6 +16,16 @@
   letter-spacing: .3px;
   color: #fff !important;
 }
+.navbar-petrol .navbar-brand {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.navbar-petrol {
+  min-height: 70px;      /* subís un poco la altura de la navbar */
+}
 
 /* Navbar petróleo */
 .navbar-petrol{

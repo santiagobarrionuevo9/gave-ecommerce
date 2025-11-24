@@ -6,6 +6,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
     { path: '', redirectTo: 'catalogo', pathMatch: 'full' },
   { path: 'catalogo', component: ProductbrowseComponent },
+  {path: 'historia', loadComponent: () => import('./introduccion/introduccion.component').then(m => m.IntroduccionComponent) },
   { path: 'producto/:slug', loadComponent: () => import('./product/detailproduct/detailproduct.component').then(m => m.DetailproductComponent) },
 
   // auth
@@ -30,6 +31,7 @@ export const routes: Routes = [
    // ADMIN pedidos
   { path: 'admin/pedidos', canActivate: [adminGuard], loadComponent: () => import('./order/adminorderstatus/adminorderstatus.component').then(m => m.AdminorderstatusComponent) },
   { path: 'admin/pedidos/:id', canActivate: [adminGuard], loadComponent: () => import('./order/admindetailorder/admindetailorder.component').then(m => m.AdmindetailorderComponent) },
-
-  { path: '**', redirectTo: 'catalogo' }
+  
+  { path: '**', redirectTo: 'catalogo' },
+  
 ];

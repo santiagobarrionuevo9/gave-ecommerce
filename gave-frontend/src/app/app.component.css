@@ -1,0 +1,6 @@
+.Logo-GV {
+  height: 72px;      /* probá 72, 80 o 90 hasta que te guste */
+  width: auto;
+  object-fit: contain;
+}
+
