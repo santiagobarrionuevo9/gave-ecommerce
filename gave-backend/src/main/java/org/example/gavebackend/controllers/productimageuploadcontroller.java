@@ -1,6 +1,7 @@
 package org.example.gavebackend.controllers;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.ProductImageDTO;
 import org.example.gavebackend.entities.product;
 import org.example.gavebackend.repositories.productRepository;
@@ -25,23 +26,25 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/images")
+@RequiredArgsConstructor
 public class productimageuploadcontroller {
-    @Autowired private productRepository productRepo;
-    @Autowired private serviceproducts service;
-    @Autowired private CloudinaryService cloudinaryService;
 
-    @PostMapping(value = "/{productId}/images/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    private final serviceproducts productService;
+    private final CloudinaryService cloudinaryService;
+
+
+    @PostMapping(
+            value = "/{productId}/images/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ProductImageDTO upload(
             @PathVariable Long productId,
             @RequestPart("file") @NotNull MultipartFile file,
-            @RequestParam(value="altText", required = false) String altText,
-            @RequestParam(value="sortOrder", required = false, defaultValue = "0") Integer sortOrder
+            @RequestParam(value = "altText", required = false) String altText,
+            @RequestParam(value = "sortOrder", required = false, defaultValue = "0") Integer sortOrder
     ) throws IOException {
 
-        productRepo.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
-
-        Map res = cloudinaryService.upload(file);
+        Map<String, Object> res = cloudinaryService.upload(file);
         String secureUrl = (String) res.get("secure_url");
         String publicId  = (String) res.get("public_id");
 
@@ -52,19 +55,19 @@ public class productimageuploadcontroller {
         dto.setSortOrder(sortOrder);
         dto.setCloudPublicId(publicId);
 
-        return service.addImage(dto);
+        return productService.addImage(dto);
     }
 
-    @PostMapping(value = "/{productId}/images/upload-multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(
+            value = "/{productId}/images/upload-multiple",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public List<ProductImageDTO> uploadMultiple(
             @PathVariable Long productId,
             @RequestPart("files") MultipartFile[] files,
-            @RequestParam(value="altText", required=false) String altText,
-            @RequestParam(value="sortStart", required=false, defaultValue="0") Integer sortStart
+            @RequestParam(value = "altText", required = false) String altText,
+            @RequestParam(value = "sortStart", required = false, defaultValue = "0") Integer sortStart
     ) throws IOException {
-
-        productRepo.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product no encontrado"));
 
         List<ProductImageDTO> results = new ArrayList<>();
         int sort = sortStart;
@@ -73,7 +76,7 @@ public class productimageuploadcontroller {
             if (file == null || file.isEmpty()) continue;
             if (file.getContentType() == null || !file.getContentType().startsWith("image/")) continue;
 
-            Map res = cloudinaryService.upload(file);
+            Map<String, Object> res = cloudinaryService.upload(file);
             String secureUrl = (String) res.get("secure_url");
             String publicId  = (String) res.get("public_id");
 
@@ -84,7 +87,7 @@ public class productimageuploadcontroller {
             dto.setSortOrder(sort++);
             dto.setCloudPublicId(publicId);
 
-            results.add(service.addImage(dto));
+            results.add(productService.addImage(dto));
         }
         return results;
     }

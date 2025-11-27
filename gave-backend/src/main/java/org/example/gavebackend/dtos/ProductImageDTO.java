@@ -14,6 +14,5 @@ public class ProductImageDTO {
     private String altText;
     private Integer sortOrder;
 
-    // NUEVO: guardar el public_id de Cloudinary para poder borrar
     private String cloudPublicId;
 }

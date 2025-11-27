@@ -2,6 +2,7 @@ package org.example.gavebackend.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,16 +11,13 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender sender;
 
     @Value("${app.mail.from:}")
     private String from;
-
-    public MailService(JavaMailSender sender) { this.sender = sender; }
-
-    // ===== API PÚBLICA =====
 
     /** Bienvenida luego de registrarse */
     public void sendWelcomeEmail(String to, String fullName) {
@@ -37,8 +35,7 @@ public class MailService {
         send(to, subject, html, text);
     }
 
-    // ===== ENVÍO GENÉRICO =====
-
+    /** Envío genérico de email con HTML y texto plano */
     private void send(String to, String subject, String htmlBody, String textFallback) {
         MimeMessage msg = sender.createMimeMessage();
         try {
@@ -55,8 +52,7 @@ public class MailService {
         }
     }
 
-    // ===== TEMPLATES HTML / TEXTO =====
-
+    /** Construye el cuerpo HTML del email de bienvenida */
     private String buildWelcomeHtml(String name) {
         String safe = name != null && !name.isBlank() ? name : "¡Hola!";
         return """
@@ -69,6 +65,7 @@ public class MailService {
       """.formatted("Hola " + safe + ",");
     }
 
+    /** Construye el cuerpo de texto plano del email de bienvenida */
     private String buildWelcomeText(String name) {
         String safe = name != null && !name.isBlank() ? name : "";
         return """
@@ -82,6 +79,7 @@ public class MailService {
       """.formatted(safe);
     }
 
+    /** Construye el cuerpo HTML del email de reseteo de contraseña */
     private String buildResetHtml(String name, String link, int hours) {
         String safe = (name != null && !name.isBlank()) ? name : "";
         return """
@@ -101,6 +99,7 @@ public class MailService {
       """.formatted(safe, link, hours);
     }
 
+    /** Construye el cuerpo de texto plano del email de reseteo de contraseña */
     private String buildResetText(String name, String link, int hours) {
         String safe = name != null && !name.isBlank() ? name : "";
         return """
@@ -116,7 +115,7 @@ public class MailService {
       """.formatted(safe, hours, link);
     }
 
-    // src/main/java/.../services/MailService.java (agregar)
+    /** Confirmación de pedido */
     public void sendOrderConfirmationEmail(String to, String fullName, Long orderId, BigDecimal total) {
         String subject = "Tu pedido #" + orderId + " fue recibido";
         String link = "#"; // si luego tenés front para /mis-pedidos

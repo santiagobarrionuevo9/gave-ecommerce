@@ -18,14 +18,12 @@ public class OpenApiConfig {
                         .title("Gave Mini-ecommerce API")
                         .version("v1")
                         .description("API del mini ecommerce (productos, imágenes, auth)"))
-                // definir el scheme en Components
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")))
-                // requisito global: todas las operaciones llevan candado por defecto
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 }

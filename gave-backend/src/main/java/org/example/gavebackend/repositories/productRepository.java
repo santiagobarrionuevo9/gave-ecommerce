@@ -15,18 +15,12 @@ import java.util.Optional;
 @Repository
 public interface productRepository extends JpaRepository<product, Long> {
     Optional<product> findBySlugAndIsActiveTrue(String slug);
-    Optional<product> findBySku(String sku);
     boolean existsBySlug(String slug);
     boolean existsBySku(String sku);
     boolean existsBySlugAndIdNot(String slug, Long id);
     boolean existsBySkuAndIdNot(String sku, Long id);
-
     Page<product> findByIsActive(Boolean active, Pageable pageable);
     Page<product> findByTypeIdAndIsActive(Long typeId, Boolean active, Pageable pageable);
-    Page<product> findByNameContainingIgnoreCaseAndIsActive(String q, Boolean active, Pageable pageable);
-    Page<product> findByTypeIdAndNameContainingIgnoreCaseAndIsActive(Long typeId, String q, Boolean active, Pageable pageable);
-
-    // NUEVO: busca por name, slug, sku, shortDesc, description y nombre del tipo
     @Query("""
       select p from product p
         join p.type t
@@ -47,12 +41,9 @@ public interface productRepository extends JpaRepository<product, Long> {
             @Param("like") String like,
             Pageable pageable
     );
-
-    // src/main/java/.../repositories/productRepository.java (agregar)
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from product p where p.id = :id")
     product lockById(@Param("id") Long id);
-
     boolean existsByTypeId(Long typeId);
 
 }

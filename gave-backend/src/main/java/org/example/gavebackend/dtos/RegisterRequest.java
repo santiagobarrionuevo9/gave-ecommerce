@@ -11,5 +11,5 @@ public class RegisterRequest {
     private String email;
     @NotBlank private String password;
     private String fullName;
-    private String role; // "ADMIN" | "CLIENT" (opcional, default CLIENT)
+    private String role;
 }

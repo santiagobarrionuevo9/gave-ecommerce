@@ -7,8 +7,7 @@ import lombok.Data;
 @Data
 public class StockChangeDTO {
     public enum Op { SET, INCREMENT, DECREMENT }
-
-    @NotNull private Op operation;  // SET | INCREMENT | DECREMENT
-    @NotNull @Min(0) private Integer amount; // para SET = nuevo valor; para +/- = delta
+    @NotNull private Op operation;
+    @NotNull @Min(0) private Integer amount;
     private String reason;
 }

@@ -17,8 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class publiccatalogcontroller {
 
-    @Autowired
-    private serviceproducts service;
+
+    private final serviceproducts service;
 
     @GetMapping("/products/{slug}")
     public ProductDTO getBySlug(@PathVariable String slug){

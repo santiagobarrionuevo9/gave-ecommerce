@@ -17,6 +17,11 @@ public class JwtUtil {
     private final Key key;
     private final long expMs;
 
+    /**
+     * Constructor de JwtUtil
+     * @param secret Clave secreta para firmar los tokens
+     * @param expMin Tiempo de expiración en minutos (por defecto 120 minutos)
+     */
     public JwtUtil(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.exp-min:120}") long expMin
@@ -25,6 +30,12 @@ public class JwtUtil {
         this.expMs = expMin * 60_000L;
     }
 
+    /**
+     * Genera un token JWT
+     * @param subject Asunto del token (normalmente el identificador del usuario)
+     * @param claims Reclamaciones adicionales a incluir en el token
+     * @return Token JWT firmado
+     */
     public String generate(String subject, Map<String, Object> claims){
         Date now = new Date();
         Date exp = new Date(now.getTime() + expMs);
@@ -37,6 +48,11 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Parsea y valida un token JWT
+     * @param token Token JWT a parsear
+     * @return Objeto Jws con las reclamaciones del token
+     */
     public Jws<Claims> parse(String token){
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
     }

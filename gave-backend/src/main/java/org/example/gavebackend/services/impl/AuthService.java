@@ -1,5 +1,6 @@
 package org.example.gavebackend.services.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.*;
 import org.example.gavebackend.entities.enums.Rol;
 import org.example.gavebackend.entities.appUser;
@@ -18,20 +19,25 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private  appUserRepository repo;
-    @Autowired
-    private  PasswordEncoder encoder;
-    @Autowired
-    private  JwtUtil jwt;
-    @Autowired
-    private MailService mail;
+
+    private final appUserRepository repo;
+
+    private final PasswordEncoder encoder;
+
+    private final JwtUtil jwt;
+
+    private final MailService mail;
 
     @Value("${app.frontend.base-url}")
     private String frontendBase;
 
-    // ====== AUTH BÁSICO ======
+    /**
+     * Registro de nuevo usuario
+     * @param req Datos de registro
+     * @return Token JWT y datos del usuario
+     */
     public AuthResponse register(RegisterRequest req){
         if (repo.existsByEmail(req.getEmail()))
             throw new IllegalArgumentException("Email ya registrado");
@@ -48,13 +54,18 @@ public class AuthService {
         u.setRole(role);
         repo.save(u);
 
-        // email de bienvenida (no bloquear flujo si falla)
+
         try { mail.sendWelcomeEmail(u.getEmail(), u.getFullName()); } catch (Exception ignored){}
 
         String token = jwt.generate(u.getEmail(), Map.of("role", u.getRole().name()));
         return new AuthResponse(token, u.getEmail(), u.getRole().name());
     }
 
+    /**
+     * Login de usuario
+     * @param req Datos de login
+     * @return Token JWT y datos del usuario
+     */
     public AuthResponse login(LoginRequest req){
         var u = repo.findByEmail(req.getEmail().toLowerCase().trim())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
@@ -65,14 +76,15 @@ public class AuthService {
         return new AuthResponse(token, u.getEmail(), u.getRole().name());
     }
 
-    // ====== RECUPERACIÓN DE CONTRASEÑA (sin entidad extra) ======
-
-    /** Inicia el proceso: genera token opaco, guarda en app_user y envía email con link */
+    /**
+     * Solicitar reseteo de contraseña
+     * @param req Datos de solicitud
+     */
     public void forgot(ForgotPasswordRequest req) {
         String email = req.getEmail().toLowerCase().trim();
         Optional<appUser> opt = repo.findByEmail(email);
 
-        // Por privacidad, devolver 200 aunque el mail no exista.
+
         if (opt.isEmpty()) return;
 
         var user = opt.get();
@@ -85,7 +97,10 @@ public class AuthService {
         try { mail.sendPasswordResetEmail(user.getEmail(), user.getFullName(), link, 2); } catch (Exception ignored){}
     }
 
-    /** Completa el reseteo validando token y expiración; invalida el token al finalizar */
+    /**
+     * Resetear contraseña
+     * @param req Datos de reseteo
+     */
     public void reset(ResetPasswordRequest req) {
         var user = repo.findByPasswordResetToken(req.getToken())
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido"));

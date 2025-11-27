@@ -36,18 +36,17 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // <-- ACTIVA CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()      // <-- preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/orders/mine").authenticated()
-                        // catálogo GET clásico (si querés mantenerlo)
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -66,18 +65,16 @@ public class SecurityConfig {
         cors.setAllowedOrigins(List.of(
                 "http://localhost:4200",
                 "http://127.0.0.1:4200"
-                // agregá aquí tu dominio en prod, ej:
-                // "https://app.midominio.com"
+
         ));
 
         cors.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
-        cors.setExposedHeaders(List.of("Location")); // si devolvés Location en 201 CREATED
-        cors.setAllowCredentials(true);              // ponelo en false si no usás cookies
-        cors.setMaxAge(3600L);                       // cachea preflight 1 hora
+        cors.setExposedHeaders(List.of("Location"));
+        cors.setAllowCredentials(true);
+        cors.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Aplica a toda tu API:
         source.registerCorsConfiguration("/**", cors);
         return source;
     }

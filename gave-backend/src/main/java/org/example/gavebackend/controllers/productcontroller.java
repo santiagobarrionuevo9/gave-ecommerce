@@ -2,6 +2,7 @@ package org.example.gavebackend.controllers;
 
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.*;
 
 import org.example.gavebackend.services.serviceproducts;
@@ -15,18 +16,22 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@RequiredArgsConstructor
 public class productcontroller {
-    @Autowired
-    private serviceproducts service;
 
-    // TYPES
+    private final serviceproducts service;
+
     @PostMapping("/types")
-    public ProductTypeDTO createType(@Valid @RequestBody ProductTypeDTO dto){ return service.createType(dto); }
+    public ProductTypeDTO createType(@Valid @RequestBody ProductTypeDTO dto){
+        return service.createType(dto);
+    }
 
     @GetMapping("/types")
-    public List<ProductTypeDTO> listTypes(){ return service.listTypes(); }
+    public List<ProductTypeDTO> listTypes(){
+        return service.listTypes();
+    }
 
-    // productcontroller.java
+
     @PutMapping("/types/{id}")
     public ProductTypeDTO updateType(@PathVariable Long id, @Valid @RequestBody ProductTypeDTO dto){
         dto.setId(id);
@@ -35,15 +40,18 @@ public class productcontroller {
 
     @DeleteMapping("/types/{id}")
     public void deleteType(@PathVariable Long id){
+
         service.deleteType(id);
     }
 
 
-    // PRODUCTS
-    @PostMapping
-    public ProductDTO create(@Valid @RequestBody ProductDTO dto){ return service.create(dto); }
 
-    // src/main/java/org/example/gavebackend/controllers/productcontroller.java
+    @PostMapping
+    public ProductDTO create(@Valid @RequestBody ProductDTO dto){
+        return service.create(dto);
+    }
+
+
     @PostMapping("/{id}/stock")
     public ProductDTO updateStock(@PathVariable Long id, @Valid @RequestBody StockChangeDTO dto) {
         return service.updateStock(id, dto);
@@ -51,7 +59,6 @@ public class productcontroller {
 
     @PostMapping("/stock/bulk")
     public List<ProductDTO> bulkUpdateStock(@Valid @RequestBody List<StockChangeDTOItem> items) {
-        // items = [{ productId, operation, amount, reason }]
         return service.bulkUpdateStock(items);
     }
 
@@ -69,7 +76,9 @@ public class productcontroller {
     }
 
     @GetMapping("/{id}")
-    public ProductDTO get(@PathVariable Long id){ return service.get(id); }
+    public ProductDTO get(@PathVariable Long id){
+        return service.get(id);
+    }
 
     @PutMapping("/{id}")
     public ProductDTO update(@PathVariable Long id, @Valid @RequestBody ProductDTO dto){
@@ -77,9 +86,10 @@ public class productcontroller {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id){ service.delete(id); }
+    public void delete(@PathVariable Long id){
+        service.delete(id);
+    }
 
-    // IMAGES
     @PostMapping("/{productId}/images")
     public ProductImageDTO addImageToProduct(@PathVariable Long productId, @Valid @RequestBody ProductImageDTO dto){
         dto.setProductId(productId);
@@ -93,6 +103,7 @@ public class productcontroller {
 
     @DeleteMapping("/images/{imageId}")
     public void deleteImage(@PathVariable Long imageId){
+
         service.deleteImage(imageId);
     }
 

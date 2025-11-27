@@ -19,9 +19,9 @@ public class CreateOrderDTO {
     private String buyerPhone;
 
     @NotNull
-    private DeliveryMethod deliveryMethod;   // DELIVERY o PICKUP
-    private ShippingAddressDTO address;               // obligatorio si DELIVERY
-    private BigDecimal deliveryCost;                  // 0 si PICKUP
+    private DeliveryMethod deliveryMethod;
+    private ShippingAddressDTO address;
+    private BigDecimal deliveryCost;
 
     @NotEmpty
     private List<CreateOrderItemDTO> items;
