@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment.prod';
 })
 export class OrderService {
 
-  private base = environment.apiBase; // ajustá si tenés proxy (angular.json)
+  private base = environment.apiBase + '/api'; // ajustá si tenés proxy (angular.json)
 
   constructor(private http: HttpClient) {}
 

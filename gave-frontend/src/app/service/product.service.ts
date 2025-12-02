@@ -23,7 +23,7 @@ export interface SearchParams {
 })
 export class ProductService {
 
-  private readonly base = environment.apiBase; // ajustá si tenés proxy (angular.json)
+  private readonly base = environment.apiBase + '/api'; // ajustá si tenés proxy (angular.json)
 
   constructor(private http: HttpClient) {}
 

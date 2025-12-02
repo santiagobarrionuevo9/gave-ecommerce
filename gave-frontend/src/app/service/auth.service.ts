@@ -13,7 +13,7 @@ import { environment } from '../../environments/environment.prod';
 })
 export class AuthService {
 
-  private base = environment.apiBase; // o '/api' si usás proxy
+  private base = environment.apiBase + '/api'; // o '/api' si usás proxy
 
   constructor(private http: HttpClient) {}
 
