@@ -6,13 +6,14 @@ import { tap } from 'rxjs';
 import { RegisterReq } from '../interface/auth/registerreq';
 import { ForgotPasswordRequest } from '../interface/auth/forgotpasswordrequest';
 import { ResetPasswordRequest } from '../interface/auth/resetpasswordrequest';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private base = 'http://localhost:9011/api'; // o '/api' si usás proxy
+  private base = environment.apiBase; // o '/api' si usás proxy
 
   constructor(private http: HttpClient) {}
 

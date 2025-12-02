@@ -4,13 +4,14 @@ import { ChangeOrderStatusDTO, OrderDTO } from '../interface/order/types';
 import { Observable } from 'rxjs';
 import { Pages } from '../interface/product/pages';
 import { OrderStatus } from '../interface/order/orderstatus';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
 
-  private base = 'http://localhost:9011/api';
+  private base = environment.apiBase; // ajustá si tenés proxy (angular.json)
 
   constructor(private http: HttpClient) {}
 

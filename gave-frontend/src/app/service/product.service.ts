@@ -7,6 +7,7 @@ import { Productdto } from '../interface/product/productdto';
 import { Imageproductdto } from '../interface/product/imageproductdto';
 import { Createproductdto } from '../interface/product/createproductdto';
 import { StockChangeDTO } from '../interface/product/stockchangedto';
+import { environment } from '../../environments/environment';
 
 export interface SearchParams {
   q?: string | null;
@@ -22,7 +23,7 @@ export interface SearchParams {
 })
 export class ProductService {
 
-  private readonly base = 'http://localhost:9011/api'; // ajustá si tenés proxy (angular.json)
+  private readonly base = environment.apiBase; // ajustá si tenés proxy (angular.json)
 
   constructor(private http: HttpClient) {}
 
