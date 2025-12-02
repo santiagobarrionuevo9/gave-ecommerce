@@ -6,7 +6,7 @@ import { tap } from 'rxjs';
 import { RegisterReq } from '../interface/auth/registerreq';
 import { ForgotPasswordRequest } from '../interface/auth/forgotpasswordrequest';
 import { ResetPasswordRequest } from '../interface/auth/resetpasswordrequest';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'

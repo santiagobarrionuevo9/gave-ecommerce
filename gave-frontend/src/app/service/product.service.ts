@@ -7,7 +7,7 @@ import { Productdto } from '../interface/product/productdto';
 import { Imageproductdto } from '../interface/product/imageproductdto';
 import { Createproductdto } from '../interface/product/createproductdto';
 import { StockChangeDTO } from '../interface/product/stockchangedto';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 
 export interface SearchParams {
   q?: string | null;

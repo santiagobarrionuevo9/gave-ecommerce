@@ -4,7 +4,7 @@ import { ChangeOrderStatusDTO, OrderDTO } from '../interface/order/types';
 import { Observable } from 'rxjs';
 import { Pages } from '../interface/product/pages';
 import { OrderStatus } from '../interface/order/orderstatus';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
