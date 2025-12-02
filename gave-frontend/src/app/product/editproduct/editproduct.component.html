@@ -84,9 +84,9 @@
               <div class="col-md-6">
                 <label class="form-label">Cantidad mínima para aplicar descuento</label>
                 <input type="number"
-                      class="form-control"
-                      formControlName="discountThreshold"
-                      min="1">
+                       class="form-control"
+                       formControlName="discountThreshold"
+                       min="1">
                 <div class="form-text">
                   Si dejás este campo vacío, se toma el valor por defecto:
                   <strong>10 unidades</strong>.
@@ -96,11 +96,11 @@
                 <label class="form-label">% de descuento sobre esa línea</label>
                 <div class="input-group">
                   <input type="number"
-                        class="form-control"
-                        formControlName="discountPercent"
-                        min="0"
-                        max="100"
-                        step="0.01">
+                         class="form-control"
+                         formControlName="discountPercent"
+                         min="0"
+                         max="100"
+                         step="0.01">
                   <span class="input-group-text">%</span>
                 </div>
                 <div class="form-text">
@@ -111,9 +111,16 @@
           </div>
         </div>
 
-        <!-- Botón de guardar al final de todo -->
-        <div class="col-12 d-flex justify-content-end mt-3">
-          <button class="btn btn-primary" type="submit" [disabled]="saving()">Guardar cambios</button>
+        <!-- Botones al final -->
+        <div class="col-12 d-flex justify-content-end mt-3 gap-2">
+          <a routerLink="/admin/stock" class="btn btn-outline-secondary">
+            Volver
+          </a>
+          <button class="btn btn-primary"
+                  type="submit"
+                  [disabled]="saving()">
+            Guardar cambios
+          </button>
         </div>
 
       </form>
@@ -132,58 +139,58 @@
       <div class="table-responsive" *ngIf="images.length; else noImgs">
         <table class="table align-middle">
           <thead>
-            <tr>
-              <th style="width:110px">Miniatura</th>
-              <th>URL</th>
-              <th style="width:240px">Alt text</th>
-              <th style="width:120px">Orden</th>
-              <th style="width:210px"></th>
-            </tr>
+          <tr>
+            <th style="width:110px">Miniatura</th>
+            <th>URL</th>
+            <th style="width:240px">Alt text</th>
+            <th style="width:120px">Orden</th>
+            <th style="width:210px"></th>
+          </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let img of images">
-              <td>
-                <img [src]="abs(img.url)" class="rounded border" style="width:100px; height:70px; object-fit:cover;">
-              </td>
-              <td class="small"><code>{{ img.url }}</code></td>
-              <td>
-                <ng-container *ngIf="!img._editing; else editAlt">
-                  {{ img.altText || '-' }}
-                </ng-container>
-                <ng-template #editAlt>
-                  <input type="text" class="form-control form-control-sm" [(ngModel)]="img._alt">
-                </ng-template>
-              </td>
-              <td>
-                <ng-container *ngIf="!img._editing; else editSort">
-                  {{ img.sortOrder ?? 0 }}
-                </ng-container>
-                <ng-template #editSort>
-                  <input type="number" class="form-control form-control-sm" [(ngModel)]="img._sort" min="0" step="1">
-                </ng-template>
-              </td>
-              <td class="text-end">
-                <button *ngIf="!img._editing"
-                        class="btn btn-sm btn-outline-primary me-2"
-                        (click)="startEdit(img)">
-                  Editar
-                </button>
-                <button *ngIf="img._editing"
-                        class="btn btn-sm btn-primary me-2"
-                        (click)="saveImage(img)">
-                  Guardar
-                </button>
-                <button *ngIf="img._editing"
-                        class="btn btn-sm btn-secondary me-2"
-                        (click)="cancelEdit(img)">
-                  Cancelar
-                </button>
-                <button class="btn btn-sm btn-outline-danger"
-                        (click)="deleteImage(img)">
-                  Eliminar
-                </button>
-              </td>
-            </tr>
+          <tr *ngFor="let img of images">
+            <td>
+              <img [src]="abs(img.url)" class="rounded border" style="width:100px; height:70px; object-fit:cover;">
+            </td>
+            <td class="small"><code>{{ img.url }}</code></td>
+            <td>
+              <ng-container *ngIf="!img._editing; else editAlt">
+                {{ img.altText || '-' }}
+              </ng-container>
+              <ng-template #editAlt>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="img._alt">
+              </ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="!img._editing; else editSort">
+                {{ img.sortOrder ?? 0 }}
+              </ng-container>
+              <ng-template #editSort>
+                <input type="number" class="form-control form-control-sm" [(ngModel)]="img._sort" min="0" step="1">
+              </ng-template>
+            </td>
+            <td class="text-end">
+              <button *ngIf="!img._editing"
+                      class="btn btn-sm btn-outline-primary me-2"
+                      (click)="startEdit(img)">
+                Editar
+              </button>
+              <button *ngIf="img._editing"
+                      class="btn btn-sm btn-primary me-2"
+                      (click)="saveImage(img)">
+                Guardar
+              </button>
+              <button *ngIf="img._editing"
+                      class="btn btn-sm btn-secondary me-2"
+                      (click)="cancelEdit(img)">
+                Cancelar
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="deleteImage(img)">
+                Eliminar
+              </button>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>

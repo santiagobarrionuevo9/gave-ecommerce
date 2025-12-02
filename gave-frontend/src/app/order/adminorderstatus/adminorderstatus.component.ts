@@ -98,4 +98,36 @@ export class AdminorderstatusComponent implements OnInit {
     this.page.set(p);
     this.fetch();
   }
+
+  // 📲 WhatsApp
+  buildWhatsAppLink(phone: string): string {
+    if (!phone) return '#';
+
+    let digits = phone.replace(/\D/g, '');
+    if (digits.startsWith('0')) {
+      digits = digits.substring(1);
+    }
+    if (!digits.startsWith('54')) {
+      digits = '54' + digits;
+    }
+    return `https://wa.me/${digits}`;
+  }
+
+  buildGmailLink(email: string, orderId?: number, buyerName?: string): string {
+  if (!email) return '#';
+
+  const to = encodeURIComponent(email);
+  const subject = encodeURIComponent(
+    orderId ? `Consulta por pedido #${orderId}` : 'Consulta por pedido'
+  );
+
+  const bodyText = `Hola${buyerName ? ' ' + buyerName : ''},\n\n` +
+                   `Te escribo por tu pedido${orderId ? ' #' + orderId : ''} en la tienda.\n\n` +
+                   `¡Gracias!`;
+  const body = encodeURIComponent(bodyText);
+
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`;
+}
+
+
 }

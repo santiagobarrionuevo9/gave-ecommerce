@@ -6,6 +6,7 @@ import { ProductService } from '../../service/product.service';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../service/cart.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../service/auth.service';
 
 type ToastKind = 'success' | 'danger';
 
@@ -34,8 +35,14 @@ export class DetailproductComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private api: ProductService,
-    private cart: CartService
+    private cart: CartService,
+    private auth: AuthService          // 👈 INYECCIÓN DEL AUTH
   ) {}
+
+  /** Getter para saber si el usuario es ADMIN */
+  get isAdmin(): boolean {
+    return this.auth.hasRole('ADMIN');
+  }
 
   /** Mostrar toast 3s */
   private showToast(type: ToastKind, text: string) {
@@ -43,6 +50,7 @@ export class DetailproductComponent implements OnInit {
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => this.toast.set(null), 3000);
   }
+
   clearToast() {
     clearTimeout(this.toastTimer);
     this.toast.set(null);
@@ -52,11 +60,19 @@ export class DetailproductComponent implements OnInit {
     try {
       if (!this.product) return;
 
+      // 🚫 Bloqueo para ADMIN
+      if (this.isAdmin) {
+        this.showToast('danger', 'Los usuarios ADMIN no pueden agregar productos al carrito.');
+        return;
+      }
+
       const q = Math.max(1, Math.floor(this.qty || 1));
+
       if (this.product.stock === 0) {
         this.showToast('danger', 'No hay stock disponible.');
         return;
       }
+
       if (q > this.product.stock) {
         this.showToast('danger', `Solo hay ${this.product.stock} en stock.`);
         return;
@@ -78,8 +94,14 @@ export class DetailproductComponent implements OnInit {
       next: (p) => {
         this.product = p;
         this.api.getImagesByProductId(p.id).subscribe({
-          next: (imgs) => { this.images = imgs ?? []; this.loading.set(false); },
-          error: () => { this.images = []; this.loading.set(false); }
+          next: (imgs) => {
+            this.images = imgs ?? [];
+            this.loading.set(false);
+          },
+          error: () => {
+            this.images = [];
+            this.loading.set(false);
+          }
         });
       },
       error: () => {
@@ -99,9 +121,13 @@ export class DetailproductComponent implements OnInit {
   }
 
   trackByImgId = (_: number, item: Imageproductdto) => item?.id ?? _;
+
   mainImage(): string {
-    return this.images.length ? this.images[0].url : 'https://via.placeholder.com/800x600?text=Sin+imagen';
+    return this.images.length
+      ? this.images[0].url
+      : 'https://via.placeholder.com/800x600?text=Sin+imagen';
   }
+
   /** Cantidad mínima efectiva (si no viene del backend, usamos default 10) */
   get discountThreshold(): number {
     if (!this.product) return this.DEFAULT_DISCOUNT_THRESHOLD;
@@ -117,8 +143,6 @@ export class DetailproductComponent implements OnInit {
   /** ¿Hay descuento real (> 0 %)? */
   get hasDiscount(): boolean {
     if (!this.product) return false;
-
-    // Si el back deja percent en 0, no mostramos promo
     const percent = this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
     return percent > 0;
   }

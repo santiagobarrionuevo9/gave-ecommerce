@@ -54,16 +54,40 @@
             <a [routerLink]="['/admin/pedidos', o.id]">#{{ o.id }}</a>
             <div class="text-muted small">{{ o.createdAt | date:'short' }}</div>
           </td>
+
+          <!-- Cliente -->
           <td>
             {{ o.buyerName }}
-            <div class="text-muted small">{{ o.buyerEmail }}</div>
+            <div class="text-muted small" *ngIf="o.buyerEmail">
+              <a [href]="buildGmailLink(o.buyerEmail, o.id, o.buyerName)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-decoration-none d-inline-flex align-items-center">
+                <i class="bi bi-envelope me-1"></i>
+                {{ o.buyerEmail }}
+              </a>
+            </div>
           </td>
+
+
+          <!-- Contacto -->
           <td class="small">
             <div *ngIf="o.address">
               {{ o.address.street }} {{ o.address.number || '' }} - {{ o.address.city }}
             </div>
-            <div *ngIf="o.buyerPhone">Tel: {{ o.buyerPhone }}</div>
+
+            <!-- WhatsApp si hay teléfono -->
+            <div *ngIf="o.buyerPhone" class="mt-1">
+              <a [href]="buildWhatsAppLink(o.buyerPhone)"
+                 target="_blank"
+                 rel="noopener"
+                 class="text-success text-decoration-none d-inline-flex align-items-center">
+                <i class="bi bi-whatsapp me-1"></i>
+                {{ o.buyerPhone }}
+              </a>
+            </div>
           </td>
+
           <td>
             <div class="fw-semibold text-petrol">
               $ {{ o.grandTotal | number:'1.0-0' }}
@@ -71,12 +95,15 @@
             <div class="text-muted small">Items: $ {{ o.itemsTotal | number:'1.0-0' }}</div>
             <div class="text-muted small" *ngIf="o.deliveryCost">Envío: $ {{ o.deliveryCost | number:'1.0-0' }}</div>
           </td>
+
           <td>
             <span class="badge text-bg-light me-1">{{ o.deliveryMethod }}</span>
           </td>
+
           <td>
             <span [class]="badgeCls(o.status)">{{ o.status }}</span>
           </td>
+
           <td class="text-end">
             <div class="d-flex gap-2 justify-content-end">
               <select class="form-select form-select-sm" style="max-width: 210px"

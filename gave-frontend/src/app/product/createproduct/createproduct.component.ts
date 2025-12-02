@@ -5,6 +5,7 @@ import { ProductService } from '../../service/product.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Imageproductdto } from '../../interface/product/imageproductdto';
+import Swal from 'sweetalert2';
 
 type PreviewItem = { file: File; src: string };
 
@@ -30,7 +31,7 @@ export class CreateproductComponent implements OnInit {
   // límites / validaciones de ejemplo
   readonly MAX_FILES = 12;
   readonly MAX_SIZE_MB = 10;
-  showDiscountConfig = false;  // 👈 NUEVO
+  showDiscountConfig = false;
 
   constructor(
     private fb: FormBuilder,
@@ -50,13 +51,12 @@ export class CreateproductComponent implements OnInit {
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
-      // 👇 NUEVOS CAMPOS DE DESCUENTO
+      // Descuentos
       discountThreshold: [null, [Validators.min(1)]],
       discountPercent: [null, [Validators.min(0), Validators.max(100)]],
       // Imágenes
       imageAlt: [''],
       imageSort: [0],
-      // (opcional) URL por si no querés subir archivos
       imageUrl: ['']
     });
 
@@ -72,7 +72,6 @@ export class CreateproductComponent implements OnInit {
     const files = input.files ? Array.from(input.files) : [];
     if (!files.length) return;
 
-    // acumulativo: agrego a los ya existentes
     const total = this.selectedFiles.length + files.length;
     if (total > this.MAX_FILES) {
       this.errorMsg = `Podés subir hasta ${this.MAX_FILES} imágenes.`;
@@ -99,13 +98,23 @@ export class CreateproductComponent implements OnInit {
       reader.readAsDataURL(f);
     }
 
-    // limpiar input para permitir re-selección del mismo archivo si hace falta
     input.value = '';
   }
 
   removePreview(idx: number) {
     this.previews.splice(idx, 1);
     this.selectedFiles.splice(idx, 1);
+  }
+
+  async showSuccessAndGoToStock(message: string) {
+    await Swal.fire({
+      icon: 'success',
+      title: 'Producto creado',
+      text: message,
+      confirmButtonText: 'Ir al stock'
+    });
+
+    this.router.navigate(['/admin/stock']);
   }
 
   submit(): void {
@@ -128,15 +137,14 @@ export class CreateproductComponent implements OnInit {
       sku: v.sku,
       price: Number(v.price),
       stock: Number(v.stock),
-       // 👇 NUEVO: si están vacíos, van como null
-    discountThreshold:
-      v.discountThreshold !== null && v.discountThreshold !== ''
-        ? Number(v.discountThreshold)
-        : null,
-    discountPercent:
-      v.discountPercent !== null && v.discountPercent !== ''
-        ? Number(v.discountPercent)
-        : null
+      discountThreshold:
+        v.discountThreshold !== null && v.discountThreshold !== ''
+          ? Number(v.discountThreshold)
+          : null,
+      discountPercent:
+        v.discountPercent !== null && v.discountPercent !== ''
+          ? Number(v.discountPercent)
+          : null
     };
 
     this.api.createProduct(payload).subscribe({
@@ -157,12 +165,19 @@ export class CreateproductComponent implements OnInit {
               next: (imgs: Imageproductdto[]) => {
                 this.loading.set(false);
                 this.successMsg = `Producto creado con ${imgs.length} imagen(es).`;
-                // this.router.navigate(['/producto', created.slug]);
+                this.showSuccessAndGoToStock(
+                  `Se creó el producto "${created.name}" con ${imgs.length} imagen(es).`
+                );
               },
               error: err => {
                 console.error(err);
                 this.loading.set(false);
                 this.errorMsg = 'El producto se creó, pero falló subir alguna imagen.';
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Producto creado con advertencias',
+                  text: 'El producto se creó, pero hubo errores al subir las imágenes.'
+                });
               }
             });
           return;
@@ -180,12 +195,19 @@ export class CreateproductComponent implements OnInit {
               next: () => {
                 this.loading.set(false);
                 this.successMsg = 'Producto creado y URL de imagen guardada.';
-                // this.router.navigate(['/producto', created.slug]);
+                this.showSuccessAndGoToStock(
+                  `Se creó el producto "${created.name}" y se guardó la URL de la imagen.`
+                );
               },
               error: err => {
                 console.error(err);
                 this.loading.set(false);
                 this.errorMsg = 'Producto ok, pero falló guardar la URL de imagen.';
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Producto creado con advertencias',
+                  text: 'El producto se creó, pero no se pudo guardar la URL de la imagen.'
+                });
               }
             });
           return;
@@ -194,12 +216,20 @@ export class CreateproductComponent implements OnInit {
         // 3) sin imágenes
         this.loading.set(false);
         this.successMsg = 'Producto creado (sin imágenes).';
-        // this.router.navigate(['/catalogo']);
+        this.showSuccessAndGoToStock(
+          `Se creó el producto "${created.name}" (sin imágenes).`
+        );
       },
       error: err => {
         console.error(err);
         this.loading.set(false);
-        this.errorMsg = err?.error?.message || 'Error al crear el producto.';
+        const msg = err?.error?.message || 'Error al crear el producto.';
+        this.errorMsg = msg;
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo crear el producto',
+          text: msg
+        });
       }
     });
   }

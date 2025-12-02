@@ -59,27 +59,27 @@
                          (change)="setQty(it.productId, $any($event.target).value)">
                 </td>
                 <td class="text-end">
-                <!-- Si hay descuento -->
-                <ng-container *ngIf="it.discountAmount && it.discountAmount > 0; else noDiscount">
-                  <!-- total original tachado -->
-                  <div class="text-muted small text-decoration-line-through">
-                    $ {{ (it.price * it.quantity) | number:'1.0-0' }}
-                  </div>
-                  <!-- total con descuento -->
-                  <div class="fw-semibold text-success">
-                    $ {{ (it.lineTotal || (it.price * it.quantity - it.discountAmount)) | number:'1.0-0' }}
-                  </div>
-                  <!-- mensaje de ahorro -->
-                  <div class="text-success small">
-                    Ahorrás $ {{ it.discountAmount | number:'1.0-0' }}
-                  </div>
-                </ng-container>
+                  <!-- Si hay descuento -->
+                  <ng-container *ngIf="it.discountAmount && it.discountAmount > 0; else noDiscount">
+                    <!-- total original tachado -->
+                    <div class="text-muted small text-decoration-line-through">
+                      $ {{ (it.price * it.quantity) | number:'1.0-0' }}
+                    </div>
+                    <!-- total con descuento -->
+                    <div class="fw-semibold text-success">
+                      $ {{ (it.lineTotal || (it.price * it.quantity - it.discountAmount)) | number:'1.0-0' }}
+                    </div>
+                    <!-- mensaje de ahorro -->
+                    <div class="text-success small">
+                      Ahorrás $ {{ it.discountAmount | number:'1.0-0' }}
+                    </div>
+                  </ng-container>
 
-                <!-- Si NO hay descuento -->
-                <ng-template #noDiscount>
-                  <strong>$ {{ (it.price * it.quantity) | number:'1.0-0' }}</strong>
-                </ng-template>
-              </td>
+                  <!-- Si NO hay descuento -->
+                  <ng-template #noDiscount>
+                    <strong>$ {{ (it.price * it.quantity) | number:'1.0-0' }}</strong>
+                  </ng-template>
+                </td>
 
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-danger"
@@ -119,13 +119,21 @@
             <label class="form-label">Email</label>
             <input class="form-control" [(ngModel)]="buyerEmail">
           </div>
+
           <div class="mb-2">
             <label class="form-label">Nombre</label>
             <input class="form-control" [(ngModel)]="buyerName">
           </div>
+
           <div class="mb-3">
-            <label class="form-label">Teléfono</label>
-            <input class="form-control" [(ngModel)]="buyerPhone">
+            <label class="form-label">Teléfono (WhatsApp)</label>
+            <input class="form-control"
+                   type="tel"
+                   [(ngModel)]="buyerPhone"
+                   placeholder="Ej: 3512345678 (sin 0 ni 15)">
+            <div class="form-text small text-muted">
+              Ingresá solo números, sin 0 ni 15. Ejemplo: <strong>3512345678</strong>.
+            </div>
           </div>
 
           <h5 class="mb-2">Entrega</h5>
@@ -178,13 +186,7 @@
                        placeholder="Referencia"
                        [(ngModel)]="address.reference">
               </div>
-              <div class="col-6">
-                <label class="form-label small mb-0 mt-2">Costo de envío</label>
-                <input type="number"
-                       class="form-control form-control-sm"
-                       [(ngModel)]="deliveryCost"
-                       min="0">
-              </div>
+              <!-- 👇 ya no pedimos costo de envío -->
             </div>
           </div>
 
@@ -194,21 +196,18 @@
               <span>Subtotal</span>
               <strong>$ {{ itemsTotal() | number:'1.0-0' }}</strong>
             </div>
-            <div class="d-flex justify-content-between"
-                 *ngIf="deliveryMethod==='DELIVERY'">
-              <span>Envío</span>
-              <strong>$ {{ deliveryCost | number:'1.0-0' }}</strong>
-            </div>
+            <!-- Envío eliminado, siempre 0 -->
             <div class="d-flex justify-content-between cart-total-row">
               <span>Total</span>
               <strong>$ {{ grandTotal() | number:'1.0-0' }}</strong>
             </div>
           </div>
 
+          <!-- BOTÓN CONFIRMAR (habilitado solo si canConfirm === true) -->
           <button class="btn btn-primary w-100"
-        type="button"
-        (click)="checkout()"
-        [disabled]="submitting || !isLoggedIn">
+                  type="button"
+                  (click)="checkout()"
+                  [disabled]="!canConfirm">
             <span *ngIf="!submitting">Confirmar pedido</span>
             <span *ngIf="submitting" class="d-inline-flex align-items-center gap-2">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -216,11 +215,16 @@
             </span>
           </button>
 
-          <!-- Mensajito para invitados -->
+          <!-- Mensaje para invitados -->
           <div *ngIf="!isLoggedIn" class="alert alert-info mt-2 small">
             Para confirmar el pedido necesitás <strong>iniciar sesión o crear tu cuenta</strong>.
           </div>
 
+          <!-- Mensaje si está logueado pero no llega al mínimo -->
+          <div *ngIf="isLoggedIn && !meetsMinAmount" class="alert alert-warning mt-2 small">
+            El monto mínimo para confirmar el pedido es de
+            <strong>$ {{ MIN_TOTAL | number:'1.0-0' }}</strong>.
+          </div>
 
           <button class="btn btn-outline-secondary w-100 mt-2"
                   type="button"
