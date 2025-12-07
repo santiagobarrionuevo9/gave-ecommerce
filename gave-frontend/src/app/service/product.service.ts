@@ -136,4 +136,11 @@ export class ProductService {
     return this.http.delete<void>(`${this.base}/products/types/${id}`);
   }
 
+  // product.service.ts
+    getLowStock(): Observable<Productdto[]> {
+      return this.http.get<Productdto[]>(`${this.base}/products/low-stock`);
+    }
+
+
+
 }

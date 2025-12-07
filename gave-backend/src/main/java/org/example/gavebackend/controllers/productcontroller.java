@@ -44,7 +44,12 @@ public class productcontroller {
         service.deleteType(id);
     }
 
-
+    @GetMapping("/low-stock")
+    public List<ProductDTO> getLowStock(
+            @RequestParam(name = "includeModerate", defaultValue = "false") boolean includeModerate
+    ) {
+        return service.listLowStock();
+    }
 
     @PostMapping
     public ProductDTO create(@Valid @RequestBody ProductDTO dto){

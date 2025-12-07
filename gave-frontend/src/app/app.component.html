@@ -66,6 +66,42 @@
           </ng-container>
         </a>
 
+        <!-- Campanita de stock bajo (solo admin) -->
+        <div class="dropdown me-2" *ngIf="isAdmin()">
+          <button class="btn btn-outline-light position-relative"
+                  type="button"
+                  data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            <ng-container *ngIf="lowStock() as list">
+              <span *ngIf="list.length > 0"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ list.length }}
+              </span>
+            </ng-container>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-end p-2" *ngIf="lowStock() as list">
+            <li *ngIf="list.length === 0" class="text-muted px-2">
+              ✅ No hay productos con stock bajo. Todo OK.
+            </li>
+            <li *ngFor="let p of list">
+              <a class="dropdown-item d-flex justify-content-between align-items-center"
+                [routerLink]="['/admin/editar', p.id]">
+                <span>{{ p.name }}</span>
+                <span class="badge"
+                      [ngClass]="{
+                        'bg-danger': p.stockLevel === 'DANGER',
+                        'bg-warning text-dark': p.stockLevel === 'MODERATE',
+                        'bg-success': p.stockLevel === 'OK'
+                      }">
+                  {{ p.availableStock ?? p.stock }} u.
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
 
         <!-- Autenticación -->
         <ng-container *ngIf="!isLoggedIn(); else loggedTpl">

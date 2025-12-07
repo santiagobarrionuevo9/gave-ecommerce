@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.example.gavebackend.dtos.*;
 import org.example.gavebackend.entities.ProductImage;
+import org.example.gavebackend.entities.enums.StockLevel;
 import org.example.gavebackend.entities.product;
 import org.example.gavebackend.entities.productType;
 import org.example.gavebackend.repositories.productImageRepository;
@@ -53,6 +54,14 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setId(t.getId());
         return dto;
     }
+    @Override
+    public List<ProductDTO> listLowStock() {
+        return productRepo.findAllWithLowOrModerateStock()
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
 
     /**
      * Lista todos los tipos de productos ordenados por nombre ascendente.

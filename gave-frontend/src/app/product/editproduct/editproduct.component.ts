@@ -66,6 +66,7 @@ export class EditproductComponent implements OnInit {
       // ✅ NUEVOS CAMPOS DE STOCK
       stockLowThreshold: [5, [Validators.min(0)]],
       stockMediumThreshold: [15, [Validators.min(0)]],
+      
       // descuentos
       discountThreshold: [null, [Validators.min(1)]],
       discountPercent: [null, [Validators.min(0), Validators.max(100)]],
@@ -113,6 +114,9 @@ export class EditproductComponent implements OnInit {
 
         discountThreshold: p.discountThreshold,
         discountPercent: p.discountPercent,
+        isActive: p.isActive,
+        shortDesc: p.shortDesc,
+        description: p.description,
       });
 
         this.fetchImages();
@@ -153,6 +157,12 @@ export class EditproductComponent implements OnInit {
       sku: v.sku,
       price: Number(v.price),
       stock: Number(v.stock),
+      stockLowThreshold:
+    v.stockLowThreshold !== null && v.stockLowThreshold !== '' ? Number(v.stockLowThreshold) : null,
+
+  stockMediumThreshold:
+    v.stockMediumThreshold !== null && v.stockMediumThreshold !== '' ? Number(v.stockMediumThreshold) : null,
+
       discountThreshold:
         v.discountThreshold !== null && v.discountThreshold !== '' ? Number(v.discountThreshold) : null,
       discountPercent:

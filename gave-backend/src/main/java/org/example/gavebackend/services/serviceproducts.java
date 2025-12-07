@@ -24,5 +24,7 @@ public interface serviceproducts {
     void deleteType(Long id);
     public ProductTypeDTO updateType(ProductTypeDTO dto);
 
+    public List<ProductDTO> listLowStock();
+
 
 }

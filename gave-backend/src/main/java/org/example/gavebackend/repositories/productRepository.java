@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.List;
 import java.util.Optional;
 @Repository
 public interface productRepository extends JpaRepository<product, Long> {
@@ -45,5 +46,30 @@ public interface productRepository extends JpaRepository<product, Long> {
     @Query("select p from product p where p.id = :id")
     product lockById(@Param("id") Long id);
     boolean existsByTypeId(Long typeId);
+
+    // 👇 NUEVO: productos con stock disponible por debajo de los umbrales
+
+    // Solo críticos (rojo)
+    @Query("""
+           SELECT p
+           FROM product p
+           WHERE p.isActive = true
+             AND (p.stock - p.reserved) <= p.stockLowThreshold
+           ORDER BY (p.stock - p.reserved) ASC
+           """)
+    List<product> findAllWithDangerStock();
+
+    // Críticos + moderados (rojo o amarillo)
+    @Query("""
+           SELECT p
+           FROM product p
+           WHERE p.isActive = true
+             AND (
+                  (p.stock - p.reserved) <= p.stockLowThreshold
+               OR (p.stock - p.reserved) <= p.stockMediumThreshold
+             )
+           ORDER BY (p.stock - p.reserved) ASC
+           """)
+    List<product> findAllWithLowOrModerateStock();
 
 }
