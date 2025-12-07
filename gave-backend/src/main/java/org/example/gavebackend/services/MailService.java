@@ -31,21 +31,30 @@ public class MailService {
     @Value("${app.mail.from}")
     private String from;
 
+    // 👇 tu mail de pruebas (el que Resend permite)
+    private static final String TEST_EMAIL = "santiagobarrionuevo9@gmail.com";
+
     // ========= MÉTODOS PÚBLICOS =========
 
     /** Bienvenida luego de registrarse */
     public void sendWelcomeEmail(String to, String fullName) {
         String subject = "¡Bienvenido a Gave!";
-        String html = buildWelcomeHtml(fullName);
-        String text = buildWelcomeText(fullName);
+        String html = buildWelcomeHtml(fullName)
+                + "<hr><p style='font-size:12px;color:#666'>"
+                + "Este email era para: <b>" + to + "</b></p>";
+        String text = buildWelcomeText(fullName)
+                + "\n\n---\nEste email era para: " + to;
         send(to, subject, html, text);
     }
 
     /** Recuperación de contraseña con link y horas de expiración */
     public void sendPasswordResetEmail(String to, String fullName, String link, int hoursValid) {
         String subject = "Recuperá tu contraseña — Gave";
-        String html = buildResetHtml(fullName, link, hoursValid);
-        String text = buildResetText(fullName, link, hoursValid);
+        String html = buildResetHtml(fullName, link, hoursValid)
+                + "<hr><p style='font-size:12px;color:#666'>"
+                + "Este email era para: <b>" + to + "</b></p>";
+        String text = buildResetText(fullName, link, hoursValid)
+                + "\n\n---\nEste email era para: " + to;
         send(to, subject, html, text);
     }
 
@@ -59,10 +68,13 @@ public class MailService {
               <p>Total: <b>$ %s</b></p>
               <p>Te avisaremos cuando el estado cambie.</p>
             </div>
-            """.formatted(fullName == null ? "" : fullName, orderId, total.toPlainString());
+            """.formatted(fullName == null ? "" : fullName, orderId, total.toPlainString())
+                + "<hr><p style='font-size:12px;color:#666'>"
+                + "Este email era para: <b>" + to + "</b></p>";
 
         String text = "Hola %s, recibimos tu pedido #%d. Total: $ %s"
-                .formatted(fullName == null ? "" : fullName, orderId, total.toPlainString());
+                .formatted(fullName == null ? "" : fullName, orderId, total.toPlainString())
+                + "\n\n---\nEste email era para: " + to;
 
         send(to, subject, html, text);
     }
@@ -71,7 +83,8 @@ public class MailService {
 
     private void send(String to, String subject, String htmlBody, String textFallback) {
         try {
-            log.info("Preparando email a {} con asunto '{}'", to, subject);
+            log.info("Preparando email a {} (pero se enviará a {}) con asunto '{}'",
+                    to, TEST_EMAIL, subject);
 
             String url = "https://api.resend.com/emails";
 
@@ -79,9 +92,10 @@ public class MailService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
 
+            // 👈 acá Resend SIEMPRE recibe tu mail de pruebas
             Map<String, Object> body = Map.of(
                     "from", from,
-                    "to", List.of(to),
+                    "to", List.of(TEST_EMAIL),
                     "subject", subject,
                     "html", htmlBody,
                     "text", textFallback
@@ -95,15 +109,14 @@ public class MailService {
             log.info("Respuesta Resend: status={}, body={}",
                     response.getStatusCode(), response.getBody());
         } catch (Exception e) {
-            // NO rompemos el flujo de negocio
-            log.warn("No se pudo enviar mail a {} con asunto '{}': {}",
-                    to, subject, e.getMessage());
+            log.warn("No se pudo enviar mail (destino lógico: {}, real: {}) con asunto '{}': {}",
+                    to, TEST_EMAIL, subject, e.getMessage());
         }
     }
 
     // ========= PLANTILLAS =========
+    // (las que ya tenías)
 
-    /** Construye el cuerpo HTML del email de bienvenida */
     private String buildWelcomeHtml(String name) {
         String safe = name != null && !name.isBlank() ? name : "¡Hola!";
         return """
@@ -116,7 +129,6 @@ public class MailService {
           """.formatted("Hola " + safe + ",");
     }
 
-    /** Construye el cuerpo de texto plano del email de bienvenida */
     private String buildWelcomeText(String name) {
         String safe = name != null && !name.isBlank() ? name : "";
         return """
@@ -130,7 +142,6 @@ public class MailService {
           """.formatted(safe);
     }
 
-    /** Construye el cuerpo HTML del email de reseteo de contraseña */
     private String buildResetHtml(String name, String link, int hours) {
         String safe = (name != null && !name.isBlank()) ? name : "";
         return """
@@ -150,7 +161,6 @@ public class MailService {
           """.formatted(safe, link, hours);
     }
 
-    /** Construye el cuerpo de texto plano del email de reseteo de contraseña */
     private String buildResetText(String name, String link, int hours) {
         String safe = name != null && !name.isBlank() ? name : "";
         return """

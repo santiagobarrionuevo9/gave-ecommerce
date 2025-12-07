@@ -3,6 +3,7 @@ package org.example.gavebackend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.gavebackend.entities.enums.StockLevel;
 
 
 import java.math.BigDecimal;
@@ -53,6 +54,13 @@ public class product {
     @Column(nullable=false)
     private Integer stock = 0;
 
+    @Column(name = "stock_low_threshold")
+    private Integer stockLowThreshold = 5;     // 🔴 peligro
+
+    @Column(name = "stock_medium_threshold")
+    private Integer stockMediumThreshold = 15; // 🟡 moderado
+
+
     @Column(name="created_at", updatable=false)
     private Instant createdAt;
 
@@ -64,4 +72,27 @@ public class product {
 
     @PrePersist void prePersist(){ createdAt = Instant.now(); }
     @PreUpdate  void preUpdate(){  updatedAt = Instant.now();  }
+
+    @Transient
+    public int getAvailableStock() {
+        int s = stock == null ? 0 : stock;
+        int r = reserved == null ? 0 : reserved;
+        return Math.max(0, s - r);
+    }
+
+    @Transient
+    public StockLevel getStockLevel() {
+        int available = getAvailableStock();
+
+        if (stockLowThreshold != null && available <= stockLowThreshold) {
+            return StockLevel.DANGER;
+        }
+        if (stockMediumThreshold != null && available <= stockMediumThreshold) {
+            return StockLevel.MODERATE;
+        }
+        return StockLevel.OK;
+    }
+
 }
+
+

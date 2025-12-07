@@ -54,5 +54,13 @@ public class ProductDTO {
     @DecimalMax(value = "100.00", inclusive = true, message = "El porcentaje de descuento no puede superar 100")
     private BigDecimal discountPercent;
 
+    private Integer availableStock;
+    private String stockLevel;
+
+    private Integer stockLowThreshold;
+
+
+    private Integer stockMediumThreshold;
+
     private Instant createdAt;
 }

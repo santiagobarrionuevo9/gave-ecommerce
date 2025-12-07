@@ -156,6 +156,14 @@ public class ProductServiceImpl implements serviceproducts {
         p.setStock(stock);
         p.setDiscountPercent(discountPercent == null ? BigDecimal.ZERO : discountPercent);
         p.setDiscountThreshold(discountThreshold == null ? 0 : discountThreshold);
+        p.setStockLowThreshold(
+                dto.getStockLowThreshold() == null ? 5 : dto.getStockLowThreshold()
+        );
+
+        p.setStockMediumThreshold(
+                dto.getStockMediumThreshold() == null ? 15 : dto.getStockMediumThreshold()
+        );
+
 
         p = productRepo.save(p);
         return toDTO(p);
@@ -210,6 +218,13 @@ public class ProductServiceImpl implements serviceproducts {
         p.setStock(stock);
         p.setDiscountPercent(discountPercent == null ? BigDecimal.ZERO : discountPercent);
         p.setDiscountThreshold(discountThreshold == null ? 0 : discountThreshold);
+        p.setStockLowThreshold(
+                dto.getStockLowThreshold() == null ? 5 : dto.getStockLowThreshold()
+        );
+
+        p.setStockMediumThreshold(
+                dto.getStockMediumThreshold() == null ? 15 : dto.getStockMediumThreshold()
+        );
 
         return toDTO(productRepo.save(p));
     }
@@ -437,8 +452,16 @@ public class ProductServiceImpl implements serviceproducts {
         dto.setDiscountThreshold(p.getDiscountThreshold());
         dto.setDiscountPercent(p.getDiscountPercent());
         dto.setCreatedAt(p.getCreatedAt());
+
+        dto.setAvailableStock(p.getAvailableStock());
+        dto.setStockLevel(p.getStockLevel().name());
+
+        dto.setStockLowThreshold(p.getStockLowThreshold());
+        dto.setStockMediumThreshold(p.getStockMediumThreshold());
+
         return dto;
     }
+
 
     /**     * Convierte una entidad de pedido a DTO
      * @param img Entidad de imagen de producto
