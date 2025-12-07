@@ -1,6 +1,7 @@
 package org.example.gavebackend.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gavebackend.dtos.*;
 import org.example.gavebackend.entities.enums.Rol;
 import org.example.gavebackend.entities.appUser;
@@ -20,31 +21,29 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final appUserRepository repo;
-
     private final PasswordEncoder encoder;
-
     private final JwtUtil jwt;
-
     private final MailService mail;
 
     @Value("${app.frontend.base-url}")
     private String frontendBase;
 
-    /**
-     * Registro de nuevo usuario
-     * @param req Datos de registro
-     * @return Token JWT y datos del usuario
-     */
+    /** Registro de nuevo usuario */
     public AuthResponse register(RegisterRequest req){
         if (repo.existsByEmail(req.getEmail()))
             throw new IllegalArgumentException("Email ya registrado");
 
         Rol role = Rol.CLIENT;
-        if (req.getRole()!=null) {
-            try { role = Rol.valueOf(req.getRole().toUpperCase()); } catch (Exception ignored) {}
+        if (req.getRole() != null) {
+            try {
+                role = Rol.valueOf(req.getRole().toUpperCase());
+            } catch (Exception ignored) {
+                // si manda algo raro, se queda en CLIENT
+            }
         }
 
         var u = new appUser();
@@ -54,18 +53,16 @@ public class AuthService {
         u.setRole(role);
         repo.save(u);
 
+        log.info("Usuario registrado con email {} y rol {}", u.getEmail(), u.getRole());
 
-        try { mail.sendWelcomeEmail(u.getEmail(), u.getFullName()); } catch (Exception ignored){}
+        // El MailService ya se encarga de no romper si falla
+        mail.sendWelcomeEmail(u.getEmail(), u.getFullName());
 
         String token = jwt.generate(u.getEmail(), Map.of("role", u.getRole().name()));
         return new AuthResponse(token, u.getEmail(), u.getRole().name());
     }
 
-    /**
-     * Login de usuario
-     * @param req Datos de login
-     * @return Token JWT y datos del usuario
-     */
+    /** Login de usuario */
     public AuthResponse login(LoginRequest req){
         var u = repo.findByEmail(req.getEmail().toLowerCase().trim())
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas"));
@@ -76,16 +73,15 @@ public class AuthService {
         return new AuthResponse(token, u.getEmail(), u.getRole().name());
     }
 
-    /**
-     * Solicitar reseteo de contraseña
-     * @param req Datos de solicitud
-     */
+    /** Solicitar reseteo de contraseña */
     public void forgot(ForgotPasswordRequest req) {
         String email = req.getEmail().toLowerCase().trim();
         Optional<appUser> opt = repo.findByEmail(email);
 
-
-        if (opt.isEmpty()) return;
+        if (opt.isEmpty()) {
+            log.info("Solicitud de reset para email inexistente: {}", email);
+            return;
+        }
 
         var user = opt.get();
         String token = UUID.randomUUID().toString().replace("-", "");
@@ -94,18 +90,15 @@ public class AuthService {
         repo.save(user);
 
         String link = frontendBase + "/reset?token=" + token;
-        try { mail.sendPasswordResetEmail(user.getEmail(), user.getFullName(), link, 2); } catch (Exception ignored){}
+        mail.sendPasswordResetEmail(user.getEmail(), user.getFullName(), link, 2);
     }
 
-    /**
-     * Resetear contraseña
-     * @param req Datos de reseteo
-     */
+    /** Resetear contraseña */
     public void reset(ResetPasswordRequest req) {
         var user = repo.findByPasswordResetToken(req.getToken())
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
 
-        if (user.getPasswordResetExpiry()==null || user.getPasswordResetExpiry().isBefore(Instant.now()))
+        if (user.getPasswordResetExpiry() == null || user.getPasswordResetExpiry().isBefore(Instant.now()))
             throw new IllegalArgumentException("Token expirado");
 
         user.setPasswordHash(encoder.encode(req.getNewPassword()));
