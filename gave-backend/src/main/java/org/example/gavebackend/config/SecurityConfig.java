@@ -76,6 +76,7 @@ public class SecurityConfig {
                 "https://flourishing-brioche-0c08f0.netlify.app",
                 "http://localhost:4200",
                 "http://127.0.0.1:4200"
+
         ));
 
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
