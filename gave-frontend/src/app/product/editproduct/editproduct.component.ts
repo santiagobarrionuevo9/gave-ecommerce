@@ -63,7 +63,9 @@ export class EditproductComponent implements OnInit {
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
-
+      // ✅ NUEVOS CAMPOS DE STOCK
+      stockLowThreshold: [5, [Validators.min(0)]],
+      stockMediumThreshold: [15, [Validators.min(0)]],
       // descuentos
       discountThreshold: [null, [Validators.min(1)]],
       discountPercent: [null, [Validators.min(0), Validators.max(100)]],
@@ -98,18 +100,20 @@ export class EditproductComponent implements OnInit {
       next: (p) => {
         this.currentId = p.id;
         this.form.reset({
-          typeId: p.typeId,
-          name: p.name,
-          slug: p.slug,
-          shortDesc: p.shortDesc ?? '',
-          description: p.description ?? '',
-          isActive: p.isActive ?? true,
-          sku: p.sku,
-          price: p.price,
-          stock: p.stock,
-          discountThreshold: p.discountThreshold ?? null,
-          discountPercent: p.discountPercent ?? null,
-        });
+        typeId: p.typeId,
+        name: p.name,
+        slug: p.slug,
+        sku: p.sku,
+        price: p.price,
+        stock: p.stock,
+
+        // ✅ NUEVO
+        stockLowThreshold: p.stockLowThreshold ?? 5,
+        stockMediumThreshold: p.stockMediumThreshold ?? 15,
+
+        discountThreshold: p.discountThreshold,
+        discountPercent: p.discountPercent,
+      });
 
         this.fetchImages();
         this.loading.set(false);

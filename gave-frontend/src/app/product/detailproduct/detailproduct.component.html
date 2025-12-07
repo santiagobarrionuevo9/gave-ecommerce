@@ -36,9 +36,21 @@
         <h3 class="mb-2">{{ product.name }}</h3>
         <div class="text-muted mb-3" *ngIf="product.shortDesc">{{ product.shortDesc }}</div>
         <div class="h4 fw-semibold mb-1">$ {{ product.price | number:'1.0-0' }}</div>
-        <div class="mb-1" [class.text-danger]="product.stock===0" [class.text-success]="product.stock>0">
-          Stock: {{ product.stock }}
+        
+        <!-- Stock: número -->
+        <div class="mb-1"
+            [class.text-danger]="availableStock === 0"
+            [class.text-success]="availableStock > 0">
+          Stock disponible: {{ availableStock }}
         </div>
+
+        <!-- Semaforito de stock -->
+        <div *ngIf="product.stockLevel"
+            class="d-flex align-items-center mb-2">
+          <span class="stock-dot me-2" [ngClass]="stockLevelClass"></span>
+          <small class="text-muted">{{ stockLevelText }}</small>
+        </div>
+
 
         <!-- 🔖 Promo por cantidad -->
         <div *ngIf="hasDiscount" class="alert alert-success py-2 px-3 small mb-3">

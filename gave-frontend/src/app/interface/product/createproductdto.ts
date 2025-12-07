@@ -11,4 +11,11 @@ export interface Createproductdto {
   // 👇 NUEVO
   discountThreshold?: number | null;
   discountPercent?: number | null;
+  // 👇 NUEVO: info de stock que viene del backend
+  availableStock?: number | null;
+  stockLevel?: 'DANGER' | 'MODERATE' | 'OK' | null;
+  stockLowThreshold?: number | null;
+  stockMediumThreshold?: number | null;
+
+
 }

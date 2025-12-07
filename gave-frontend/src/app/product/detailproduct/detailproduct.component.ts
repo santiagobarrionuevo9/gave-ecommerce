@@ -146,4 +146,41 @@ export class DetailproductComponent implements OnInit {
     const percent = this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
     return percent > 0;
   }
+
+  /** Stock disponible (prefiere availableStock si viene del backend) */
+  get availableStock(): number {
+    if (!this.product) return 0;
+    return this.product.availableStock ?? this.product.stock ?? 0;
+  }
+
+  /** Texto legible para el nivel de stock */
+  get stockLevelText(): string {
+    if (!this.product?.stockLevel) return '';
+    switch (this.product.stockLevel) {
+      case 'DANGER':
+        return 'Stock crítico';
+      case 'MODERATE':
+        return 'Stock moderado';
+      case 'OK':
+        return 'Stock saludable';
+      default:
+        return '';
+    }
+  }
+
+  /** Clase de color para el puntito del semáforo */
+  get stockLevelClass(): string {
+    if (!this.product?.stockLevel) return 'bg-secondary';
+
+    switch (this.product.stockLevel) {
+      case 'DANGER':
+        return 'bg-danger';
+      case 'MODERATE':
+        return 'bg-warning';
+      case 'OK':
+        return 'bg-success';
+      default:
+        return 'bg-secondary';
+    }
+  }
 }

@@ -51,6 +51,9 @@ export class CreateproductComponent implements OnInit {
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
+      // ✅ NUEVOS CAMPOS DE STOCK
+      stockLowThreshold: [5, [Validators.min(0)]],
+      stockMediumThreshold: [15, [Validators.min(0)]],
       // Descuentos
       discountThreshold: [null, [Validators.min(1)]],
       discountPercent: [null, [Validators.min(0), Validators.max(100)]],
@@ -131,20 +134,18 @@ export class CreateproductComponent implements OnInit {
       typeId: Number(v.typeId),
       name: v.name,
       slug: v.slug,
-      shortDesc: v.shortDesc || null,
-      description: v.description || null,
-      isActive: !!v.isActive,
       sku: v.sku,
       price: Number(v.price),
       stock: Number(v.stock),
-      discountThreshold:
-        v.discountThreshold !== null && v.discountThreshold !== ''
-          ? Number(v.discountThreshold)
-          : null,
-      discountPercent:
-        v.discountPercent !== null && v.discountPercent !== ''
-          ? Number(v.discountPercent)
-          : null
+
+      // ✅ NUEVO
+      stockLowThreshold:
+        v.stockLowThreshold !== null ? Number(v.stockLowThreshold) : null,
+      stockMediumThreshold:
+        v.stockMediumThreshold !== null ? Number(v.stockMediumThreshold) : null,
+
+      discountThreshold: v.discountThreshold,
+      discountPercent: v.discountPercent,
     };
 
     this.api.createProduct(payload).subscribe({

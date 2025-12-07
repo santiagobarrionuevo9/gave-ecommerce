@@ -1,5 +1,6 @@
+// src/app/interface/product/productdto.ts
 export interface Productdto {
-    id: number;
+  id: number;
   typeId: number;
   name: string;
   slug: string;
@@ -10,7 +11,16 @@ export interface Productdto {
   price: number;
   stock: number;
   createdAt: string; // ISO de backend 👈
-  // 👇 NUEVO
+
+  // 👇 Descuento
   discountThreshold?: number | null;
   discountPercent?: number | null;
+
+  // 👇 NUEVO: info de stock que viene del backend
+  availableStock?: number | null;
+  stockLevel?: 'DANGER' | 'MODERATE' | 'OK' | null;
+  
+  stockLowThreshold?: number | null;
+  stockMediumThreshold?: number | null;
+
 }
