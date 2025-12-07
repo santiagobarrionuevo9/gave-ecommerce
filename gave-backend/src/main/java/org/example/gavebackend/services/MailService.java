@@ -5,23 +5,33 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MailService {
 
-    private final JavaMailSender sender;
+    private final RestTemplate restTemplate;
 
-    @Value("${app.mail.from:}")
+    @Value("${resend.api.key}")
+    private String apiKey;
+
+    @Value("${app.mail.from}")
     private String from;
 
-    // ===================== PÚBLICOS =====================
+    // ========= MÉTODOS PÚBLICOS =========
 
     /** Bienvenida luego de registrarse */
     public void sendWelcomeEmail(String to, String fullName) {
@@ -57,35 +67,41 @@ public class MailService {
         send(to, subject, html, text);
     }
 
-    // ===================== PRIVADO GENÉRICO =====================
+    // ========= MÉTODO GENÉRICO DE ENVÍO =========
 
-    /** Envío genérico de email con HTML y texto plano */
     private void send(String to, String subject, String htmlBody, String textFallback) {
         try {
             log.info("Preparando email a {} con asunto '{}'", to, subject);
 
-            MimeMessage msg = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+            String url = "https://api.resend.com/emails";
 
-            // FROM: si viene de properties lo usamos, si no, que use el spring.mail.username
-            if (from != null && !from.isBlank()) {
-                helper.setFrom(from);
-            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
 
-            helper.setTo(to);
-            helper.setSubject(subject);
-            // texto plano (fallback) + HTML principal
-            helper.setText(textFallback, htmlBody);
+            Map<String, Object> body = Map.of(
+                    "from", from,
+                    "to", List.of(to),
+                    "subject", subject,
+                    "html", htmlBody,
+                    "text", textFallback
+            );
 
-            sender.send(msg);
-            log.info("Email enviado a {} con asunto '{}'", to, subject);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(url, entity, String.class);
+
+            log.info("Respuesta Resend: status={}, body={}",
+                    response.getStatusCode(), response.getBody());
         } catch (Exception e) {
-            // NO lanzamos RuntimeException: solo logueamos
-            log.warn("No se pudo enviar mail a {} con asunto '{}': {}", to, subject, e.getMessage());
+            // NO rompemos el flujo de negocio
+            log.warn("No se pudo enviar mail a {} con asunto '{}': {}",
+                    to, subject, e.getMessage());
         }
     }
 
-    // ===================== PLANTILLAS =====================
+    // ========= PLANTILLAS =========
 
     /** Construye el cuerpo HTML del email de bienvenida */
     private String buildWelcomeHtml(String name) {
