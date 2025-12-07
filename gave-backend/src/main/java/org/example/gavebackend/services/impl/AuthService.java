@@ -55,7 +55,7 @@ public class AuthService {
         repo.save(u);
 
 
-        //try { mail.sendWelcomeEmail(u.getEmail(), u.getFullName()); } catch (Exception ignored){}
+        try { mail.sendWelcomeEmail(u.getEmail(), u.getFullName()); } catch (Exception ignored){}
 
         String token = jwt.generate(u.getEmail(), Map.of("role", u.getRole().name()));
         return new AuthResponse(token, u.getEmail(), u.getRole().name());
