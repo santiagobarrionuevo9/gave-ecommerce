@@ -55,10 +55,10 @@ public class product {
     private Integer stock = 0;
 
     @Column(name = "stock_low_threshold")
-    private Integer stockLowThreshold = 5;     // 🔴 peligro
+    private Integer stockLowThreshold = 0;     // 🔴 peligro
 
     @Column(name = "stock_medium_threshold")
-    private Integer stockMediumThreshold = 15; // 🟡 moderado
+    private Integer stockMediumThreshold = 0; // 🟡 moderado
 
 
     @Column(name="created_at", updatable=false)

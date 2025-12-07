@@ -108,8 +108,8 @@ export class EditproductComponent implements OnInit {
         stock: p.stock,
 
         // ✅ NUEVO
-        stockLowThreshold: p.stockLowThreshold ?? 5,
-        stockMediumThreshold: p.stockMediumThreshold ?? 15,
+        stockLowThreshold: p.stockLowThreshold,
+        stockMediumThreshold: p.stockMediumThreshold,
 
         discountThreshold: p.discountThreshold,
         discountPercent: p.discountPercent,
