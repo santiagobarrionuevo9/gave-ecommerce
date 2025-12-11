@@ -31,8 +31,6 @@ public class MailService {
     @Value("${app.mail.from}")
     private String from;
 
-    // 👇 tu mail de pruebas (el que Resend permite)
-    private static final String TEST_EMAIL = "santiagobarrionuevo9@gmail.com";
 
     // ========= MÉTODOS PÚBLICOS =========
 
@@ -83,8 +81,7 @@ public class MailService {
 
     private void send(String to, String subject, String htmlBody, String textFallback) {
         try {
-            log.info("Preparando email a {} (pero se enviará a {}) con asunto '{}'",
-                    to, TEST_EMAIL, subject);
+            log.info("Preparando email a {} (pero se enviará a {}) con asunto '{}'", to, subject);
 
             String url = "https://api.resend.com/emails";
 
@@ -95,7 +92,7 @@ public class MailService {
             // 👈 acá Resend SIEMPRE recibe tu mail de pruebas
             Map<String, Object> body = Map.of(
                     "from", from,
-                    "to", List.of(TEST_EMAIL),
+                    "to", List.of(to),
                     "subject", subject,
                     "html", htmlBody,
                     "text", textFallback
@@ -110,7 +107,7 @@ public class MailService {
                     response.getStatusCode(), response.getBody());
         } catch (Exception e) {
             log.warn("No se pudo enviar mail (destino lógico: {}, real: {}) con asunto '{}': {}",
-                    to, TEST_EMAIL, subject, e.getMessage());
+                    to, subject, e.getMessage());
         }
     }
 
