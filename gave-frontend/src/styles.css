@@ -10,6 +10,43 @@
   --petrol-text:#0a2b33;
 }
 
+/* LOGO responsivo */
+.logo-gv {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 576px) {
+  .logo-gv {
+    height: 56px;
+  }
+}
+
+@media (min-width: 768px) {
+  .logo-gv {
+    height: 64px;
+  }
+}
+
+/* Texto Gave */
+.brand-text {
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+.brand-text-light {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.navbar {
+  overflow: visible !important;
+}
+
+
 /* Marca */
 .brand-logo{
   font-weight: 700;
@@ -542,6 +579,73 @@
     max-width: 180px;
   }
 }
+
+/*Semaforito de stock*/
+
+.stock-badge-dot {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.stock-dot-big {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+/* Puntito pequeño reutilizado en la leyenda */
+.stock-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Tabla de leyenda de stock compacta */
+.stock-legend td {
+  padding: .15rem .25rem;
+}
+.stock-legend small {
+  font-size: .8rem;
+}
+
+/* Contenedor general */
+.stock-legend {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;   /* pequeña separación entre filas */
+}
+
+/* Cada fila color + texto */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;    /* MUY poca distancia entre color y texto */
+}
+
+/* Puntito */
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Texto */
+.legend-text {
+  font-size: .85rem;
+  color: #555;
+}
+
 
 
 

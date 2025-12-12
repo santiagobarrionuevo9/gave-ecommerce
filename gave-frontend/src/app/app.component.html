@@ -1,11 +1,18 @@
 <nav class="navbar navbar-expand-lg navbar-petrol">
   <div class="container">
-    <a class="navbar-link brand-logo d-flex align-items-center" routerLink="/historia" routerLinkActive="active">
+    <!-- BRAND -->
+    <a class="navbar-brand d-flex align-items-center gap-2"
+      routerLink="/historia"
+      routerLinkActive="active">
       <img src="assets/Logo-GV.png"
           alt="GaVe Logo"
-          style="height:45px; width:auto; object-fit:contain;">
-    </a>
+          class="logo-gv">
 
+      <!-- GaVe siempre visible, Store desde md -->
+      <span class="brand-text">
+        GaVe <span class="brand-text-light d-none d-md-inline">Store</span>
+      </span>
+    </a>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
@@ -27,15 +34,12 @@
 
         <!-- ADMIN -->
         <ng-container *ngIf="isAdmin()">
-
-          <!-- SOLO STOCK, SIN DESPLEGABLE -->
           <li class="nav-item">
             <a class="nav-link" routerLink="/admin/stock" routerLinkActive="active">
               Stock
             </a>
           </li>
 
-          <!-- Links normales -->
           <li class="nav-item">
             <a class="nav-link" routerLink="/admin/pedidos" routerLinkActive="active">
               Pedidos
@@ -47,13 +51,11 @@
               Categorías
             </a>
           </li>
-
         </ng-container>
       </ul>
 
       <!-- DERECHA (push) -->
       <div class="ms-auto d-flex align-items-center gap-2">
-
         <!-- Carrito -->
         <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito"
           *ngIf="!isAdmin()">
@@ -80,7 +82,8 @@
             </ng-container>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end p-2" *ngIf="lowStock() as list">
+          <ul class="dropdown-menu dropdown-menu-start dropdown-menu-lg-end p-2"
+              *ngIf="lowStock() as list">
             <li *ngIf="list.length === 0" class="text-muted px-2">
               ✅ No hay productos con stock bajo. Todo OK.
             </li>
@@ -100,7 +103,6 @@
             </li>
           </ul>
         </div>
-
 
 
         <!-- Autenticación -->

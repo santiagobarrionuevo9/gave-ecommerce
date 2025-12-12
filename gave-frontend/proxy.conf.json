@@ -1,14 +1,15 @@
 {
   "/api": {
-    "target": "http://localhost:9011",
+    "target": "https://gave-ecommerce-production.up.railway.app",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   },
   "/files": {
-    "target": "http://localhost:9011",
+    "target": "https://gave-ecommerce-production.up.railway.app",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   }
 }
+

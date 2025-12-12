@@ -1,5 +1,13 @@
 <div class="container py-4" *ngIf="form">
-  <h4 class="mb-3">Editar producto</h4>
+  <!-- Título -->
+  <div class="d-flex justify-content-between align-items-center mb-3 admin-header">
+    <div>
+      <h3 class="mb-0">Editar producto</h3>
+      <p class="text-muted small mb-0">
+        Actualizá y editá los productos de tu catálogo.
+      </p>
+    </div>
+  </div>
 
   <!-- Estado de carga -->
   <div *ngIf="loading()" class="alert alert-info mb-3">

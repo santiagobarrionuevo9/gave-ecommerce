@@ -19,17 +19,35 @@
     <div class="row g-4">
       <!-- Galería simple -->
       <div class="col-12 col-lg-6">
-        <img [src]="mainImage()" class="img-fluid rounded shadow-sm mb-3" [alt]="product.name" />
+          <!-- Contenedor relativo para poder posicionar el semáforo -->
+          <div class="position-relative mb-3">
+            <img [src]="mainImage()"
+                class="img-fluid rounded shadow-sm w-100"
+                [alt]="product.name" />
 
-        <div class="d-flex gap-2 flex-wrap">
-          <img *ngFor="let img of images; trackBy: trackByImgId"
-               [src]="img.url"
-               class="rounded border"
-               style="width:90px; height:90px; object-fit:cover; cursor:pointer"
-               (click)="selectAsMain(img)"
-               [alt]="img.altText || product.name">
+            <!-- Semáforo grande en la esquina de la imagen -->
+            <div *ngIf="product.stockLevel"
+                class="stock-badge-dot"
+                [attr.title]="stockLevelText">
+              <span class="stock-dot-big"
+      [ngClass]="stockLevelClass"
+      [attr.title]="stockLevelText"></span>
+
+            </div>
+          </div>
+
+
+          <!-- Thumbnails -->
+          <div class="d-flex gap-2 flex-wrap">
+            <img *ngFor="let img of images; trackBy: trackByImgId"
+                [src]="img.url"
+                class="rounded border"
+                style="width:90px; height:90px; object-fit:cover; cursor:pointer"
+                (click)="selectAsMain(img)"
+                [alt]="img.altText || product.name">
+          </div>
         </div>
-      </div>
+
 
       <!-- Info -->
       <div class="col-12 col-lg-6">
@@ -44,14 +62,27 @@
           Stock disponible: {{ availableStock }}
         </div>
 
-        <!-- Semaforito de stock -->
-        <div *ngIf="product.stockLevel"
-            class="d-flex align-items-center mb-2">
-          <span class="stock-dot me-2" [ngClass]="stockLevelClass"></span>
-          <small class="text-muted">{{ stockLevelText }}</small>
+        <!-- Leyenda de colores de stock -->
+        <div *ngIf="product.stockLevel" class="mb-2">
+          <small class="text-muted d-block mb-1">Referencia de color:</small>
+          <!-- Leyenda de colores de stock (compacta y alineada) -->
+          <div class="stock-legend mt-1">
+            <div class="legend-item">
+              <span class="legend-dot bg-success"></span>
+              <span class="legend-text">Stock saludable</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot bg-warning"></span>
+              <span class="legend-text">Stock moderado</span>
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot bg-danger"></span>
+              <span class="legend-text">Stock crítico</span>
+            </div>
+          </div>
         </div>
-
-
         <!-- 🔖 Promo por cantidad -->
         <div *ngIf="hasDiscount" class="alert alert-success py-2 px-3 small mb-3">
           <i class="bi bi-tag-fill me-1"></i>

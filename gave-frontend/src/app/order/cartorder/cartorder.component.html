@@ -2,7 +2,15 @@
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-      <h3 class="mb-0">Carrito</h3>
+      <!-- Título -->
+      <div class="d-flex justify-content-between align-items-center mb-3 admin-header">
+        <div>
+          <h3 class="mb-0">Carrito</h3>
+          <p class="text-muted small mb-0">
+            Vizualizá los productos que agregaste al carrito y completá tus datos para finalizar la compra.
+          </p>
+        </div>
+      </div>
       <p class="text-muted small mb-0" *ngIf="cart.snapshot.items.length">
         Tenés {{ cart.snapshot.items.length }} producto{{ cart.snapshot.items.length > 1 ? 's' : '' }} en el carrito.
       </p>
