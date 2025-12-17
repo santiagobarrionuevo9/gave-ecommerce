@@ -77,7 +77,8 @@ public class SecurityConfig {
                 "http://localhost:4200",
                 "http://127.0.0.1:4200",
                 "https://gavefiltros.com.ar",
-                "https://www.gavefiltros.com.ar"
+                "https://www.gavefiltros.com.ar",
+                "https://gave-ecommerce-production.up.railway.app"
 
         ));
 
