@@ -18,7 +18,7 @@ export class CartorderComponent {
    buyerEmail = localStorage.getItem('email') || '';
   buyerName  = '';
   buyerPhone = '';
-
+  termsAccepted = false;
   deliveryMethod: 'DELIVERY' | 'PICKUP' = 'PICKUP';
   deliveryCost = 0; // siempre 0
 
@@ -69,8 +69,9 @@ export class CartorderComponent {
 
   // 👉 ¿puede confirmar? (logueado + monto mínimo + no enviando)
   get canConfirm(): boolean {
-    return this.isLoggedIn && this.meetsMinAmount && !this.submitting;
-  }
+  return this.isLoggedIn && this.meetsMinAmount && this.termsAccepted && !this.submitting;
+}
+
 
   setQty(id: number, q: number) {
     this.cart.setQty(id, Number(q));
@@ -81,8 +82,9 @@ export class CartorderComponent {
   }
 
   clear() {
-    this.cart.clear();
-  }
+  this.cart.clear();
+  this.termsAccepted = false;
+}
 
   private isValidWhatsappPhone(phone: string): boolean {
   if (!phone) return false;
@@ -144,6 +146,15 @@ private isValidEmail(email: string): boolean {
       });
       return;
     }
+    // 2.5) Chequeo de Términos
+    if (!this.termsAccepted) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Falta aceptar términos',
+        text: 'Para confirmar el pedido, debés aceptar los Términos y Condiciones.'
+      });
+      return;
+    }
 
     // 3) Validaciones normales
     if (!this.cart.snapshot.items.length) {
@@ -185,6 +196,9 @@ private isValidEmail(email: string): boolean {
       return;
     }
 
+    
+
+
 
     const dto: any = {
       buyerEmail: this.buyerEmail,
@@ -207,6 +221,7 @@ private isValidEmail(email: string): boolean {
       next: async (o) => {
         this.submitting = false;
         this.cart.clear();
+        this.termsAccepted = false;
         const res = await Swal.fire({
           icon: 'success',
           title: '¡Pedido confirmado!',

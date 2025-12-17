@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Producttypedto } from '../../interface/product/producttypedto';
 import { ProductService } from '../../service/product.service';
 import { Router, RouterModule } from '@angular/router';
@@ -28,9 +28,10 @@ export class CreateproductComponent implements OnInit {
   selectedFiles: File[] = [];
   previews: PreviewItem[] = [];
 
-  // límites / validaciones de ejemplo
+  // límites
   readonly MAX_FILES = 12;
   readonly MAX_SIZE_MB = 10;
+
   showDiscountConfig = false;
 
   constructor(
@@ -39,34 +40,130 @@ export class CreateproductComponent implements OnInit {
     private router: Router
   ) {}
 
+  // ✅ Slug: minúsculas, números y guiones (sin espacios)
+  private slugValidator(): ValidatorFn {
+    const re = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = String(control.value ?? '').trim();
+      if (!v) return null;
+      return re.test(v) ? null : { slugFormat: true };
+    };
+  }
+
+  // ✅ SKU: letras/números/guiones/underscore/punto (sin espacios)
+  private skuValidator(): ValidatorFn {
+    const re = /^[A-Za-z0-9._-]+$/;
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = String(control.value ?? '').trim();
+      if (!v) return null;
+      return re.test(v) ? null : { skuFormat: true };
+    };
+  }
+
+  // ✅ Entero
+  private integerValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = control.value;
+      if (v === null || v === undefined || v === '') return null;
+      return Number.isInteger(Number(v)) ? null : { integer: true };
+    };
+  }
+
+  // ✅ Semáforo: low <= medium
+  private stockThresholdsValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const low = group.get('stockLowThreshold')?.value;
+      const med = group.get('stockMediumThreshold')?.value;
+
+      if (low === null || low === '' || med === null || med === '') return null;
+
+      const lowN = Number(low);
+      const medN = Number(med);
+
+      if (Number.isNaN(lowN) || Number.isNaN(medN)) return null;
+
+      return lowN <= medN ? null : { thresholdsOrder: true };
+    };
+  }
+
+  // ✅ Descuento: si uno está, el otro es obligatorio
+  private discountPairValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const th = group.get('discountThreshold')?.value;
+      const pct = group.get('discountPercent')?.value;
+
+      const hasTh = th !== null && th !== '' && th !== undefined;
+      const hasPct = pct !== null && pct !== '' && pct !== undefined;
+
+      if (!hasTh && !hasPct) return null;
+
+      if (hasTh && !hasPct) return { discountPercentRequired: true };
+      if (!hasTh && hasPct) return { discountThresholdRequired: true };
+
+      return null;
+    };
+  }
+
   ngOnInit(): void {
-    this.form = this.fb.group({
-      // Producto
-      typeId: [null, [Validators.required]],
-      name: ['', [Validators.required, Validators.maxLength(180)]],
-      slug: ['', [Validators.required, Validators.maxLength(200)]],
-      shortDesc: ['', [Validators.maxLength(300)]],
-      description: [''],
-      isActive: [true],
-      sku: ['', [Validators.required, Validators.maxLength(64)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      stock: [0, [Validators.required, Validators.min(0)]],
-      // ✅ NUEVOS CAMPOS DE STOCK
-      stockLowThreshold: [5, [Validators.min(0)]],
-      stockMediumThreshold: [15, [Validators.min(0)]],
-      // Descuentos
-      discountThreshold: [null, [Validators.min(1)]],
-      discountPercent: [null, [Validators.min(0), Validators.max(100)]],
-      // Imágenes
-      imageAlt: [''],
-      imageSort: [0],
-      imageUrl: ['']
+    this.form = this.fb.group(
+      {
+        // Producto
+        typeId: [null, [Validators.required]],
+        name: ['', [Validators.required, Validators.maxLength(180)]],
+        slug: ['', [Validators.required, Validators.maxLength(200), this.slugValidator()]],
+        shortDesc: ['', [Validators.maxLength(300)]],
+        description: [''],
+        isActive: [true],
+
+        sku: ['', [Validators.required, Validators.maxLength(64), this.skuValidator()]],
+
+        // precio > 0 (si querés permitir 0, cambiá min(0.01) por min(0))
+        price: [0, [Validators.required, Validators.min(0.01)]],
+
+        // stock entero
+        stock: [0, [Validators.required, Validators.min(0), this.integerValidator()]],
+
+        // semáforo
+        stockLowThreshold: [5, [Validators.required, Validators.min(0), this.integerValidator()]],
+        stockMediumThreshold: [15, [Validators.required, Validators.min(0), this.integerValidator()]],
+
+        // descuentos
+        discountThreshold: [null, [Validators.min(1), this.integerValidator()]],
+        discountPercent: [null, [Validators.min(0), Validators.max(100)]],
+
+        // imágenes
+        imageAlt: ['', [Validators.maxLength(140)]],
+        imageSort: [0, [Validators.min(0), this.integerValidator()]],
+        imageUrl: ['', [Validators.pattern(/^(https?:\/\/).+/i)]]
+      },
+      {
+        validators: [this.stockThresholdsValidator(), this.discountPairValidator()]
+      }
+    );
+
+    // 🔒 SKU siempre en MAYÚSCULAS
+    this.form.get('sku')?.valueChanges.subscribe(value => {
+      if (!value) return;
+
+      const upper = String(value).toUpperCase();
+
+      if (value !== upper) {
+        this.form.get('sku')?.setValue(upper, { emitEvent: false });
+      }
     });
 
     this.api.getTypes().subscribe({
       next: ts => (this.types = ts),
       error: () => (this.types = [])
     });
+  }
+
+  toggleDiscountConfig() {
+    this.showDiscountConfig = !this.showDiscountConfig;
+    if (this.showDiscountConfig) {
+      this.form.get('discountThreshold')?.markAsTouched();
+      this.form.get('discountPercent')?.markAsTouched();
+    }
   }
 
   // selección de múltiples archivos
@@ -122,6 +219,7 @@ export class CreateproductComponent implements OnInit {
 
   submit(): void {
     this.successMsg = this.errorMsg = null;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -132,20 +230,17 @@ export class CreateproductComponent implements OnInit {
 
     const payload = {
       typeId: Number(v.typeId),
-      name: v.name,
-      slug: v.slug,
-      sku: v.sku,
+      name: String(v.name).trim(),
+      slug: String(v.slug).trim(),
+      sku: String(v.sku).trim(),
       price: Number(v.price),
       stock: Number(v.stock),
 
-      // ✅ NUEVO
-      stockLowThreshold:
-        v.stockLowThreshold !== null ? Number(v.stockLowThreshold) : null,
-      stockMediumThreshold:
-        v.stockMediumThreshold !== null ? Number(v.stockMediumThreshold) : null,
+      stockLowThreshold: v.stockLowThreshold !== null ? Number(v.stockLowThreshold) : null,
+      stockMediumThreshold: v.stockMediumThreshold !== null ? Number(v.stockMediumThreshold) : null,
 
       discountThreshold: v.discountThreshold,
-      discountPercent: v.discountPercent,
+      discountPercent: v.discountPercent
     };
 
     this.api.createProduct(payload).subscribe({
@@ -217,9 +312,7 @@ export class CreateproductComponent implements OnInit {
         // 3) sin imágenes
         this.loading.set(false);
         this.successMsg = 'Producto creado (sin imágenes).';
-        this.showSuccessAndGoToStock(
-          `Se creó el producto "${created.name}" (sin imágenes).`
-        );
+        this.showSuccessAndGoToStock(`Se creó el producto "${created.name}" (sin imágenes).`);
       },
       error: err => {
         console.error(err);

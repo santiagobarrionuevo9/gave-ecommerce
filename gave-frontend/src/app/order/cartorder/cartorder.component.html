@@ -211,6 +211,34 @@
             </div>
           </div>
 
+          <!-- Aviso de pago / facturación -->
+          <div class="alert alert-warning small mb-2">
+            <strong>Importante:</strong> Los pagos se realizan <strong>únicamente en efectivo</strong>.
+            Actualmente <strong>no se emite factura</strong>. El pedido se confirma y coordinamos entrega/retiro por WhatsApp.
+          </div>
+
+          <!-- Aceptación de términos -->
+          <div class="form-check mt-2">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="termsAccepted"
+              [(ngModel)]="termsAccepted"
+              [disabled]="submitting"
+            />
+            <label class="form-check-label small" for="termsAccepted">
+              He leído y acepto los
+              <a routerLink="/terminos" target="_blank" rel="noopener">
+                Términos y Condiciones
+              </a>.
+            </label>
+          </div>
+
+          <!-- Mensaje si no acepta términos -->
+          <div *ngIf="isLoggedIn && meetsMinAmount && !termsAccepted" class="text-danger small mt-1">
+            Para confirmar el pedido tenés que aceptar los Términos y Condiciones.
+          </div>
+
           <!-- BOTÓN CONFIRMAR (habilitado solo si canConfirm === true) -->
           <button class="btn btn-primary w-100"
                   type="button"

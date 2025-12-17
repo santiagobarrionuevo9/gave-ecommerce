@@ -10,12 +10,13 @@
   --petrol-text:#0a2b33;
 }
 
-/* LOGO responsivo */
-.logo-gv {
+.logo-gv{
   height: 48px;
-  width: auto;
+  width: 48px;
   object-fit: contain;
+  display: block;
 }
+
 
 @media (min-width: 576px) {
   .logo-gv {
@@ -66,7 +67,10 @@
 
 /* Navbar petróleo */
 .navbar-petrol{
-  background: var(--petrol-600) !important;
+  background: linear-gradient(90deg, #1c8b90 0%, #0f4c5c 55%, #0c3e4b 100%) !important;
+  border-top: 1px solid rgba(gba(255,255,255,.15));
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  
 }
 .navbar-petrol .nav-link{
   color: #cfe6eb !important;
@@ -646,7 +650,193 @@
   color: #555;
 }
 
+/* ===== TOPBAR estilo NIC ===== */
+.topbar {
+  background: linear-gradient(90deg, #1c8b90 0%, #0f4c5c 55%, #0c3e4b 100%) !important;
+  color: #eaf6f8;
+  font-size: 0.85rem;
+  padding: 6px 0;
+}
 
+.topbar a {
+  color: #eaf6f8;
+  text-decoration: none;
+  font-weight: 500;
+}
 
+.topbar a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
 
+.topbar i {
+  font-size: 0.95rem;
+}
+
+/* Buscador */
+.topbar-search {
+  position: relative;
+}
+
+.topbar-search input {
+  height: 28px;
+  padding: 0 28px 0 10px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.topbar-search i {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  font-size: 0.8rem;
+}
+
+.terms-container h3 {
+  color: var(--petrol-text);
+  font-weight: 800;
+}
+
+.terms-header p {
+  max-width: 820px;
+}
+
+.terms-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 76, 92, .10);
+  background: #fff;
+  box-shadow: 0 10px 18px rgba(15, 76, 92, .08);
+  overflow: hidden;
+}
+
+.terms-section {
+  padding: 1rem 1.25rem;
+}
+
+.terms-section + .terms-section {
+  border-top: 1px dashed rgba(15, 76, 92, .18);
+}
+
+.terms-section h5 {
+  color: var(--petrol-600);
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-bottom: .5rem;
+}
+
+.terms-section p {
+  color: #22343a;
+  margin-bottom: .5rem;
+}
+
+.terms-alert {
+  margin-top: .75rem;
+  border-radius: 12px;
+  padding: .65rem .8rem;
+  display: flex;
+  gap: .55rem;
+  align-items: flex-start;
+  background: var(--petrol-100);
+  border: 1px solid rgba(15, 76, 92, .18);
+  color: var(--petrol-700);
+}
+
+.terms-alert i {
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+.terms-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+.terms-contact .btn i {
+  margin-right: .35rem;
+}
+
+/* Ajuste mobile */
+@media (max-width: 575.98px) {
+  .terms-section {
+    padding: .9rem .95rem;
+  }
+}
+
+.historia-page {
+  color: #22343a;
+}
+
+/* HERO */
+.historia-hero {
+  border-bottom: 1px solid rgba(15, 76, 92, .12);
+  padding-bottom: 2rem;
+}
+
+.historia-logo {
+  max-width: 180px;
+}
+
+.historia-title {
+  color: var(--petrol-text);
+  font-weight: 800;
+}
+
+.historia-subtitle {
+  color: #3a4f55;
+}
+
+/* TITULOS */
+.historia-section-title {
+  color: var(--petrol-600);
+  font-weight: 700;
+}
+
+/* CARD LATERAL */
+.historia-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 76, 92, .10);
+  background: #fff;
+  box-shadow: 0 8px 16px rgba(15, 76, 92, .08);
+}
+
+.historia-team li + li {
+  margin-top: .35rem;
+}
+
+/* LISTAS */
+.historia-list {
+  padding-left: 1rem;
+}
+
+.historia-list li {
+  margin-bottom: .4rem;
+  position: relative;
+}
+
+.historia-list li::marker {
+  color: var(--petrol-600);
+}
+
+/* CTA */
+.historia-cta {
+  border-top: 1px dashed rgba(15, 76, 92, .18);
+  padding-top: 2rem;
+}
+
+.historia-cta h5 {
+  color: var(--petrol-text);
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+  .historia-logo {
+    max-width: 140px;
+  }
+}
 

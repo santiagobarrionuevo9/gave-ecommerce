@@ -2,13 +2,14 @@ import { Routes } from '@angular/router';
 import { ProductbrowseComponent } from './product/productbrowse/productbrowse.component';
 import { adminGuard } from './guards/admin.guard';
 import { authGuard } from './guards/auth.guard';
+import { TermsComponent } from './terms/terms.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'catalogo', pathMatch: 'full' },
   { path: 'catalogo', component: ProductbrowseComponent },
   {path: 'historia', loadComponent: () => import('./introduccion/introduccion.component').then(m => m.IntroduccionComponent) },
   { path: 'producto/:slug', loadComponent: () => import('./product/detailproduct/detailproduct.component').then(m => m.DetailproductComponent) },
-
+  { path: 'terminos', component: TermsComponent },
   // auth
   { path: 'login',    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },

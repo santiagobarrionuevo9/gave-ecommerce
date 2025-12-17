@@ -21,27 +21,40 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Nombre *</label>
-              <input type="text" class="form-control" formControlName="name" placeholder="Ej: Remera Oversize Negra">
+              <input type="text" class="form-control" formControlName="name" placeholder="Ej: Filtro de aceite Toyota">
               <div class="text-danger small" *ngIf="hasError('name','required')">Requerido</div>
+              <div class="text-danger small" *ngIf="hasError('name','maxlength')">Máximo 180 caracteres</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label">Slug *</label>
-              <input type="text" class="form-control" formControlName="slug" placeholder="remera-oversize-negra">
+              <input type="text" class="form-control" formControlName="slug" placeholder="filtro-aceite-toyota">
               <div class="text-danger small" *ngIf="hasError('slug','required')">Requerido</div>
+              <div class="text-danger small" *ngIf="hasError('slug','maxlength')">Máximo 200 caracteres</div>
+              <div class="text-danger small" *ngIf="hasError('slug','slugFormat')">
+                Formato inválido. Usá minúsculas, números y guiones (ej: filtro-aceite-toyota).
+              </div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label">SKU *</label>
-              <input type="text" class="form-control" formControlName="sku" placeholder="REM-OVS-BLK-M">
+              <input
+              type="text"
+              class="form-control text-uppercase"
+              formControlName="sku"
+              placeholder="FIL-ACE-TOY-001">
               <div class="text-danger small" *ngIf="hasError('sku','required')">Requerido</div>
+              <div class="text-danger small" *ngIf="hasError('sku','maxlength')">Máximo 64 caracteres</div>
+              <div class="text-danger small" *ngIf="hasError('sku','skuFormat')">
+                Formato inválido. Usá letras/números y - _ . (sin espacios).
+              </div>
             </div>
 
             <div class="col-md-3">
               <label class="form-label">Precio *</label>
               <input type="number" class="form-control" formControlName="price" min="0" step="0.01">
               <div class="text-danger small" *ngIf="hasError('price','required')">Requerido</div>
-              <div class="text-danger small" *ngIf="hasError('price','min')">No puede ser negativo</div>
+              <div class="text-danger small" *ngIf="hasError('price','min')">Debe ser mayor a 0.</div>
             </div>
 
             <div class="col-md-3">
@@ -49,7 +62,9 @@
               <input type="number" class="form-control" formControlName="stock" min="0" step="1">
               <div class="text-danger small" *ngIf="hasError('stock','required')">Requerido</div>
               <div class="text-danger small" *ngIf="hasError('stock','min')">No puede ser negativo</div>
+              <div class="text-danger small" *ngIf="hasError('stock','integer')">Debe ser un número entero</div>
             </div>
+
             <!-- 🌈 Configuración de semáforo de stock -->
             <div class="col-12 mt-2">
               <div class="border rounded p-3 bg-light">
@@ -60,27 +75,30 @@
                     <label class="form-label text-danger">
                       🔴 Stock crítico (peligro)
                     </label>
-                    <input type="number"
-                          class="form-control"
-                          formControlName="stockLowThreshold"
-                          min="0">
-                    <div class="form-text">
-                      Si el stock disponible ≤ este valor → rojo.
-                    </div>
+                    <input type="number" class="form-control" formControlName="stockLowThreshold" min="0" step="1">
+                    <div class="form-text">Si el stock disponible ≤ este valor → rojo.</div>
+
+                    <div class="text-danger small" *ngIf="hasError('stockLowThreshold','required')">Requerido</div>
+                    <div class="text-danger small" *ngIf="hasError('stockLowThreshold','min')">No puede ser negativo</div>
+                    <div class="text-danger small" *ngIf="hasError('stockLowThreshold','integer')">Debe ser entero</div>
                   </div>
 
                   <div class="col-md-6">
                     <label class="form-label text-warning">
                       🟡 Stock moderado
                     </label>
-                    <input type="number"
-                          class="form-control"
-                          formControlName="stockMediumThreshold"
-                          min="0">
-                    <div class="form-text">
-                      Si el stock disponible ≤ este valor → amarillo.
-                    </div>
+                    <input type="number" class="form-control" formControlName="stockMediumThreshold" min="0" step="1">
+                    <div class="form-text">Si el stock disponible ≤ este valor → amarillo.</div>
+
+                    <div class="text-danger small" *ngIf="hasError('stockMediumThreshold','required')">Requerido</div>
+                    <div class="text-danger small" *ngIf="hasError('stockMediumThreshold','min')">No puede ser negativo</div>
+                    <div class="text-danger small" *ngIf="hasError('stockMediumThreshold','integer')">Debe ser entero</div>
                   </div>
+                </div>
+
+                <div class="text-danger small mt-2"
+                     *ngIf="form.touched && form.hasError('thresholdsOrder')">
+                  El “Stock crítico” debe ser menor o igual al “Stock moderado”.
                 </div>
               </div>
             </div>
@@ -105,20 +123,22 @@
             <div class="col-12">
               <label class="form-label">Descripción corta</label>
               <input type="text" class="form-control" formControlName="shortDesc" maxlength="300">
+              <div class="text-danger small" *ngIf="hasError('shortDesc','maxlength')">Máximo 300 caracteres</div>
             </div>
 
             <div class="col-12">
               <label class="form-label">Descripción</label>
               <textarea rows="5" class="form-control" formControlName="description" placeholder="Detalles del producto"></textarea>
             </div>
-            <!-- 🔧 Config de descuentos (tuerca a la derecha) -->
+
+            <!-- 🔧 Config de descuentos -->
             <div class="col-12 d-flex justify-content-between align-items-center mt-2">
               <div class="text-muted small">
                 Descuentos por cantidad (opcionales)
               </div>
               <button type="button"
                       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center"
-                      (click)="showDiscountConfig = !showDiscountConfig">
+                      (click)="toggleDiscountConfig()">
                 <i class="bi bi-gear me-1"></i>
                 Configurar descuentos
               </button>
@@ -129,29 +149,36 @@
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label">Cantidad mínima para aplicar descuento</label>
-                    <input type="number"
-                          class="form-control"
-                          formControlName="discountThreshold"
-                          min="1">
+                    <input type="number" class="form-control" formControlName="discountThreshold" min="1" step="1">
                     <div class="form-text">
                       Si lo dejás vacío, se usa el valor por defecto: <strong>10 unidades</strong>.
                     </div>
+                    <div class="text-danger small" *ngIf="hasError('discountThreshold','min')">Debe ser mínimo 1</div>
+                    <div class="text-danger small" *ngIf="hasError('discountThreshold','integer')">Debe ser entero</div>
                   </div>
+
                   <div class="col-md-6">
                     <label class="form-label">% de descuento sobre esa línea</label>
                     <div class="input-group">
-                      <input type="number"
-                            class="form-control"
-                            formControlName="discountPercent"
-                            min="0"
-                            max="100"
-                            step="0.01">
+                      <input type="number" class="form-control" formControlName="discountPercent" min="0" max="100" step="0.01">
                       <span class="input-group-text">%</span>
                     </div>
                     <div class="form-text">
                       Si lo dejás vacío, se aplica el <strong>10&nbsp;%</strong> por defecto.
                     </div>
+                    <div class="text-danger small" *ngIf="hasError('discountPercent','min')">No puede ser negativo</div>
+                    <div class="text-danger small" *ngIf="hasError('discountPercent','max')">No puede superar 100</div>
                   </div>
+                </div>
+
+                <div class="text-danger small mt-2"
+                     *ngIf="form.touched && form.hasError('discountPercentRequired')">
+                  Si completás la cantidad mínima, también tenés que completar el % de descuento.
+                </div>
+
+                <div class="text-danger small mt-2"
+                     *ngIf="form.touched && form.hasError('discountThresholdRequired')">
+                  Si completás el % de descuento, también tenés que completar la cantidad mínima.
                 </div>
               </div>
             </div>
@@ -178,18 +205,23 @@
           <div class="mb-3">
             <label class="form-label">Alt text (para todas)</label>
             <input type="text" class="form-control" formControlName="imageAlt" placeholder="Descripción accesible/SEO">
+            <div class="text-danger small" *ngIf="hasError('imageAlt','maxlength')">Máximo 140 caracteres</div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Orden inicial</label>
             <input type="number" class="form-control" formControlName="imageSort" min="0" step="1">
             <div class="form-text">La primera imagen tendrá este orden; las siguientes se incrementan 1 en 1.</div>
+            <div class="text-danger small" *ngIf="hasError('imageSort','min')">No puede ser negativo</div>
+            <div class="text-danger small" *ngIf="hasError('imageSort','integer')">Debe ser entero</div>
           </div>
 
-          <!-- (Opcional) URL única si no subís archivos -->
           <div class="mb-3">
             <label class="form-label">O pegar URL (opcional)</label>
             <input type="url" class="form-control" formControlName="imageUrl" placeholder="https://cdn.tuapp.com/img.jpg">
+            <div class="text-danger small" *ngIf="hasError('imageUrl','pattern')">
+              Pegá una URL válida que empiece con http:// o https://
+            </div>
           </div>
 
           <!-- Previews -->
