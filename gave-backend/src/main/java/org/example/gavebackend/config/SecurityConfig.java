@@ -75,7 +75,9 @@ public class SecurityConfig {
         cors.setAllowedOrigins(List.of(
                 "https://flourishing-brioche-0c08f0.netlify.app",
                 "http://localhost:4200",
-                "http://127.0.0.1:4200"
+                "http://127.0.0.1:4200",
+                "https://gavefiltros.com.ar",
+                "https://www.gavefiltros.com.ar"
 
         ));
 
