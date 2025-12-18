@@ -8,6 +8,7 @@ import { Imageproductdto } from '../../interface/product/imageproductdto';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductstateService } from '../../service/productstate.service';
 import Swal from 'sweetalert2';
+import { finalize } from 'rxjs';
 
 type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: number };
 @Component({
@@ -18,8 +19,8 @@ type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: n
   styleUrl: './editproduct.component.css'
 })
 export class EditproductComponent implements OnInit {
-  loadForm!: FormGroup;   // para ingresar ID
-  form!: FormGroup;       // edición producto
+  loadForm!: FormGroup;
+  form!: FormGroup;
 
   loading = signal(false);
   saving = signal(false);
@@ -36,6 +37,7 @@ export class EditproductComponent implements OnInit {
   previews: string[] = [];
   readonly MAX_FILES = 20;
   readonly MAX_MB = 10;
+
   showDiscountConfig = false;
 
   private readonly filesHost = 'http://localhost:9011';
@@ -45,7 +47,7 @@ export class EditproductComponent implements OnInit {
     private api: ProductService,
     private route: ActivatedRoute,
     private productState: ProductstateService,
-    private router: Router          // 👈 para redirigir al stock
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -60,25 +62,24 @@ export class EditproductComponent implements OnInit {
       shortDesc: ['', [Validators.maxLength(300)]],
       description: [''],
       isActive: [true],
+
       sku: ['', [Validators.required, Validators.maxLength(64)]],
       price: [0, [Validators.required, Validators.min(0)]],
       stock: [0, [Validators.required, Validators.min(0)]],
-      // ✅ NUEVOS CAMPOS DE STOCK
+
       stockLowThreshold: [5, [Validators.min(0)]],
       stockMediumThreshold: [15, [Validators.min(0)]],
-      
-      // descuentos
-      discountThreshold: [null, [Validators.min(1)]],
-      discountPercent: [null, [Validators.min(0), Validators.max(100)]],
+
+      discountThreshold: [null],
+      discountPercent: [null],
+
     });
 
-    // cargar tipos
     this.api.getTypes().subscribe({
-      next: ts => this.types = ts,
-      error: () => this.types = []
+      next: ts => (this.types = ts),
+      error: () => (this.types = [])
     });
 
-    // si viene id por la ruta, cargarlo directamente
     const paramId = this.route.snapshot.paramMap.get('id');
     if (paramId) {
       const idNum = Number(paramId);
@@ -89,52 +90,70 @@ export class EditproductComponent implements OnInit {
     }
   }
 
-  // ---------- cargar producto por ID ----------
   loadById(): void {
     this.successMsg = this.errorMsg = null;
-    if (this.loadForm.invalid) { this.loadForm.markAllAsTouched(); return; }
+
+    if (this.loadForm.invalid) {
+      this.loadForm.markAllAsTouched();
+      return;
+    }
 
     const id = Number(this.loadForm.value.id);
     this.loading.set(true);
 
-    this.api.getProductById(id).subscribe({
-      next: (p) => {
-        this.currentId = p.id;
-        this.form.reset({
-        typeId: p.typeId,
-        name: p.name,
-        slug: p.slug,
-        sku: p.sku,
-        price: p.price,
-        stock: p.stock,
+    this.api.getProductById(id)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (p) => {
+          this.currentId = p.id;
 
-        // ✅ NUEVO
-        stockLowThreshold: p.stockLowThreshold,
-        stockMediumThreshold: p.stockMediumThreshold,
+          this.form.reset({
+            typeId: p.typeId,
+            name: p.name ?? '',
+            slug: p.slug ?? '',
+            sku: p.sku ?? '',
+            price: p.price ?? 0,
+            stock: p.stock ?? 0,
 
-        discountThreshold: p.discountThreshold,
-        discountPercent: p.discountPercent,
-        isActive: p.isActive,
-        shortDesc: p.shortDesc,
-        description: p.description,
+            stockLowThreshold: p.stockLowThreshold ?? 0,
+            stockMediumThreshold: p.stockMediumThreshold ?? 0,
+
+            discountThreshold: p.discountThreshold ?? null,
+            discountPercent: p.discountPercent ?? null,
+
+            isActive: p.isActive ?? true,
+            shortDesc: p.shortDesc ?? '',
+            description: p.description ?? '',
+          });
+
+          this.fetchImages();
+        },
+        error: (err) => {
+          console.error(err);
+          this.currentId = null;
+          this.images = [];
+          this.errorMsg = 'No se pudo cargar el producto. Verificá el ID.';
+        }
       });
-
-        this.fetchImages();
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading.set(false);
-        this.currentId = null;
-        this.images = [];
-        this.errorMsg = 'No se pudo cargar el producto. Verificá el ID.';
-      }
-    });
   }
 
-  // ---------- guardar cambios de producto ----------
   save(): void {
+    // DEBUG fuerte para que veas si entra o si se frena por invalid
+    console.log('SAVE CLICK', {
+      currentId: this.currentId,
+      saving: this.saving(),
+      invalid: this.form.invalid,
+      status: this.form.status
+    });
+    console.log('CONTROL ERRORS', Object.keys(this.form.controls).map(k => ({
+      k,
+      valid: this.form.get(k)?.valid,
+      errors: this.form.get(k)?.errors
+    })));
+
     this.successMsg = this.errorMsg = null;
+
+    if (this.saving()) return; // evita doble submit
 
     if (this.currentId == null) {
       this.errorMsg = 'Primero cargá un producto por ID.';
@@ -143,84 +162,102 @@ export class EditproductComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.errorMsg = 'Revisá los campos marcados en rojo.';
       return;
     }
 
     const v = this.form.getRawValue();
+
     const payload: Createproductdto = {
       typeId: Number(v.typeId),
-      name: v.name,
-      slug: v.slug,
-      shortDesc: v.shortDesc || null,
-      description: v.description || null,
+      name: String(v.name ?? '').trim(),
+      slug: String(v.slug ?? '').trim(),
+      shortDesc: String(v.shortDesc ?? '').trim() || null,
+      description: String(v.description ?? '').trim() || null,
       isActive: !!v.isActive,
-      sku: v.sku,
+      sku: String(v.sku ?? '').trim(),
       price: Number(v.price),
       stock: Number(v.stock),
-      stockLowThreshold:
-    v.stockLowThreshold !== null && v.stockLowThreshold !== '' ? Number(v.stockLowThreshold) : null,
 
-  stockMediumThreshold:
-    v.stockMediumThreshold !== null && v.stockMediumThreshold !== '' ? Number(v.stockMediumThreshold) : null,
+      stockLowThreshold:
+        v.stockLowThreshold !== null && v.stockLowThreshold !== ''
+          ? Number(v.stockLowThreshold)
+          : null,
+
+      stockMediumThreshold:
+        v.stockMediumThreshold !== null && v.stockMediumThreshold !== ''
+          ? Number(v.stockMediumThreshold)
+          : null,
 
       discountThreshold:
-        v.discountThreshold !== null && v.discountThreshold !== '' ? Number(v.discountThreshold) : null,
+        v.discountThreshold !== null && v.discountThreshold !== ''
+          ? Number(v.discountThreshold)
+          : null,
+
       discountPercent:
-        v.discountPercent !== null && v.discountPercent !== '' ? Number(v.discountPercent) : null,
+        v.discountPercent !== null && v.discountPercent !== ''
+          ? Number(v.discountPercent)
+          : null,
     };
 
+    console.log('UPDATE PAYLOAD', payload);
+
     this.saving.set(true);
-    this.api.updateProduct(this.currentId, payload).subscribe({
-      next: (updated) => {
-        this.saving.set(false);
-        this.successMsg = `Producto #${updated.id} actualizado correctamente.`;
 
-        // avisar a otros componentes
-        this.productState.bump();
+    this.api.updateProduct(this.currentId, payload)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.successMsg = `Producto #${updated.id} actualizado correctamente.`;
+          this.productState.bump();
 
-        // ✅ SweetAlert + redirección al stock
-        Swal.fire({
-          icon: 'success',
-          title: 'Producto actualizado',
-          text: `Se actualizaron los datos del producto "${updated.name}".`,
-          confirmButtonText: 'Ir al stock'
-        }).then(res => {
-          if (res.isConfirmed) {
-            this.router.navigate(['/admin/stock']);
-          }
-        });
-      },
-      error: (err) => {
-        console.error(err);
-        this.saving.set(false);
-        const msg = err?.error?.message || 'Error al actualizar el producto.';
-        this.errorMsg = msg;
-        Swal.fire({
-          icon: 'error',
-          title: 'No se pudo actualizar el producto',
-          text: msg
-        });
-      }
-    });
+          Swal.fire({
+            icon: 'success',
+            title: 'Producto actualizado',
+            text: `Se actualizaron los datos del producto "${updated.name}".`,
+            confirmButtonText: 'Ir al stock'
+          }).then(res => {
+            if (res.isConfirmed) {
+              this.router.navigate(['/admin/stock']);
+            }
+          });
+        },
+        error: (err) => {
+          console.error(err);
+          const msg = err?.error?.message || 'Error al actualizar el producto.';
+          this.errorMsg = msg;
+
+          Swal.fire({
+            icon: 'error',
+            title: 'No se pudo actualizar el producto',
+            text: msg
+          });
+        }
+      });
   }
 
   // ===================== IMÁGENES =====================
 
-  fetchImages() {
+  fetchImages(): void {
     if (this.currentId == null) return;
+
     this.imgLoading.set(true);
-    this.api.getImages(this.currentId).subscribe({
-      next: list => {
-        this.images = (list || []).map(img => ({
-          ...img,
-          _editing: false,
-          _alt: img.altText ?? '',
-          _sort: img.sortOrder ?? 0
-        }));
-        this.imgLoading.set(false);
-      },
-      error: e => { console.error(e); this.imgLoading.set(false); this.images = []; }
-    });
+    this.api.getImages(this.currentId)
+      .pipe(finalize(() => this.imgLoading.set(false)))
+      .subscribe({
+        next: list => {
+          this.images = (list || []).map(img => ({
+            ...img,
+            _editing: false,
+            _alt: img.altText ?? '',
+            _sort: img.sortOrder ?? 0
+          }));
+        },
+        error: e => {
+          console.error(e);
+          this.images = [];
+        }
+      });
   }
 
   startEdit(row: ImageRow) {
@@ -246,18 +283,25 @@ export class EditproductComponent implements OnInit {
         row._editing = false;
         this.successMsg = 'Imagen actualizada.';
       },
-      error: (e) => { console.error(e); this.errorMsg = 'No se pudo actualizar la imagen.'; }
+      error: (e) => {
+        console.error(e);
+        this.errorMsg = 'No se pudo actualizar la imagen.';
+      }
     });
   }
 
   deleteImage(row: ImageRow) {
     if (!confirm('¿Eliminar esta imagen?')) return;
+
     this.api.deleteImage(row.id).subscribe({
       next: () => {
         this.images = this.images.filter(i => i.id !== row.id);
         this.successMsg = 'Imagen eliminada.';
       },
-      error: (e) => { console.error(e); this.errorMsg = 'No se pudo eliminar la imagen.'; }
+      error: (e) => {
+        console.error(e);
+        this.errorMsg = 'No se pudo eliminar la imagen.';
+      }
     });
   }
 
@@ -293,25 +337,28 @@ export class EditproductComponent implements OnInit {
   }
 
   uploadSelected() {
-    if (this.currentId == null) { this.errorMsg = 'Primero cargá el producto.'; return; }
+    if (this.currentId == null) {
+      this.errorMsg = 'Primero cargá el producto.';
+      return;
+    }
     if (!this.selectedFiles.length) return;
 
     const sortStart = Math.max(0, ...this.images.map(i => i.sortOrder ?? 0), 0) + 1;
 
     this.imgLoading.set(true);
-    this.api.uploadImages(this.currentId, this.selectedFiles, '', sortStart).subscribe({
-      next: (created) => {
-        this.successMsg = `Se subieron ${created.length} imagen(es).`;
-        this.clearUploads();
-        this.fetchImages();
-        this.imgLoading.set(false);
-      },
-      error: e => {
-        console.error(e);
-        this.errorMsg = 'Error al subir imágenes.';
-        this.imgLoading.set(false);
-      }
-    });
+    this.api.uploadImages(this.currentId, this.selectedFiles, '', sortStart)
+      .pipe(finalize(() => this.imgLoading.set(false)))
+      .subscribe({
+        next: (created) => {
+          this.successMsg = `Se subieron ${created.length} imagen(es).`;
+          this.clearUploads();
+          this.fetchImages();
+        },
+        error: e => {
+          console.error(e);
+          this.errorMsg = 'Error al subir imágenes.';
+        }
+      });
   }
 
   abs(url?: string) {

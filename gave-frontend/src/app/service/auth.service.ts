@@ -13,19 +13,22 @@ import { environment } from '../../environments/environment.prod';
 })
 export class AuthService {
 
-  private base = environment.apiBase + '/api'; // o '/api' si usás proxy
+  private base = environment.apiBase + '/api';
+
+  private readonly TOKEN_KEY = 'token';
+  private readonly ROLE_KEY  = 'role';
+  private readonly EMAIL_KEY = 'email';
 
   constructor(private http: HttpClient) {}
 
   login(body: LoginReq){
-    return this.http.post<AuthResponse>(`${this.base}/auth/login`, body).pipe(
-      tap(res => this.store(res))
-    );
+    return this.http.post<AuthResponse>(`${this.base}/auth/login`, body)
+      .pipe(tap(res => this.store(res)));
   }
+
   register(body: RegisterReq){
-    return this.http.post<AuthResponse>(`${this.base}/auth/register`, body).pipe(
-      tap(res => this.store(res))
-    );
+    return this.http.post<AuthResponse>(`${this.base}/auth/register`, body)
+      .pipe(tap(res => this.store(res)));
   }
 
   // ----- PASSWORD FLOW -----
@@ -37,18 +40,49 @@ export class AuthService {
     return this.http.post<void>(`${this.base}/auth/reset`, body);
   }
 
+  // ================= STORAGE =================
+
   private store(res: AuthResponse){
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('role', res.role);
-    localStorage.setItem('email', res.email);
+    // Local (persistente)
+    localStorage.setItem(this.TOKEN_KEY, res.token);
+    localStorage.setItem(this.ROLE_KEY, res.role);
+    localStorage.setItem(this.EMAIL_KEY, res.email);
+
+    // Session (backup para mobile)
+    sessionStorage.setItem(this.TOKEN_KEY, res.token);
+    sessionStorage.setItem(this.ROLE_KEY, res.role);
+    sessionStorage.setItem(this.EMAIL_KEY, res.email);
   }
+
   logout(){
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('email');
+    localStorage.clear();
+    sessionStorage.clear();
   }
-  get token(){ return localStorage.getItem('token'); }
-  get role(){ return (localStorage.getItem('role') as 'ADMIN'|'CLIENT'|null); }
+
+  // ================= GETTERS =================
+
+  get token(){
+    return (
+      localStorage.getItem(this.TOKEN_KEY) ||
+      sessionStorage.getItem(this.TOKEN_KEY)
+    );
+  }
+
+  get role(){
+    return (
+      (localStorage.getItem(this.ROLE_KEY) ||
+       sessionStorage.getItem(this.ROLE_KEY)) as 'ADMIN'|'CLIENT'|null
+    );
+  }
+
+  get email(){
+    return (
+      localStorage.getItem(this.EMAIL_KEY) ||
+      sessionStorage.getItem(this.EMAIL_KEY)
+    );
+  }
+
   get isLoggedIn(){ return !!this.token; }
+
   hasRole(r: 'ADMIN'|'CLIENT'){ return this.role === r; }
 }

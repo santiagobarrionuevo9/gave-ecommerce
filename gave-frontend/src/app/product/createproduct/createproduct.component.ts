@@ -229,19 +229,35 @@ export class CreateproductComponent implements OnInit {
     const v = this.form.getRawValue();
 
     const payload = {
-      typeId: Number(v.typeId),
-      name: String(v.name).trim(),
-      slug: String(v.slug).trim(),
-      sku: String(v.sku).trim(),
-      price: Number(v.price),
-      stock: Number(v.stock),
+    typeId: Number(v.typeId),
+    name: String(v.name).trim(),
+    slug: String(v.slug).trim(),
+    sku: String(v.sku).trim(),
 
-      stockLowThreshold: v.stockLowThreshold !== null ? Number(v.stockLowThreshold) : null,
-      stockMediumThreshold: v.stockMediumThreshold !== null ? Number(v.stockMediumThreshold) : null,
+    shortDesc: (v.shortDesc ?? '').toString().trim() || null,
+    description: (v.description ?? '').toString().trim() || null,
+    isActive: Boolean(v.isActive),
 
-      discountThreshold: v.discountThreshold,
-      discountPercent: v.discountPercent
-    };
+    price: Number(v.price),
+    stock: Number(v.stock),
+
+    stockLowThreshold: v.stockLowThreshold !== null && v.stockLowThreshold !== ''
+      ? Number(v.stockLowThreshold)
+      : null,
+
+    stockMediumThreshold: v.stockMediumThreshold !== null && v.stockMediumThreshold !== ''
+      ? Number(v.stockMediumThreshold)
+      : null,
+
+    discountThreshold: v.discountThreshold !== null && v.discountThreshold !== ''
+      ? Number(v.discountThreshold)
+      : null,
+
+    discountPercent: v.discountPercent !== null && v.discountPercent !== ''
+      ? Number(v.discountPercent)
+      : null,
+  };
+
 
     this.api.createProduct(payload).subscribe({
       next: created => {
