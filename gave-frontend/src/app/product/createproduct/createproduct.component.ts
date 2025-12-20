@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {  Component, OnInit, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Producttypedto } from '../../interface/product/producttypedto';
 import { ProductService } from '../../service/product.service';
@@ -6,6 +6,8 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Imageproductdto } from '../../interface/product/imageproductdto';
 import Swal from 'sweetalert2';
+import { AfterViewInit } from '@angular/core';
+declare const bootstrap: any;
 
 type PreviewItem = { file: File; src: string };
 
@@ -16,9 +18,10 @@ type PreviewItem = { file: File; src: string };
   templateUrl: './createproduct.component.html',
   styleUrl: './createproduct.component.css'
 })
-export class CreateproductComponent implements OnInit {
+export class CreateproductComponent implements OnInit, AfterViewInit {
   form!: FormGroup;
   types: Producttypedto[] = [];
+
 
   loading = signal(false);
   successMsg: string | null = null;
@@ -70,6 +73,12 @@ export class CreateproductComponent implements OnInit {
       if (v === null || v === undefined || v === '') return null;
       return Number.isInteger(Number(v)) ? null : { integer: true };
     };
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializa TODOS los tooltips en la vista
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
   }
 
   // ✅ Semáforo: low <= medium

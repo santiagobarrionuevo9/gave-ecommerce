@@ -1,8 +1,37 @@
 <div class="container py-4" *ngIf="form">
   <!-- Título -->
   <div class="d-flex justify-content-between align-items-center mb-3 admin-header">
-    <div>
-      <h3 class="mb-0">Crear producto</h3>
+   <div>
+      <h3 class="mb-0 d-flex align-items-center gap-2">
+        Crear producto
+
+        <!-- Ícono de ayuda -->
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-secondary rounded-circle help-icon"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          data-bs-html="true"
+          title="
+            <div style='max-width:320px'>
+              <div class='fw-semibold mb-1'>Reglas del formulario</div>
+              <ul class='mb-2 ps-3'>
+                <li><b>SKU</b> obligatorio y <b>no puede repetirse</b>.</li>
+                <li><b>Slug</b> obligatorio y <b>no puede repetirse</b>.</li>
+                <li><b>Slug</b>: minúsculas, números y guiones (ej: <code>filtro-aceite-toyota</code>).</li>
+                <li><b>SKU</b>: letras/números y <code>-</code> <code>_</code> <code>.</code> (sin espacios). Se guarda en <b>MAYÚSCULAS</b>.</li>
+              </ul>
+              <div class='small'>
+                <b>Importante:</b> en el catálogo vas a ver primero el <b>SKU</b> y después el <b>nombre</b>.
+              </div>
+            </div>
+          "
+          aria-label="Ayuda: reglas del formulario"
+        >
+          <i class="bi bi-question-lg"></i>
+        </button>
+      </h3>
+
       <p class="text-muted small mb-0">
         Completá el formulario para agregar un nuevo producto a tu catálogo.
       </p>
@@ -27,7 +56,30 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Slug *</label>
+              <label class="form-label d-flex align-items-center gap-2">
+              Slug *
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary rounded-circle help-icon"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-html="true"
+                title="
+                  <div style='max-width:280px'>
+                    <div class='fw-semibold mb-1'>Reglas del Slug</div>
+                    <ul class='mb-0 ps-3'>
+                      <li>No puede repetirse.</li>
+                      <li>Minúsculas, números y guiones.</li>
+                      <li>Ej: <code>filtro-aceite-toyota</code></li>
+                    </ul>
+                  </div>
+                "
+                aria-label="Ayuda: reglas del slug"
+              >
+                <i class="bi bi-question-lg"></i>
+              </button>
+            </label>
+
               <input type="text" class="form-control" formControlName="slug" placeholder="filtro-aceite-toyota">
               <div class="text-danger small" *ngIf="hasError('slug','required')">Requerido</div>
               <div class="text-danger small" *ngIf="hasError('slug','maxlength')">Máximo 200 caracteres</div>
@@ -37,7 +89,33 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">SKU *</label>
+              <label class="form-label d-flex align-items-center gap-2">
+              SKU *
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary rounded-circle help-icon"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                data-bs-html="true"
+                title="
+                  <div style='max-width:300px'>
+                    <div class='fw-semibold mb-1'>Reglas del SKU</div>
+                    <ul class='mb-2 ps-3'>
+                      <li>No puede repetirse.</li>
+                      <li>Sin espacios: letras/números y <code>-</code> <code>_</code> <code>.</code></li>
+                      <li>Se guarda en <b>MAYÚSCULAS</b>.</li>
+                    </ul>
+                    <div class='small'>
+                      En el catálogo se verá primero el <b>SKU</b> y luego el <b>nombre</b>.
+                    </div>
+                  </div>
+                "
+                aria-label="Ayuda: reglas del sku"
+              >
+                <i class="bi bi-question-lg"></i>
+              </button>
+            </label>
+
               <input
               type="text"
               class="form-control text-uppercase"

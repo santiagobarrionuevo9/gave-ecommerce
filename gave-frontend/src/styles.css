@@ -840,3 +840,17 @@
   }
 }
 
+.help-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.help-icon i {
+  font-size: 0.95rem;
+}
+
