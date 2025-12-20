@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -31,6 +33,18 @@ public class MailService {
     @Value("${app.mail.from}")
     private String from;
 
+    // Opcionales (si no los querés, los podés borrar y también borrar su uso)
+    @Value("${app.mail.from-name:GaVe Store}")
+    private String fromName;
+
+    @Value("${app.mail.reply-to:}")
+    private String replyTo;
+
+    @Value("${app.mail.test-mode:false}")
+    private boolean testMode;
+
+    @Value("${app.mail.test-to:}")
+    private String testTo;
 
     // ========= MÉTODOS PÚBLICOS =========
 
@@ -39,9 +53,11 @@ public class MailService {
         String subject = "¡Bienvenido a Gave!";
         String html = buildWelcomeHtml(fullName)
                 + "<hr><p style='font-size:12px;color:#666'>"
-                + "Este email era para: <b>" + to + "</b></p>";
+                + "Este email era para: <b>" + safe(to) + "</b></p>";
+
         String text = buildWelcomeText(fullName)
-                + "\n\n---\nEste email era para: " + to;
+                + "\n\n---\nEste email era para: " + safe(to);
+
         send(to, subject, html, text);
     }
 
@@ -50,15 +66,18 @@ public class MailService {
         String subject = "Recuperá tu contraseña — Gave";
         String html = buildResetHtml(fullName, link, hoursValid)
                 + "<hr><p style='font-size:12px;color:#666'>"
-                + "Este email era para: <b>" + to + "</b></p>";
+                + "Este email era para: <b>" + safe(to) + "</b></p>";
+
         String text = buildResetText(fullName, link, hoursValid)
-                + "\n\n---\nEste email era para: " + to;
+                + "\n\n---\nEste email era para: " + safe(to);
+
         send(to, subject, html, text);
     }
 
     /** Confirmación de pedido */
     public void sendOrderConfirmationEmail(String to, String fullName, Long orderId, BigDecimal total) {
         String subject = "Tu pedido #" + orderId + " fue recibido";
+
         String html = """
             <div style="font-family:Arial,Helvetica,sans-serif;line-height:1.5">
               <h2>¡Gracias por tu pedido!</h2>
@@ -68,11 +87,11 @@ public class MailService {
             </div>
             """.formatted(fullName == null ? "" : fullName, orderId, total.toPlainString())
                 + "<hr><p style='font-size:12px;color:#666'>"
-                + "Este email era para: <b>" + to + "</b></p>";
+                + "Este email era para: <b>" + safe(to) + "</b></p>";
 
         String text = "Hola %s, recibimos tu pedido #%d. Total: $ %s"
                 .formatted(fullName == null ? "" : fullName, orderId, total.toPlainString())
-                + "\n\n---\nEste email era para: " + to;
+                + "\n\n---\nEste email era para: " + safe(to);
 
         send(to, subject, html, text);
     }
@@ -80,39 +99,92 @@ public class MailService {
     // ========= MÉTODO GENÉRICO DE ENVÍO =========
 
     private void send(String to, String subject, String htmlBody, String textFallback) {
-        try {
-            log.info("Preparando email a {} (pero se enviará a {}) con asunto '{}'", to, subject);
+        // Validación mínima para no hacer requests rotos
+        if (to == null || to.isBlank()) {
+            log.warn("MailService: destinatario vacío. Asunto='{}' (no se envía).", safe(subject));
+            return;
+        }
+        if (subject == null || subject.isBlank()) {
+            subject = "(Sin asunto)";
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            log.warn("MailService: RESEND_API_KEY no configurada. No se envía mail a {}.", to);
+            return;
+        }
+        if (from == null || from.isBlank()) {
+            log.warn("MailService: MAIL_FROM no configurado. No se envía mail a {}.", to);
+            return;
+        }
 
+        // Test mode: fuerza envío a testTo si está seteado
+        String realTo = to;
+        if (testMode) {
+            if (testTo == null || testTo.isBlank()) {
+                log.warn("MailService: app.mail.test-mode=true pero app.mail.test-to está vacío. No se envía.");
+                return;
+            }
+            realTo = testTo.trim();
+        }
+
+        try {
             String url = "https://api.resend.com/emails";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
 
-            // 👈 acá Resend SIEMPRE recibe tu mail de pruebas
+            // From con nombre visible: "GaVe Store <no-reply@dominio>"
+            String fromFormatted = (fromName != null && !fromName.isBlank())
+                    ? fromName.trim() + " <" + from.trim() + ">"
+                    : from.trim();
+
+            // Body Resend
             Map<String, Object> body = Map.of(
-                    "from", from,
-                    "to", List.of(to),
+                    "from", fromFormatted,
+                    "to", List.of(realTo),
                     "subject", subject,
                     "html", htmlBody,
                     "text", textFallback
             );
 
+            // Si querés reply_to, Resend lo soporta. Solo lo agregamos si viene seteado.
+            if (replyTo != null && !replyTo.isBlank()) {
+                body = new java.util.HashMap<>(body);
+                ((java.util.HashMap<String, Object>) body).put("reply_to", replyTo.trim());
+            }
+
+            log.info("Enviando email por Resend -> to={}, subject='{}' (testMode={}, logicalTo={})",
+                    realTo, subject, testMode, to);
+
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-            ResponseEntity<String> response =
-                    restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
-            log.info("Respuesta Resend: status={}, body={}",
-                    response.getStatusCode(), response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Resend OK -> status={}, body={}", response.getStatusCode(), response.getBody());
+            } else {
+                log.warn("Resend NO OK -> status={}, body={}", response.getStatusCode(), response.getBody());
+            }
+
+        } catch (HttpStatusCodeException e) {
+            // Captura status + body real (clave para debug)
+            log.warn("Resend ERROR HTTP -> status={}, body={}, to={}, subject='{}'",
+                    e.getStatusCode(), e.getResponseBodyAsString(), realTo, subject);
+        } catch (ResourceAccessException e) {
+            // Timeout / DNS / red
+            log.warn("Resend ERROR de conexión -> to={}, subject='{}': {}",
+                    realTo, subject, e.getMessage());
         } catch (Exception e) {
-            log.warn("No se pudo enviar mail (destino lógico: {}, real: {}) con asunto '{}': {}",
-                    to, subject, e.getMessage());
+            log.warn("Resend ERROR inesperado -> to={}, subject='{}': {}",
+                    realTo, subject, e.getMessage());
         }
     }
 
+    private String safe(String s) {
+        return s == null ? "" : s;
+    }
+
     // ========= PLANTILLAS =========
-    // (las que ya tenías)
 
     private String buildWelcomeHtml(String name) {
         String safe = name != null && !name.isBlank() ? name : "¡Hola!";

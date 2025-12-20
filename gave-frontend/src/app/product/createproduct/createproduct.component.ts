@@ -33,6 +33,9 @@ export class CreateproductComponent implements OnInit {
   readonly MAX_SIZE_MB = 10;
 
   showDiscountConfig = false;
+  submitted = false;
+
+
 
   constructor(
     private fb: FormBuilder,
@@ -218,12 +221,14 @@ export class CreateproductComponent implements OnInit {
   }
 
   submit(): void {
-    this.successMsg = this.errorMsg = null;
+  this.submitted = true;
+  this.successMsg = this.errorMsg = null;
 
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    this.errorMsg = 'Revisá los campos marcados en rojo.';
+    return;
+  }
 
     this.loading.set(true);
     const v = this.form.getRawValue();
@@ -344,8 +349,10 @@ export class CreateproductComponent implements OnInit {
     });
   }
 
+  
+  
   hasError(ctrl: string, err: string) {
     const c = this.form.get(ctrl);
-    return !!c && c.touched && c.hasError(err);
+    return !!c && (c.touched || this.submitted) && c.hasError(err);
   }
 }
