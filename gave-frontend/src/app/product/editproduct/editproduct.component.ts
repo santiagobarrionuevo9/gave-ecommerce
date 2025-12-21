@@ -1,5 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AfterViewInit, Component, OnInit, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Producttypedto } from '../../interface/product/producttypedto';
 import { ProductService } from '../../service/product.service';
 import { Createproductdto } from '../../interface/product/createproductdto';
@@ -9,7 +9,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductstateService } from '../../service/productstate.service';
 import Swal from 'sweetalert2';
 import { finalize } from 'rxjs';
-
+declare const bootstrap: any;
 type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: number };
 @Component({
   selector: 'app-editproduct',
@@ -18,7 +18,7 @@ type ImageRow = Imageproductdto & { _editing?: boolean; _alt?: string; _sort?: n
   templateUrl: './editproduct.component.html',
   styleUrl: './editproduct.component.css'
 })
-export class EditproductComponent implements OnInit {
+export class EditproductComponent implements OnInit, AfterViewInit {
   loadForm!: FormGroup;
   form!: FormGroup;
 
@@ -39,7 +39,9 @@ export class EditproductComponent implements OnInit {
   readonly MAX_MB = 10;
 
   showDiscountConfig = false;
+  submitted = false;
 
+  // Ajustá esto a tu host real (en prod normalmente viene desde env)
   private readonly filesHost = 'http://localhost:9011';
 
   constructor(
@@ -50,29 +52,115 @@ export class EditproductComponent implements OnInit {
     private router: Router
   ) {}
 
+  // ===================== VALIDADORES (igual que Crear) =====================
+
+  // ✅ Slug: minúsculas, números y guiones (sin espacios)
+  private slugValidator(): ValidatorFn {
+    const re = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = String(control.value ?? '').trim();
+      if (!v) return null;
+      return re.test(v) ? null : { slugFormat: true };
+    };
+  }
+
+  // ✅ SKU: letras/números/guiones/underscore/punto/barra (sin espacios)
+  private skuValidator(): ValidatorFn {
+    const re = /^[A-Za-z0-9._\/-]+$/; // incluye "/"
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = String(control.value ?? '').trim();
+      if (!v) return null;
+      return re.test(v) ? null : { skuFormat: true };
+    };
+  }
+
+  // ✅ Entero
+  private integerValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const v = control.value;
+      if (v === null || v === undefined || v === '') return null;
+      return Number.isInteger(Number(v)) ? null : { integer: true };
+    };
+  }
+
+  // ✅ Semáforo: low <= medium
+  private stockThresholdsValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const low = group.get('stockLowThreshold')?.value;
+      const med = group.get('stockMediumThreshold')?.value;
+
+      if (low === null || low === '' || med === null || med === '') return null;
+
+      const lowN = Number(low);
+      const medN = Number(med);
+
+      if (Number.isNaN(lowN) || Number.isNaN(medN)) return null;
+
+      return lowN <= medN ? null : { thresholdsOrder: true };
+    };
+  }
+
+  // ✅ Descuento: si uno está, el otro es obligatorio
+  private discountPairValidator(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const th = group.get('discountThreshold')?.value;
+      const pct = group.get('discountPercent')?.value;
+
+      const hasTh = th !== null && th !== '' && th !== undefined;
+      const hasPct = pct !== null && pct !== '' && pct !== undefined;
+
+      if (!hasTh && !hasPct) return null;
+
+      if (hasTh && !hasPct) return { discountPercentRequired: true };
+      if (!hasTh && hasPct) return { discountThresholdRequired: true };
+
+      return null;
+    };
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializa TODOS los tooltips en la vista
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+  }
+
   ngOnInit(): void {
     this.loadForm = this.fb.group({
       id: [null, [Validators.required, Validators.min(1)]]
     });
 
-    this.form = this.fb.group({
-      typeId: [null, [Validators.required]],
-      name: ['', [Validators.required, Validators.maxLength(180)]],
-      slug: ['', [Validators.required, Validators.maxLength(200)]],
-      shortDesc: ['', [Validators.maxLength(300)]],
-      description: [''],
-      isActive: [true],
+    this.form = this.fb.group(
+      {
+        typeId: [null, [Validators.required]],
+        name: ['', [Validators.required, Validators.maxLength(180)]],
+        slug: ['', [Validators.required, Validators.maxLength(200), this.slugValidator()]],
+        shortDesc: ['', [Validators.maxLength(300)]],
+        description: [''],
+        isActive: [true],
 
-      sku: ['', [Validators.required, Validators.maxLength(64)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      stock: [0, [Validators.required, Validators.min(0)]],
+        sku: ['', [Validators.required, Validators.maxLength(64), this.skuValidator()]],
 
-      stockLowThreshold: [5, [Validators.min(0)]],
-      stockMediumThreshold: [15, [Validators.min(0)]],
+        // Si querés permitir 0, cambiá min(0.01) por min(0)
+        price: [0, [Validators.required, Validators.min(0.01)]],
 
-      discountThreshold: [null],
-      discountPercent: [null],
+        stock: [0, [Validators.required, Validators.min(0), this.integerValidator()]],
 
+        stockLowThreshold: [5, [Validators.required, Validators.min(0), this.integerValidator()]],
+        stockMediumThreshold: [15, [Validators.required, Validators.min(0), this.integerValidator()]],
+
+        discountThreshold: [null, [Validators.min(1), this.integerValidator()]],
+        discountPercent: [null, [Validators.min(0), Validators.max(100)]],
+      },
+      {
+        validators: [this.stockThresholdsValidator(), this.discountPairValidator()]
+      }
+    );
+
+    // 🔒 SKU siempre en MAYÚSCULAS
+    this.form.get('sku')?.valueChanges.subscribe(value => {
+      if (!value) return;
+      const upper = String(value).toUpperCase();
+      if (value !== upper) this.form.get('sku')?.setValue(upper, { emitEvent: false });
     });
 
     this.api.getTypes().subscribe({
@@ -88,6 +176,11 @@ export class EditproductComponent implements OnInit {
         this.loadById();
       }
     }
+  }
+
+  hasError(ctrl: string, err: string) {
+    const c = this.form.get(ctrl);
+    return !!c && (c.touched || this.submitted) && c.hasError(err);
   }
 
   loadById(): void {
@@ -108,7 +201,7 @@ export class EditproductComponent implements OnInit {
           this.currentId = p.id;
 
           this.form.reset({
-            typeId: p.typeId,
+            typeId: p.typeId ?? null,
             name: p.name ?? '',
             slug: p.slug ?? '',
             sku: p.sku ?? '',
@@ -126,7 +219,11 @@ export class EditproductComponent implements OnInit {
             description: p.description ?? '',
           });
 
+          this.submitted = false;
           this.fetchImages();
+
+          // Re-init tooltips si la vista cambia (seguro, por si se renderiza luego)
+          setTimeout(() => this.ngAfterViewInit(), 0);
         },
         error: (err) => {
           console.error(err);
@@ -138,22 +235,10 @@ export class EditproductComponent implements OnInit {
   }
 
   save(): void {
-    // DEBUG fuerte para que veas si entra o si se frena por invalid
-    console.log('SAVE CLICK', {
-      currentId: this.currentId,
-      saving: this.saving(),
-      invalid: this.form.invalid,
-      status: this.form.status
-    });
-    console.log('CONTROL ERRORS', Object.keys(this.form.controls).map(k => ({
-      k,
-      valid: this.form.get(k)?.valid,
-      errors: this.form.get(k)?.errors
-    })));
-
+    this.submitted = true;
     this.successMsg = this.errorMsg = null;
 
-    if (this.saving()) return; // evita doble submit
+    if (this.saving()) return;
 
     if (this.currentId == null) {
       this.errorMsg = 'Primero cargá un producto por ID.';
@@ -199,8 +284,6 @@ export class EditproductComponent implements OnInit {
           ? Number(v.discountPercent)
           : null,
     };
-
-    console.log('UPDATE PAYLOAD', payload);
 
     this.saving.set(true);
 

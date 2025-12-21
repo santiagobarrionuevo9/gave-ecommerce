@@ -58,7 +58,7 @@ export class CreateproductComponent implements OnInit, AfterViewInit {
 
   // ✅ SKU: letras/números/guiones/underscore/punto (sin espacios)
   private skuValidator(): ValidatorFn {
-    const re = /^[A-Za-z0-9._-]+$/;
+    const re = /^[A-Za-z0-9._\/-]+$/;
     return (control: AbstractControl): ValidationErrors | null => {
       const v = String(control.value ?? '').trim();
       if (!v) return null;
