@@ -148,7 +148,8 @@ export class EditproductComponent implements OnInit, AfterViewInit {
         stockLowThreshold: [5, [Validators.required, Validators.min(0), this.integerValidator()]],
         stockMediumThreshold: [15, [Validators.required, Validators.min(0), this.integerValidator()]],
 
-        discountThreshold: [null, [Validators.min(1), this.integerValidator()]],
+        discountThreshold: [null, [Validators.min(0), this.integerValidator()]],
+
         discountPercent: [null, [Validators.min(0), Validators.max(100)]],
       },
       {
@@ -374,19 +375,58 @@ export class EditproductComponent implements OnInit, AfterViewInit {
   }
 
   deleteImage(row: ImageRow) {
-    if (!confirm('¿Eliminar esta imagen?')) return;
+  Swal.fire({
+    icon: 'warning',
+    title: '¿Eliminar imagen?',
+    html: `
+      <div class="text-start">
+        <div class="mb-2">Esta acción no se puede deshacer.</div>
+        <div class="small text-muted">
+          <b>URL:</b> <code>${row.url ?? '-'}</code>
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#d33',
+    reverseButtons: true
+  }).then(result => {
+    if (!result.isConfirmed) return;
 
-    this.api.deleteImage(row.id).subscribe({
-      next: () => {
-        this.images = this.images.filter(i => i.id !== row.id);
-        this.successMsg = 'Imagen eliminada.';
-      },
-      error: (e) => {
-        console.error(e);
-        this.errorMsg = 'No se pudo eliminar la imagen.';
-      }
-    });
-  }
+    // (Opcional) loading mientras borra
+    this.imgLoading.set(true);
+
+    this.api.deleteImage(row.id)
+      .pipe(finalize(() => this.imgLoading.set(false)))
+      .subscribe({
+        next: () => {
+          this.images = this.images.filter(i => i.id !== row.id);
+          this.successMsg = 'Imagen eliminada.';
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Eliminada',
+            text: 'La imagen se eliminó correctamente.',
+            timer: 1400,
+            showConfirmButton: false
+          });
+        },
+        error: (e) => {
+          console.error(e);
+          const msg = e?.error?.message || 'No se pudo eliminar la imagen.';
+          this.errorMsg = msg;
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: msg
+          });
+        }
+      });
+  });
+}
+
 
   onFilesChange(ev: Event) {
     const input = ev.target as HTMLInputElement;

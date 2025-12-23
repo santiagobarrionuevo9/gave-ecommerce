@@ -215,9 +215,14 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Cantidad mínima para aplicar descuento</label>
-                <input type="number" class="form-control" formControlName="discountThreshold" min="1" step="1">
-                <div class="text-danger small" *ngIf="hasError('discountThreshold','min')">Debe ser mínimo 1</div>
-                <div class="text-danger small" *ngIf="hasError('discountThreshold','integer')">Debe ser entero</div>
+                <input type="number" class="form-control" formControlName="discountThreshold" min="0" step="1">
+                <div class="text-danger small" *ngIf="hasError('discountThreshold','min')">
+                  No puede ser negativo (mínimo 0).
+                </div>
+                <div class="text-danger small" *ngIf="hasError('discountThreshold','integer')">
+                  Debe ser un número entero.
+                </div>
+
               </div>
 
               <div class="col-md-6">
