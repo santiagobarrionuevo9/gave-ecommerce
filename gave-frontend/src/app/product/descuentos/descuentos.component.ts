@@ -4,11 +4,12 @@ import { ProductService } from '../../service/product.service';
 import Swal from 'sweetalert2';
 import { finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-descuentos',
   standalone: true,
-  imports: [  ReactiveFormsModule ,CommonModule ],
+  imports: [  ReactiveFormsModule ,CommonModule, RouterModule ],
   templateUrl: './descuentos.component.html',
   styleUrl: './descuentos.component.css'
 })
