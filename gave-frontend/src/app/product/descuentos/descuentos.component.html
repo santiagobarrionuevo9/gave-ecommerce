@@ -1,0 +1,46 @@
+<div class="container py-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="mb-1">Descuento masivo por keyword en el nombre</h4>
+      <p class="text-muted mb-3">
+        Ej: keyword "chevrolet" aplica tanto para "CHEVROLET ..." como "chevrolet ...".
+      </p>
+
+      <form class="row g-3" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="col-12 col-lg-6">
+          <label class="form-label">Keyword (marca / texto)</label>
+          <input class="form-control" formControlName="keyword" placeholder="Ej: chevrolet" />
+          <div class="text-danger small" *ngIf="form.get('keyword')?.touched && form.get('keyword')?.invalid">
+            Keyword requerido (mínimo 2 caracteres).
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-6 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="activeOnly" formControlName="activeOnly" />
+            <label class="form-check-label" for="activeOnly">Aplicar solo a productos activos</label>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <label class="form-label">Umbral de descuento (cantidad)</label>
+          <input type="number" class="form-control" formControlName="discountThreshold" placeholder="Ej: 10" min="0" />
+          <div class="text-muted small">Dejá vacío para no modificar.</div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <label class="form-label">% descuento</label>
+          <input type="number" class="form-control" formControlName="discountPercent" placeholder="Ej: 12.5" min="0" max="100" step="0.01" />
+          <div class="text-muted small">Dejá vacío para no modificar.</div>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary" type="submit" [disabled]="loading">
+            {{ loading ? 'Aplicando…' : 'Aplicar cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

@@ -361,6 +361,25 @@ public class ProductServiceImpl implements serviceproducts {
         return result;
     }
 
+    @Transactional
+    @Override
+    public BulkDiscountByNameResponse bulkUpdateDiscountByName(BulkDiscountByNameRequest req) {
+        String keyword = reqTrim(req.getKeyword(), "keyword");
+        boolean activeOnly = req.getActiveOnly() == null ? true : req.getActiveOnly();
+
+        int updated = productRepo.bulkUpdateDiscountByNameKeyword(
+                keyword,
+                req.getDiscountThreshold(),
+                req.getDiscountPercent(),
+                activeOnly
+        );
+
+        var res = new BulkDiscountByNameResponse();
+        res.setKeyword(keyword);
+        res.setUpdatedCount(updated);
+        return res;
+    }
+
     /**
      * Agrega una nueva imagen a un producto según los datos del DTO recibido.
      * Valida los campos requeridos, persiste la entidad y devuelve el DTO con el id generado.

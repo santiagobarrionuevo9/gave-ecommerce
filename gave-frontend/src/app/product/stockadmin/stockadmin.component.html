@@ -7,11 +7,20 @@
         Gestioná el stock de tus productos de forma rápida.
       </p>
     </div>
+    <div class="d-flex gap-2">
+  <!-- BOTÓN CONFIG (Tuerquita) -->
+  <a class="btn btn-outline-secondary btn-sm px-2"
+     [routerLink]="['/admin/descuentos']"
+     title="Descuentos masivos">
+    <i class="bi bi-gear"></i>
+  </a>
 
-    <!-- BOTÓN AGREGAR PRODUCTO -->
-    <a class="btn btn-primary btn-sm px-3" [routerLink]="['/admin/crear']">
-      + Agregar producto
-    </a>
+  <!-- BOTÓN AGREGAR PRODUCTO -->
+  <a class="btn btn-primary btn-sm px-3" [routerLink]="['/admin/crear']">
+    + Agregar producto
+  </a>
+</div>
+
   </div>
 
   <!-- Filtros -->

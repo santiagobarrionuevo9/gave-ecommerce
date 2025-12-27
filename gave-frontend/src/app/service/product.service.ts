@@ -8,6 +8,8 @@ import { Imageproductdto } from '../interface/product/imageproductdto';
 import { Createproductdto } from '../interface/product/createproductdto';
 import { StockChangeDTO } from '../interface/product/stockchangedto';
 import { environment } from '../../environments/environment.prod';
+import { BulkDiscountByNameRequest } from '../interface/product/BulkDiscountByNameRequest';
+import { BulkDiscountByNameResponse } from '../interface/product/BulkDiscountByNameResponse';
 
 export interface SearchParams {
   q?: string | null;
@@ -141,6 +143,11 @@ export class ProductService {
       return this.http.get<Productdto[]>(`${this.base}/products/low-stock`);
     }
 
-
+    bulkDiscountByName(payload: BulkDiscountByNameRequest): Observable<BulkDiscountByNameResponse> {
+    return this.http.post<BulkDiscountByNameResponse>(
+      `${this.base}/products/bulk/discount/by-name`,
+      payload
+    );
+  }
 
 }

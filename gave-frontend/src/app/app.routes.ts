@@ -28,7 +28,7 @@ export const routes: Routes = [
   // src/app/app.routes.ts
   { path: 'admin/stock', canActivate: [adminGuard], loadComponent: () => import('./product/stockadmin/stockadmin.component').then(m => m.StockadminComponent) },
   { path: 'admin/categorias', canActivate: [adminGuard], loadComponent: () => import('./product/typeadmin/typeadmin.component').then(m => m.TypeadminComponent) },
-
+  { path: 'admin/descuentos', canActivate: [adminGuard], loadComponent: () => import('./product/descuentos/descuentos.component').then(m => m.DescuentosComponent) },
    // ADMIN pedidos
   { path: 'admin/pedidos', canActivate: [adminGuard], loadComponent: () => import('./order/adminorderstatus/adminorderstatus.component').then(m => m.AdminorderstatusComponent) },
   { path: 'admin/pedidos/:id', canActivate: [adminGuard], loadComponent: () => import('./order/admindetailorder/admindetailorder.component').then(m => m.AdmindetailorderComponent) },

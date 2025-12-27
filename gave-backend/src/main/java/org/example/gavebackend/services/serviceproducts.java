@@ -26,5 +26,8 @@ public interface serviceproducts {
 
     public List<ProductDTO> listLowStock();
 
+    BulkDiscountByNameResponse bulkUpdateDiscountByName(BulkDiscountByNameRequest req);
+
+
 
 }
