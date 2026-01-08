@@ -1,6 +1,6 @@
 # 🛒 Gave — Mini E-commerce de Filtros
 
-**Gave** es una aplicación web full stack desarrollada con **Angular** (frontend) y **Spring Boot** (backend), pensada para la venta de filtros de agua y productos relacionados.  
+**Gave** es una aplicación web full stack desarrollada con **Angular** (frontend) y **Spring Boot** (backend), pensada para la venta de filtros y productos relacionados.  
 Permite a los clientes navegar, agregar productos al carrito y realizar compras, mientras que los administradores pueden gestionar stock, precios y pedidos.
 
 ---
