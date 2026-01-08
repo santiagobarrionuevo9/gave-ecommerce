@@ -24,27 +24,30 @@ public class order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // para rastrear al comprador (por email es suficiente si no usás usuarios)
     @Column(nullable=false) private String buyerEmail;
+
     @Column(nullable=false) private String buyerName;
+
     @Column(nullable=true)  private String buyerPhone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(nullable=false) private BigDecimal itemsTotal; // suma de (price * qty)
-    @Column(nullable=false) private BigDecimal grandTotal; // por si sumas delivery, etc.
+    @Column(nullable=false) private BigDecimal itemsTotal;
+
+    @Column(nullable=false) private BigDecimal grandTotal;
 
     @Column(nullable=false) private Instant createdAt;
+
     @Column(nullable=false) private Instant updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
-    private DeliveryMethod deliveryMethod = DeliveryMethod.DELIVERY; // o PICKUP
+    private DeliveryMethod deliveryMethod = DeliveryMethod.DELIVERY;
 
     @Embedded
-    private ShippingAddress shippingAddress; // obligatorio si DELIVERY
+    private ShippingAddress shippingAddress;
 
     @Column(precision=12, scale=2, nullable=false)
     private BigDecimal deliveryCost = BigDecimal.ZERO;

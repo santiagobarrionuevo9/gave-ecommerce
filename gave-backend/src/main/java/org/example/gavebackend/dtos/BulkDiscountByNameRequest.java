@@ -11,14 +11,14 @@ import java.math.BigDecimal;
 @Data
 public class BulkDiscountByNameRequest {
     @NotBlank
-    private String keyword;            // ej "chevrolet"
+    private String keyword;
 
     @Min(0)
-    private Integer discountThreshold; // null = no tocar
+    private Integer discountThreshold;
 
     @DecimalMin(value = "0.00")
     @DecimalMax(value = "100.00")
-    private BigDecimal discountPercent; // null = no tocar
+    private BigDecimal discountPercent;
 
-    private Boolean activeOnly = true; // default true
+    private Boolean activeOnly = true;
 }

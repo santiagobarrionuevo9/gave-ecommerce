@@ -40,26 +40,18 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 🔹 Usa nuestra config de CORS
+
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Preflight de CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-
-                        // Productos públicos (GET)
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-
-                        // Administración de productos (POST/PUT/DELETE, etc.)
                         .requestMatchers("/api/products/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -70,8 +62,6 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-
-        // 🔹 Orígenes permitidos (frontend)
         cors.setAllowedOrigins(List.of(
                 "https://flourishing-brioche-0c08f0.netlify.app",
                 "http://localhost:4200",
@@ -84,7 +74,6 @@ public class SecurityConfig {
 
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // 🔹 Para no quedarnos cortos de headers
         cors.setAllowedHeaders(List.of("*"));
 
         cors.setExposedHeaders(List.of("Location"));

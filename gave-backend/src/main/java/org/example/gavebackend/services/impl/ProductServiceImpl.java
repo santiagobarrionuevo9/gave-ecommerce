@@ -361,6 +361,15 @@ public class ProductServiceImpl implements serviceproducts {
         return result;
     }
 
+    /**
+     * Actualiza el descuento de múltiples productos cuyo nombre contenga una palabra clave.
+     * Permite filtrar por productos activos si se especifica.
+     *
+     * @param req Objeto con los parámetros para la actualización masiva.
+     * @return Respuesta con el conteo de productos actualizados.
+     * @throws IllegalArgumentException si la palabra clave es inválida.
+     */
+
     @Transactional
     @Override
     public BulkDiscountByNameResponse bulkUpdateDiscountByName(BulkDiscountByNameRequest req) {

@@ -17,8 +17,8 @@ import { ProductService } from './service/product.service';
 })
 export class AppComponent {
   lowStockProducts: Productdto[] = [];
-lowStockCount = 0;
-  title = 'gave-frontend';
+  lowStockCount = 0;
+  title = 'GaveStore';
   lowStock = signal<Productdto[]>([]);
   year = new Date().getFullYear();
 

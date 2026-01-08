@@ -26,9 +26,11 @@ public class orderItem {
     private product product;
 
     @Column(nullable=false) private Integer quantity;
-    @Column(nullable=false) private BigDecimal unitPrice; // precio al momento del pedido
-    @Column(nullable=false) private BigDecimal lineTotal; // unitPrice * quantity
-    /** NUEVO: monto de descuento aplicado en este ítem */
+
+    @Column(nullable=false) private BigDecimal unitPrice;
+
+    @Column(nullable=false) private BigDecimal lineTotal;
+
     @Column(nullable = false)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 }

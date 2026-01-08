@@ -37,36 +37,33 @@ public class product {
     @Column(name="is_active")
     private Boolean isActive = true;
 
-    // Campos unificados (antes en variant)
     @Column(unique=true, length=64)
-    private String sku;                 // si querés, podés dejarlo nullable
+    private String sku;
 
     @Column(precision=12, scale=2)
-    private BigDecimal price;           // si querés, podés dejarlo nullable
+    private BigDecimal price;
 
-    /** NUEVO: descuento por cantidad */
     @Column(name = "discount_threshold")
-    private Integer discountThreshold;       // ej: 10
+    private Integer discountThreshold;
 
     @Column(name = "discount_percent", precision = 5, scale = 2)
-    private BigDecimal discountPercent;      // ej: 10.00 -> 10%
+    private BigDecimal discountPercent;
 
     @Column(nullable=false)
     private Integer stock = 0;
 
     @Column(name = "stock_low_threshold")
-    private Integer stockLowThreshold = 0;     // 🔴 peligro
+    private Integer stockLowThreshold = 0;
 
     @Column(name = "stock_medium_threshold")
-    private Integer stockMediumThreshold = 0; // 🟡 moderado
-
+    private Integer stockMediumThreshold = 0;
 
     @Column(name="created_at", updatable=false)
     private Instant createdAt;
 
     @Column(name="updated_at")
     private Instant updatedAt;
-    /** NUEVO: unidades reservadas (pendientes en pedidos no entregados) */
+
     @Column(nullable = false)
     private Integer reserved = 0;
 

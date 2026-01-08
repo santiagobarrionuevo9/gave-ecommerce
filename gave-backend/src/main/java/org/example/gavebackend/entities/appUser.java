@@ -27,10 +27,10 @@ public class appUser {
     private Rol role;
 
     private String fullName;
+
     private Instant createdAt;
 
-    // === Reset password inline ===
-    @Column(name="password_reset_token", length=180, unique=false) // unique lo controla el índice parcial
+    @Column(name="password_reset_token", length=180, unique=false)
     private String passwordResetToken;
 
     @Column(name="password_reset_expiry")

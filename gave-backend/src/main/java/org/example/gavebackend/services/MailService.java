@@ -33,7 +33,6 @@ public class MailService {
     @Value("${app.mail.from}")
     private String from;
 
-    // Opcionales (si no los querés, los podés borrar y también borrar su uso)
     @Value("${app.mail.from-name:GaVe Store}")
     private String fromName;
 
@@ -46,13 +45,11 @@ public class MailService {
     @Value("${app.mail.test-to:}")
     private String testTo;
 
-
-    // ========= CONSTANTES DE NEGOCIO =========
     private static final String SELLER_EMAIL = "gavefiltros@gmail.com";
     private static final String WHATSAPP_NUMBER = "5493512449110";
     private static final String WHATSAPP_LINK = "https://wa.me/" + WHATSAPP_NUMBER;
 
-    // ========= MÉTODOS PÚBLICOS =========
+
 
     /** Bienvenida luego de registrarse */
     public void sendWelcomeEmail(String to, String fullName) {
@@ -210,7 +207,7 @@ public class MailService {
         send(to, subject, html, text);
     }
 
-    // ========= MÉTODO GENÉRICO DE ENVÍO (RESEND) =========
+    /** Método genérico de envío por Resend */
 
     private void send(String to, String subject, String htmlBody, String textFallback) {
         if (to == null || to.isBlank()) {
@@ -285,7 +282,7 @@ public class MailService {
         }
     }
 
-    // ========= LAYOUT / UI HELPERS =========
+    /** Métodos privados de ayuda para construir el HTML del email */
 
     private String wrapWithLayout(String title, String subtitle, String bodyHtml, String toEmail) {
         return """
@@ -319,6 +316,7 @@ public class MailService {
         """.formatted(subtitle, title, bodyHtml, SELLER_EMAIL, SELLER_EMAIL, WHATSAPP_LINK, WHATSAPP_NUMBER, safe(toEmail));
     }
 
+    /** Botón principal estilizado */
     private String primaryButton(String text, String url) {
         return """
         <a href="%s"
@@ -330,6 +328,7 @@ public class MailService {
         """.formatted(url, text);
     }
 
+    /** Tarjeta con fondo suave */
     private String softCard(String innerHtml) {
         return """
         <div style="background:#f0fdfa;border:1px solid #99f6e4;
@@ -339,6 +338,7 @@ public class MailService {
         """.formatted(innerHtml);
     }
 
+    /** Nota en texto atenuado */
     private String mutedNote(String html) {
         return """
         <div style="margin-top:14px;font-size:13px;color:#374151;line-height:1.55">

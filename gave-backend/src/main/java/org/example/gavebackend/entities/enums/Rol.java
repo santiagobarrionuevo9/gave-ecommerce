@@ -1,3 +1,6 @@
 package org.example.gavebackend.entities.enums;
 
-public enum Rol { ADMIN, CLIENT }
+public enum Rol {
+    ADMIN, CLIENT
+
+}
