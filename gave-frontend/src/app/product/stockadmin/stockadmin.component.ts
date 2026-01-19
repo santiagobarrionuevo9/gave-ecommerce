@@ -1,12 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Productdto } from '../../interface/product/productdto';
 import { Pages } from '../../interface/product/pages';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService, SearchParams } from '../../service/product.service';
 import Swal from 'sweetalert2';
 import { StockChangeDTO } from '../../interface/product/stockchangedto';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { BulkPriceIncreaseByNameResponse } from '../../interface/product/BulkPriceIncreaseByNameResponse';
+import { BulkPriceIncreaseByNameRequest } from '../../interface/product/BulkPriceIncreaseByNameRequest';
 
 @Component({
   selector: 'app-stockadmin',
@@ -21,6 +23,9 @@ export class StockadminComponent implements OnInit {
   loading = signal(false);
   deltas: Record<number, number> = {};   // para +/- cantidad
   sets:   Record<number, number> = {};   // para SET absoluto
+  priceModalOpen = signal(false);
+  priceForm!: FormGroup;
+
 
   constructor(private fb: FormBuilder, private api: ProductService) {
     this.form = this.fb.group({
@@ -28,7 +33,14 @@ export class StockadminComponent implements OnInit {
       size: [12],
       sort: ['name,asc']
     });
+
+    this.priceForm = this.fb.group({
+      keyword: ['', [Validators.required, Validators.minLength(2)]],
+      percent: [10, [Validators.required, Validators.min(0.01)]],
+      activeOnly: [true]
+    });
   }
+
 
   ngOnInit(): void { this.search(); this.form.valueChanges.subscribe(()=> this.search()); }
 
@@ -111,5 +123,71 @@ export class StockadminComponent implements OnInit {
     });
   });
 }
+openPriceModal() {
+  this.priceModalOpen.set(true);
+  this.priceForm.reset({ keyword: '', percent: 10, activeOnly: true });
+}
+
+closePriceModal() {
+  this.priceModalOpen.set(false);
+}
+
+applyBulkPriceIncrease() {
+  if (this.priceForm.invalid) {
+    this.priceForm.markAllAsTouched();
+    Swal.fire('Atención', 'Completá correctamente el formulario', 'warning');
+    return;
+  }
+
+  const v = this.priceForm.getRawValue();
+  const payload: BulkPriceIncreaseByNameRequest = {
+    keyword: String(v.keyword || '').trim(),
+    percent: Number(v.percent),
+    activeOnly: !!v.activeOnly
+  };
+
+  if (!payload.keyword) {
+    Swal.fire('Atención', 'Ingresá una marca / texto', 'warning');
+    return;
+  }
+  if (payload.percent <= 0) {
+    Swal.fire('Atención', 'El porcentaje debe ser mayor a 0', 'warning');
+    return;
+  }
+
+  Swal.fire({
+    title: 'Confirmar aumento masivo',
+    html: `
+      Vas a aumentar <b>${payload.percent}%</b> a todos los productos cuyo nombre contenga:
+      <br><br>
+      <code>${payload.keyword}</code>
+      <br><br>
+      <span class="text-muted">No distingue mayúsculas/minúsculas.</span>
+    `,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, aplicar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#0f4c5c'
+  }).then(r => {
+    if (!r.isConfirmed) return;
+
+    this.api.bulkIncreasePriceByName(payload).subscribe({
+      next: (res: BulkPriceIncreaseByNameResponse) => {
+        Swal.fire(
+          'Aplicado',
+          `Se actualizaron ${res.updatedCount} producto(s) con "${res.keyword}" (+${res.percent}%).`,
+          'success'
+        );
+        this.closePriceModal();
+        this.search(this.page?.number || 0);
+      },
+      error: (e) => {
+        Swal.fire('Error', e?.error?.message || 'No se pudo aplicar el aumento', 'error');
+      }
+    });
+  });
+}
+
 
 }

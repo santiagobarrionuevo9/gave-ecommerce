@@ -88,4 +88,18 @@ public interface productRepository extends JpaRepository<product, Long> {
             @Param("discountPercent") BigDecimal discountPercent,
             @Param("activeOnly") boolean activeOnly
     );
+
+    @Modifying
+    @Query(value = """
+        UPDATE product
+        SET price = ROUND(price * :multiplier, 2)
+        WHERE (:activeOnly = false OR is_active = true)
+          AND LOWER(name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          AND price IS NOT NULL
+        """, nativeQuery = true)
+    int bulkIncreasePriceByNameKeyword(
+            @Param("keyword") String keyword,
+            @Param("multiplier") BigDecimal multiplier,
+            @Param("activeOnly") boolean activeOnly
+    );
 }

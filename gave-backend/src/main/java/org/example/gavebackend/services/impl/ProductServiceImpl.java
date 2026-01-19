@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -385,6 +386,40 @@ public class ProductServiceImpl implements serviceproducts {
 
         var res = new BulkDiscountByNameResponse();
         res.setKeyword(keyword);
+        res.setUpdatedCount(updated);
+        return res;
+    }
+
+    /**
+     * Aumenta el precio de múltiples productos cuyo nombre contenga una palabra clave en un porcentaje dado.
+     * Permite filtrar por productos activos si se especifica.
+     *
+     * @param req Objeto con los parámetros para el aumento masivo de precios.
+     * @return Respuesta con el conteo de productos actualizados.
+     * @throws IllegalArgumentException si la palabra clave es inválida o si el porcentaje es menor o igual a cero.
+     */
+    @Transactional
+    @Override
+    public BulkPriceIncreaseByNameResponse bulkIncreasePriceByName(BulkPriceIncreaseByNameRequest req) {
+
+        String keyword = reqTrim(req.getKeyword(), "keyword");
+        boolean activeOnly = req.getActiveOnly() == null ? true : req.getActiveOnly();
+
+        BigDecimal percent = req.getPercent();
+        if (percent == null || percent.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("percent debe ser mayor a 0");
+        }
+
+        // multiplier = 1 + (percent / 100)
+        BigDecimal multiplier = BigDecimal.ONE.add(
+                percent.divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP)
+        );
+
+        int updated = productRepo.bulkIncreasePriceByNameKeyword(keyword, multiplier, activeOnly);
+
+        var res = new BulkPriceIncreaseByNameResponse();
+        res.setKeyword(keyword);
+        res.setPercent(percent);
         res.setUpdatedCount(updated);
         return res;
     }

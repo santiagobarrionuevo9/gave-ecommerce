@@ -10,6 +10,8 @@ import { StockChangeDTO } from '../interface/product/stockchangedto';
 import { environment } from '../../environments/environment.prod';
 import { BulkDiscountByNameRequest } from '../interface/product/BulkDiscountByNameRequest';
 import { BulkDiscountByNameResponse } from '../interface/product/BulkDiscountByNameResponse';
+import { BulkPriceIncreaseByNameRequest } from '../interface/product/BulkPriceIncreaseByNameRequest';
+import { BulkPriceIncreaseByNameResponse } from '../interface/product/BulkPriceIncreaseByNameResponse';
 
 export interface SearchParams {
   q?: string | null;
@@ -149,5 +151,13 @@ export class ProductService {
       payload
     );
   }
+
+  bulkIncreasePriceByName(payload: BulkPriceIncreaseByNameRequest): Observable<BulkPriceIncreaseByNameResponse> {
+  return this.http.post<BulkPriceIncreaseByNameResponse>(
+    `${this.base}/products/bulk/price/increase/by-name`,
+    payload
+  );
+}
+
 
 }

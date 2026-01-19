@@ -42,7 +42,7 @@ public class AuthService {
             try {
                 role = Rol.valueOf(req.getRole().toUpperCase());
             } catch (Exception ignored) {
-                // si manda algo raro, se queda en CLIENT
+
             }
         }
 
@@ -55,7 +55,7 @@ public class AuthService {
 
         log.info("Usuario registrado con email {} y rol {}", u.getEmail(), u.getRole());
 
-        // El MailService ya se encarga de no romper si falla
+
         mail.sendWelcomeEmail(u.getEmail(), u.getFullName());
 
         String token = jwt.generate(u.getEmail(), Map.of("role", u.getRole().name()));

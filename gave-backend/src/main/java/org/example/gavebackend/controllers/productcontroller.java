@@ -72,6 +72,14 @@ public class productcontroller {
         return service.bulkUpdateDiscountByName(req);
     }
 
+    @PostMapping("/bulk/price/increase/by-name")
+    public BulkPriceIncreaseByNameResponse bulkIncreasePriceByName(
+            @Valid @RequestBody BulkPriceIncreaseByNameRequest req
+    ) {
+        return service.bulkIncreasePriceByName(req);
+    }
+
+
     @GetMapping
     public Page<ProductDTO> search(
             @RequestParam(required=false) String q,

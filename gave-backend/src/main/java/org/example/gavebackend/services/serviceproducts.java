@@ -28,6 +28,8 @@ public interface serviceproducts {
 
     BulkDiscountByNameResponse bulkUpdateDiscountByName(BulkDiscountByNameRequest req);
 
+    BulkPriceIncreaseByNameResponse bulkIncreasePriceByName(BulkPriceIncreaseByNameRequest req);
+
 
 
 }

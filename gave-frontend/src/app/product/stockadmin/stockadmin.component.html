@@ -19,6 +19,14 @@
   <a class="btn btn-primary btn-sm px-3" [routerLink]="['/admin/crear']">
     + Agregar producto
   </a>
+  <!-- BOTÓN % (Aumentos masivos) -->
+  <button class="btn btn-outline-secondary btn-sm px-2"
+          type="button"
+          title="Aumento masivo por marca"
+          (click)="openPriceModal()">
+    <i class="bi bi-percent"></i>
+  </button>
+
 </div>
 
   </div>
@@ -162,3 +170,66 @@
     </nav>
   </div>
 </div>
+
+<!-- MODAL CUSTOM: AUMENTO MASIVO -->
+<div class="custom-backdrop" *ngIf="priceModalOpen()">
+  <div class="custom-modal">
+    <div class="custom-modal-header">
+      <div>
+        <h5 class="mb-0">Aumento masivo por marca</h5>
+        <div class="text-muted small">
+          Aumenta el precio por % a productos cuyo nombre contenga el texto.
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary" type="button" (click)="closePriceModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="custom-modal-body">
+      <form [formGroup]="priceForm" class="row g-2">
+        <div class="col-12">
+          <label class="form-label">Marca / palabra en el nombre</label>
+          <input class="form-control"
+                 placeholder="Ej: WEGA, PRO FILTER, MANN..."
+                 formControlName="keyword">
+          <div class="text-danger small" *ngIf="priceForm.get('keyword')?.touched && priceForm.get('keyword')?.invalid">
+            Ingresá al menos 2 caracteres.
+          </div>
+          <div class="form-text small">
+            No distingue mayúsculas/minúsculas.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Porcentaje a aumentar (%)</label>
+          <input type="number"
+                 min="0.01"
+                 step="0.01"
+                 class="form-control"
+                 formControlName="percent">
+          <div class="text-danger small" *ngIf="priceForm.get('percent')?.touched && priceForm.get('percent')?.invalid">
+            El porcentaje debe ser mayor a 0.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="activeOnly" id="activeOnlyChk">
+            <label class="form-check-label" for="activeOnlyChk">
+              Solo productos activos
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="custom-modal-footer">
+      <button class="btn btn-outline-secondary" type="button" (click)="closePriceModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" (click)="applyBulkPriceIncrease()">
+        Aplicar aumento
+      </button>
+    </div>
+  </div>
+</div>
+
