@@ -3,6 +3,7 @@ package org.example.gavebackend.controllers;
 import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.ProductDTO;
 import org.example.gavebackend.dtos.ProductImageDTO;
+import org.example.gavebackend.entities.PriceVisibility;
 import org.example.gavebackend.services.serviceproducts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +20,11 @@ public class publiccatalogcontroller {
 
 
     private final serviceproducts service;
+    private final PriceVisibility priceVisibility;
 
     @GetMapping("/products/{slug}")
     public ProductDTO getBySlug(@PathVariable String slug){
-        return service.getPublicBySlug(slug);
+        return priceVisibility.apply(service.getPublicBySlug(slug), priceVisibility.canSeePrices());
     }
 
     @GetMapping("/products/{slug}/images")

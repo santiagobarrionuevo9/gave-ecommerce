@@ -1,4 +1,14 @@
 <div class="container py-4" *ngIf="form">
+
+  <!-- Banner para quienes no ven precios -->
+  <div *ngIf="!pricesVisible()"
+       class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <span>Para ver los precios necesitás una cuenta aprobada.</span>
+    <a class="btn btn-success btn-sm" [href]="whatsappLink()" target="_blank" rel="noopener">
+      Solicitar acceso por WhatsApp
+    </a>
+  </div>
+
   <!-- Filtros -->
   <div class="card shadow-sm mb-3">
     <div class="card-body">
@@ -22,11 +32,11 @@
         <div class="col-6 col-md-2">
           <label class="form-label">Ordenar por</label>
           <select class="form-select" formControlName="sort">
-            <option value="createdAt,desc">Novedades (recientes)</option> <!-- ✅ usa createdAt -->
+            <option value="createdAt,desc">Novedades (recientes)</option>
             <option value="name,asc">Nombre (A→Z)</option>
             <option value="name,desc">Nombre (Z→A)</option>
-            <option value="price,asc">Precio (menor→mayor)</option>
-            <option value="price,desc">Precio (mayor→menor)</option>
+            <option value="price,asc" *ngIf="pricesVisible()">Precio (menor→mayor)</option>
+            <option value="price,desc" *ngIf="pricesVisible()">Precio (mayor→menor)</option>
           </select>
         </div>
 
@@ -88,8 +98,7 @@
             <img class="card-img-top" [src]="getImageUrl(p)" [alt]="p.name"
                  style="object-fit: cover; height: 200px;">
             <!-- BADGE NUEVO -->
-            <span *ngIf="isNew(p)"
-                  class="badge-new shadow-sm">
+            <span *ngIf="isNew(p)" class="badge-new shadow-sm">
               Nuevo
             </span>
           </div>
@@ -98,7 +107,18 @@
             <h6 class="card-title mb-1 text-truncate" title="{{ p.name }}">{{ p.sku + "-" + p.name }}</h6>
             <div class="text-muted small mb-2 line-clamp-2" *ngIf="p.shortDesc">{{ p.shortDesc }}</div>
             <div class="mt-auto">
-              <div class="price h5 mb-1">$ {{ p.price | number:'1.0-0' }}</div>
+
+              <!-- Precio (solo si el backend lo mandó) -->
+              <div class="price h5 mb-1" *ngIf="hasPrice(p); else askPrice">
+                $ {{ p.price | number:'1.0-0' }}
+              </div>
+              <ng-template #askPrice>
+                <a class="btn btn-sm btn-success w-100 mb-1"
+                   [href]="whatsappLink(p)" target="_blank" rel="noopener">
+                  Consultar precio por WhatsApp
+                </a>
+              </ng-template>
+
               <div class="small" [class.text-danger]="p.stock===0" [class.text-success]="p.stock>0">
                 Stock: {{ p.stock }}
               </div>

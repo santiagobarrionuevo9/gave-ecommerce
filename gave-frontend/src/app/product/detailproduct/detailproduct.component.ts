@@ -28,6 +28,9 @@ export class DetailproductComponent implements OnInit {
   private readonly DEFAULT_DISCOUNT_THRESHOLD = 10;
   private readonly DEFAULT_DISCOUNT_PERCENT = 10;
 
+  // 👇 Número de WhatsApp (código de país, sin + ni espacios)
+  readonly WHATSAPP = '5493510000000';
+
   // estado del toast
   toast = signal<{ type: ToastKind; text: string } | null>(null);
   private toastTimer: any;
@@ -36,12 +39,23 @@ export class DetailproductComponent implements OnInit {
     private route: ActivatedRoute,
     private api: ProductService,
     private cart: CartService,
-    private auth: AuthService          // 👈 INYECCIÓN DEL AUTH
+    private auth: AuthService
   ) {}
 
   /** Getter para saber si el usuario es ADMIN */
   get isAdmin(): boolean {
     return this.auth.hasRole('ADMIN');
+  }
+
+  /** ¿El backend mandó el precio? (usuario aprobado o admin) */
+  get pricesVisible(): boolean {
+    return !!this.product && this.product.price !== null && this.product.price !== undefined;
+  }
+
+  /** Link de WhatsApp para pedir acceso a precios */
+  get whatsappLink(): string {
+    const msg = `Hola! Quiero acceso para ver precios. Me interesa: ${this.product?.sku} - ${this.product?.name}`;
+    return `https://wa.me/${this.WHATSAPP}?text=${encodeURIComponent(msg)}`;
   }
 
   /** Mostrar toast 3s */
@@ -59,6 +73,12 @@ export class DetailproductComponent implements OnInit {
   addToCart() {
     try {
       if (!this.product) return;
+
+      // 🚫 Sin acceso a precios no se puede comprar
+      if (!this.pricesVisible) {
+        this.showToast('danger', 'Necesitás una cuenta aprobada para comprar.');
+        return;
+      }
 
       // 🚫 Bloqueo para ADMIN
       if (this.isAdmin) {
@@ -140,9 +160,9 @@ export class DetailproductComponent implements OnInit {
     return this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
   }
 
-  /** ¿Hay descuento real (> 0 %)? */
+  /** ¿Hay descuento real (> 0 %)? Solo se muestra si el usuario ve precios */
   get hasDiscount(): boolean {
-    if (!this.product) return false;
+    if (!this.product || !this.pricesVisible) return false;
     const percent = this.product.discountPercent ?? this.DEFAULT_DISCOUNT_PERCENT;
     return percent > 0;
   }

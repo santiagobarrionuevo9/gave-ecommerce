@@ -19,53 +19,61 @@
     <div class="row g-4">
       <!-- Galería simple -->
       <div class="col-12 col-lg-6">
-          <!-- Contenedor relativo para poder posicionar el semáforo -->
-          <div class="position-relative mb-3">
-            <img [src]="mainImage()"
-                class="img-fluid rounded shadow-sm w-100"
-                [alt]="product.name" />
+        <!-- Contenedor relativo para poder posicionar el semáforo -->
+        <div class="position-relative mb-3">
+          <img [src]="mainImage()"
+               class="img-fluid rounded shadow-sm w-100"
+               [alt]="product.name" />
 
-            <!-- Semáforo grande en la esquina de la imagen -->
-            <div *ngIf="product.stockLevel"
-                class="stock-badge-dot"
-                [attr.title]="stockLevelText">
-              <span class="stock-dot-big"
-      [ngClass]="stockLevelClass"
-      [attr.title]="stockLevelText"></span>
-
-            </div>
-          </div>
-
-
-          <!-- Thumbnails -->
-          <div class="d-flex gap-2 flex-wrap">
-            <img *ngFor="let img of images; trackBy: trackByImgId"
-                [src]="img.url"
-                class="rounded border"
-                style="width:90px; height:90px; object-fit:cover; cursor:pointer"
-                (click)="selectAsMain(img)"
-                [alt]="img.altText || product.name">
+          <!-- Semáforo grande en la esquina de la imagen -->
+          <div *ngIf="product.stockLevel"
+               class="stock-badge-dot"
+               [attr.title]="stockLevelText">
+            <span class="stock-dot-big"
+                  [ngClass]="stockLevelClass"
+                  [attr.title]="stockLevelText"></span>
           </div>
         </div>
 
+        <!-- Thumbnails -->
+        <div class="d-flex gap-2 flex-wrap">
+          <img *ngFor="let img of images; trackBy: trackByImgId"
+               [src]="img.url"
+               class="rounded border"
+               style="width:90px; height:90px; object-fit:cover; cursor:pointer"
+               (click)="selectAsMain(img)"
+               [alt]="img.altText || product.name">
+        </div>
+      </div>
 
       <!-- Info -->
       <div class="col-12 col-lg-6">
         <h3 class="mb-2">{{ product.name }}</h3>
         <div class="text-muted mb-3" *ngIf="product.shortDesc">{{ product.shortDesc }}</div>
-        <div class="h4 fw-semibold mb-1">$ {{ product.price | number:'1.0-0' }}</div>
-        
+
+        <!-- Precio (solo si el backend lo mandó) -->
+        <div class="h4 fw-semibold mb-1" *ngIf="pricesVisible; else askPrice">
+          $ {{ product.price | number:'1.0-0' }}
+        </div>
+        <ng-template #askPrice>
+          <div class="alert alert-warning py-2 px-3 small mb-2">
+            Los precios son visibles solo para clientes registrados.
+            <a [href]="whatsappLink" target="_blank" rel="noopener" class="btn btn-success btn-sm ms-2">
+              Solicitar acceso por WhatsApp
+            </a>
+          </div>
+        </ng-template>
+
         <!-- Stock: número -->
         <div class="mb-1"
-            [class.text-danger]="availableStock === 0"
-            [class.text-success]="availableStock > 0">
+             [class.text-danger]="availableStock === 0"
+             [class.text-success]="availableStock > 0">
           Stock disponible: {{ availableStock }}
         </div>
 
         <!-- Leyenda de colores de stock -->
         <div *ngIf="product.stockLevel" class="mb-2">
           <small class="text-muted d-block mb-1">Referencia de color:</small>
-          <!-- Leyenda de colores de stock (compacta y alineada) -->
           <div class="stock-legend mt-1">
             <div class="legend-item">
               <span class="legend-dot bg-success"></span>
@@ -83,14 +91,16 @@
             </div>
           </div>
         </div>
-        <!-- 🔖 Promo por cantidad -->
+
+        <!-- 🔖 Promo por cantidad (solo si ve precios) -->
         <div *ngIf="hasDiscount" class="alert alert-success py-2 px-3 small mb-3">
           <i class="bi bi-tag-fill me-1"></i>
           Llevando <strong>{{ discountThreshold }}</strong> o más unidades,
           obtenés un <strong>{{ discountPercent }}% de descuento</strong> en este producto.
         </div>
 
-        <div class="d-flex align-items-center gap-2 mb-3">
+        <!-- Cantidad + carrito (solo si ve precios) -->
+        <div class="d-flex align-items-center gap-2 mb-3" *ngIf="pricesVisible">
           <input type="number"
                  class="form-control"
                  style="max-width:110px"

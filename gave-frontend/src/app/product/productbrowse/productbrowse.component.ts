@@ -3,17 +3,16 @@ import { Producttypedto } from '../../interface/product/producttypedto';
 import { Pages } from '../../interface/product/pages';
 import { Productdto } from '../../interface/product/productdto';
 import { Imageproductdto } from '../../interface/product/imageproductdto';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ProductService, SearchParams } from '../../service/product.service';
 import { debounceTime, switchMap, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-productbrowse',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule,RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './productbrowse.component.html',
   styleUrl: './productbrowse.component.css'
 })
@@ -22,6 +21,12 @@ export class ProductbrowseComponent implements OnInit {
   page!: Pages<Productdto>;
   imagesMap: Record<number, Imageproductdto | null> = {};
   loading = signal(false);
+
+  // 👇 Número de WhatsApp (código de país, sin + ni espacios)
+  readonly WHATSAPP = '5493510000000';
+
+  // 👇 true si el backend nos manda precios (usuario aprobado o admin)
+  pricesVisible = signal(true);
 
   form!: FormGroup;           // se crea en ngOnInit
   currentPage = signal(0);
@@ -36,45 +41,60 @@ export class ProductbrowseComponent implements OnInit {
   constructor(private fb: FormBuilder, private api: ProductService) {}
 
   ngOnInit(): void {
-  this.form = this.fb.group({
-    q: [''],
-    typeId: [null],
-    sort: ['createdAt,desc'],   // 👈 default: recientes primero
-    size: [12]
-  });
+    this.form = this.fb.group({
+      q: [''],
+      typeId: [null],
+      sort: ['createdAt,desc'],   // default: recientes primero
+      size: [12]
+    });
 
-  this.api.getTypes().subscribe(ts => this.types = ts);
+    this.api.getTypes().subscribe(ts => this.types = ts);
 
-  this.form.valueChanges.pipe(
-    debounceTime(300),
-    tap(() => this.currentPage.set(0)),
-    switchMap(() => this.fetch())
-  ).subscribe();
+    this.form.valueChanges.pipe(
+      debounceTime(300),
+      tap(() => this.currentPage.set(0)),
+      switchMap(() => this.fetch())
+    ).subscribe();
 
-  this.fetch().subscribe();
-}
+    this.fetch().subscribe();
+  }
 
-fetch() {
-  this.loading.set(true);
-  const v = this.form.getRawValue();
+  fetch() {
+    this.loading.set(true);
+    const v = this.form.getRawValue();
 
-  const params: SearchParams = {
-    q: v.q ?? '',
-    typeId: (v.typeId === null || v.typeId === undefined) ? null : Number(v.typeId),
-    active: true,
-    page: this.currentPage(),
-    size: Number(v.size ?? 12),
-    sort: v.sort || 'createdAt,desc'   // 👈 usar SIEMPRE lo que el usuario eligió
-  };
+    const params: SearchParams = {
+      q: v.q ?? '',
+      typeId: (v.typeId === null || v.typeId === undefined) ? null : Number(v.typeId),
+      active: true,
+      page: this.currentPage(),
+      size: Number(v.size ?? 12),
+      sort: v.sort || 'createdAt,desc'
+    };
 
-  return this.api.searchProducts(params).pipe(
-    tap(page => { this.page = page; }),
-    switchMap(page => this.api.loadFirstImages(page.content)),
-    tap(mapImg => { this.imagesMap = mapImg; this.loading.set(false); })
-  );
-}
+    return this.api.searchProducts(params).pipe(
+      tap(page => {
+        this.page = page;
+        // Si hay productos, deducimos si el backend mandó precios
+        if (page.content.length) {
+          this.pricesVisible.set(page.content.some(p => this.hasPrice(p)));
+        }
+      }),
+      switchMap(page => this.api.loadFirstImages(page.content)),
+      tap(mapImg => { this.imagesMap = mapImg; this.loading.set(false); })
+    );
+  }
 
+  hasPrice(p: Productdto): boolean {
+    return p.price !== null && p.price !== undefined;
+  }
 
+  whatsappLink(p?: Productdto): string {
+    const msg = p
+      ? `Hola! Quiero acceso para ver precios. Me interesa: ${p.sku} - ${p.name}`
+      : `Hola! Quiero acceso para ver los precios de los productos.`;
+    return `https://wa.me/${this.WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  }
 
   isNew(p: Productdto): boolean {
     if (!p?.createdAt) return false;

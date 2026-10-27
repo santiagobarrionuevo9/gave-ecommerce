@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gavebackend.dtos.*;
 
+import org.example.gavebackend.entities.PriceVisibility;
 import org.example.gavebackend.services.serviceproducts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,12 +15,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class productcontroller {
 
     private final serviceproducts service;
+    private final PriceVisibility priceVisibility;
 
     @PostMapping("/types")
     public ProductTypeDTO createType(@Valid @RequestBody ProductTypeDTO dto){
@@ -79,7 +83,6 @@ public class productcontroller {
         return service.bulkIncreasePriceByName(req);
     }
 
-
     @GetMapping
     public Page<ProductDTO> search(
             @RequestParam(required=false) String q,
@@ -89,14 +92,18 @@ public class productcontroller {
             @RequestParam(defaultValue="10") int size,
             @RequestParam(defaultValue="name,asc") String sort
     ){
-        Sort s = parseSort(sort);
-        return service.search(q, typeId, active, PageRequest.of(page, size, s));
+        boolean canSee = priceVisibility.canSeePrices();
+        if (!canSee && sort.startsWith("price")) sort = "name,asc";
+        return service.search(q, typeId, active, PageRequest.of(page, size, parseSort(sort)))
+                .map(d -> priceVisibility.apply(d, canSee));
     }
 
     @GetMapping("/{id}")
     public ProductDTO get(@PathVariable Long id){
-        return service.get(id);
+        return priceVisibility.apply(service.get(id), priceVisibility.canSeePrices());
     }
+
+
 
     @PutMapping("/{id}")
     public ProductDTO update(@PathVariable Long id, @Valid @RequestBody ProductDTO dto){

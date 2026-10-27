@@ -36,5 +36,7 @@ public class appUser {
     @Column(name="password_reset_expiry")
     private Instant passwordResetExpiry;
 
+    @Column(name = "price_access", nullable = false)
+    private boolean priceAccess = false;
     @PrePersist void pre(){ createdAt = Instant.now(); }
 }

@@ -8,19 +8,18 @@ export interface Productdto {
   description?: string | null;
   isActive?: boolean | null;
   sku: string;
-  price: number;
+  price?: number | null; // 👈 ahora puede venir null si el usuario no tiene acceso a precios
   stock: number;
-  createdAt: string; // ISO de backend 👈
+  createdAt: string; // ISO de backend
 
-  // 👇 Descuento
+  // Descuento
   discountThreshold?: number | null;
   discountPercent?: number | null;
 
-  // 👇 NUEVO: info de stock que viene del backend
+  // Info de stock que viene del backend
   availableStock?: number | null;
   stockLevel?: 'DANGER' | 'MODERATE' | 'OK' | null;
-  
+
   stockLowThreshold?: number | null;
   stockMediumThreshold?: number | null;
-
 }
