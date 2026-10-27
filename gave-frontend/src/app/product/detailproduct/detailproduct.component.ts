@@ -29,7 +29,7 @@ export class DetailproductComponent implements OnInit {
   private readonly DEFAULT_DISCOUNT_PERCENT = 10;
 
   // 👇 Número de WhatsApp (código de país, sin + ni espacios)
-  readonly WHATSAPP = '5493510000000';
+  readonly WHATSAPP = '5493512449110';
 
   // estado del toast
   toast = signal<{ type: ToastKind; text: string } | null>(null);

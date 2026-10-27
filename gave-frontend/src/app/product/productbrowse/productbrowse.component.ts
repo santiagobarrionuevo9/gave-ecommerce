@@ -23,7 +23,7 @@ export class ProductbrowseComponent implements OnInit {
   loading = signal(false);
 
   // 👇 Número de WhatsApp (código de país, sin + ni espacios)
-  readonly WHATSAPP = '5493510000000';
+  readonly WHATSAPP = '5493512449110';
 
   // 👇 true si el backend nos manda precios (usuario aprobado o admin)
   pricesVisible = signal(true);
