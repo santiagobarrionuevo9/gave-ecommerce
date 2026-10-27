@@ -63,7 +63,10 @@ loadLowStock() {
     return localStorage.getItem('email') || 'Usuario';
   }
 
-  logout() { this.auth.logout(); }
+  logout() {
+    this.cart.clear();
+    this.auth.logout();
+  }
 
   goToEditProduct(id: number) {
   this.router.navigate(['/admin/editar/', id]);

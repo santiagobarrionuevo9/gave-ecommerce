@@ -16,7 +16,7 @@ export const routes: Routes = [
   { path: 'forgot',   loadComponent: () => import('./auth/forgot/forgot.component').then(m => m.ForgotComponent) },
   { path: 'reset',    loadComponent: () => import('./auth/reset/reset.component').then(m => m.ResetComponent) },
   // routes.ts
-  { path: 'carrito', loadComponent: () => import('./order/cartorder/cartorder.component').then(m => m.CartorderComponent) },
+  { path: 'carrito', canActivate: [authGuard], loadComponent: () => import('./order/cartorder/cartorder.component').then(m => m.CartorderComponent) },
   { path: 'mis-pedidos', canActivate: [authGuard], loadComponent: () => import('./order/myorder/myorder.component').then(m => m.MyorderComponent) },
 
 
@@ -32,11 +32,7 @@ export const routes: Routes = [
    // ADMIN pedidos
   { path: 'admin/pedidos', canActivate: [adminGuard], loadComponent: () => import('./order/adminorderstatus/adminorderstatus.component').then(m => m.AdminorderstatusComponent) },
   { path: 'admin/pedidos/:id', canActivate: [adminGuard], loadComponent: () => import('./order/admindetailorder/admindetailorder.component').then(m => m.AdmindetailorderComponent) },
-  {
-  path: 'admin/usuarios',
-  loadComponent: () => import('./admin/adminusers/adminusers.component').then(m => m.AdminusersComponent),
-  // canActivate: [tuGuardAdmin]
-},
+  {path: 'admin/usuarios', canActivate: [adminGuard],loadComponent: () => import('./admin/adminusers/adminusers.component').then(m => m.AdminusersComponent)},
   { path: '**', redirectTo: 'catalogo' },
   
 ];

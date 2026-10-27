@@ -76,6 +76,12 @@
               Categorías
             </a>
           </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/admin/usuarios" routerLinkActive="active">
+              Usuarios
+            </a>
+          </li>
         </ng-container>
       </ul>
 
@@ -83,7 +89,7 @@
       <div class="ms-auto d-flex align-items-center gap-2">
         <!-- Carrito -->
         <a class="btn btn-outline-light position-relative" routerLink="/carrito" aria-label="Abrir carrito"
-          *ngIf="!isAdmin()">
+          *ngIf="isLoggedIn() && !isAdmin()">
           <i class="bi bi-cart"></i>
           <ng-container *ngIf="cartCount() as c">
             <span *ngIf="c > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
