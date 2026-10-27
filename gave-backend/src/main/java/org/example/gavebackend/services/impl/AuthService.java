@@ -51,6 +51,7 @@ public class AuthService {
         u.setPasswordHash(encoder.encode(req.getPassword()));
         u.setFullName(req.getFullName());
         u.setRole(role);
+        u.setPriceAccess(true); // creado por el admin = ya ve precios
         repo.save(u);
 
         log.info("Usuario registrado con email {} y rol {}", u.getEmail(), u.getRole());

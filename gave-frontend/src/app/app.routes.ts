@@ -12,7 +12,7 @@ export const routes: Routes = [
   { path: 'terminos', component: TermsComponent },
   // auth
   { path: 'login',    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
-  { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'register', canActivate: [adminGuard], loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'forgot',   loadComponent: () => import('./auth/forgot/forgot.component').then(m => m.ForgotComponent) },
   { path: 'reset',    loadComponent: () => import('./auth/reset/reset.component').then(m => m.ResetComponent) },
   // routes.ts

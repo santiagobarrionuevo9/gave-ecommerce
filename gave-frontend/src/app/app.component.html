@@ -76,10 +76,10 @@
               Categorías
             </a>
           </li>
-
+          <!-- dentro del <ng-container *ngIf="isAdmin()"> del menú -->
           <li class="nav-item">
-            <a class="nav-link" routerLink="/admin/usuarios" routerLinkActive="active">
-              Usuarios
+            <a class="nav-link" routerLink="/register" routerLinkActive="active">
+              Crear cuenta
             </a>
           </li>
         </ng-container>
@@ -139,7 +139,6 @@
         <!-- Autenticación -->
         <ng-container *ngIf="!isLoggedIn(); else loggedTpl">
           <a class="btn btn-outline-light btn-sm" routerLink="/login">Ingresar</a>
-          <a class="btn btn-light btn-sm" routerLink="/register">Crear cuenta</a>
         </ng-container>
 
         <ng-template #loggedTpl>
